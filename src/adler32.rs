@@ -26,8 +26,8 @@ pub fn verify_from_bytes(bytes: &[u8], checksum: u32) -> Result<bool, DexError> 
 
     /* Verification of the checksum read from the DEX header */
     if computed_checksum == checksum {
-        return Ok(true);
+        Ok(true)
     } else {
-        return Err(DexError::new("[adler32] error: computed checksum does not match one in header"));
+        Err(DexError::new("[adler32] error: computed checksum does not match one in header"))
     }
 }

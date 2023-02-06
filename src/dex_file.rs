@@ -1,6 +1,6 @@
 #![allow(dead_code)]
 
-use std::io::{Read, Write};
+use std::io::Read;
 
 use crate::error::DexError;
 use crate::endianness::DexCursor;
@@ -34,31 +34,28 @@ pub struct DexHeader {
 }
 
 impl DexHeader {
-    pub fn new(mut raw_data: &[u8]) -> Result<DexHeader, DexError> {
+    pub fn new(raw_data: &[u8]) -> Result<DexHeader, DexError> {
         /* First check endianness */
-        let endianness = DexCursor::check_endianness(&raw_data).unwrap();
-        println!("{:?}", endianness);
-        let mut dex_cursor = DexCursor { bytes: raw_data, endianness: endianness };
+        let endianness = DexCursor::check_endianness(raw_data).unwrap();
+        let mut dex_cursor = DexCursor { bytes: raw_data, endianness };
 
         /* DEX version */
         let mut magic = [0; 8];
-        let _ = dex_cursor.bytes.take(8).read(&mut magic);
+        dex_cursor.bytes.read_exact(&mut magic).unwrap();
         let mut version = [0; 3];
         version[0] = magic[4];
         version[1] = magic[5];
         version[2] = magic[6];
 
         let checksum = dex_cursor.read_u32().unwrap();
-        match adler32::verify_from_bytes(&dex_cursor.bytes, checksum) {
-            Ok(val) => {println!("OK OK {val}");},
+        match adler32::verify_from_bytes(dex_cursor.bytes, checksum) {
+            Ok(_) => { },
             Err(err) => {panic!("{}", err);},
         }
 
         let mut signature = [0; 20];
-        let _ = dex_cursor.bytes.take(20).read(&mut signature);
+        dex_cursor.bytes.read_exact(&mut signature).unwrap();
 
-        /* TODO: this does not consume the data! */
-        /* TODO: repalce with DexCursor or something that has endianness and cursor */
         let file_size = dex_cursor.read_u32().unwrap();
         let header_size = dex_cursor.read_u32().unwrap();
         let endian_tag = dex_cursor.read_u32().unwrap();
@@ -82,29 +79,29 @@ impl DexHeader {
         let data_off = dex_cursor.read_u32().unwrap();
 
         Ok(DexHeader {
-                version: version,
-                checksum: checksum,
-                signature: signature,
-                file_size: file_size,
-                header_size: header_size,
-                endian_tag: endian_tag,
-                link_size: link_size,
-                link_off: link_off,
-                map_off: map_off,
-                string_ids_size: string_ids_size,
-                string_ids_off: string_ids_off,
-                type_ids_size: type_ids_size,
-                type_ids_off: type_ids_off,
-                proto_ids_size: proto_ids_size,
-                proto_ids_off: proto_ids_off,
-                fields_ids_size: fields_ids_size,
-                fields_ids_off: fields_ids_off,
-                method_ids_size: method_ids_size,
-                method_ids_off: method_ids_off,
-                class_defs_size: class_defs_size,
-                class_defs_off: class_defs_off,
-                data_size: data_size,
-                data_off:data_off
+                version,
+                checksum,
+                signature,
+                file_size,
+                header_size,
+                endian_tag,
+                link_size,
+                link_off,
+                map_off,
+                string_ids_size,
+                string_ids_off,
+                type_ids_size,
+                type_ids_off,
+                proto_ids_size,
+                proto_ids_off,
+                fields_ids_size,
+                fields_ids_off,
+                method_ids_size,
+                method_ids_off,
+                class_defs_size,
+                class_defs_off,
+                data_size,
+                data_off
         })
     }
 }

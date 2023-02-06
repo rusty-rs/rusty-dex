@@ -1,5 +1,5 @@
-use std::io::Read;
 use byteorder::{BigEndian, LittleEndian, ReadBytesExt};
+
 use crate::error::DexError;
 
 /* Endianness constants */
@@ -20,6 +20,8 @@ pub struct DexCursor<'a> {
 
 impl <'a> DexCursor<'a> {
     pub fn check_endianness(bytes: &[u8]) -> Result<DexEndianness, DexError> {
+        // Cannot use self here as we need to know the endianness before anything else
+
         if bytes.len() < 44 {
             return Err(DexError::new("Error: DEX header too short"));
         }
@@ -34,7 +36,7 @@ impl <'a> DexCursor<'a> {
     }
 
     pub fn read_u8(&mut self) -> Result<u8, DexError> {
-        if self.bytes.len() < 1 {
+        if self.bytes.is_empty() {
             return Err(DexError::new("Error: no data left to read"));
         }
 
