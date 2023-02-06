@@ -4,6 +4,7 @@ use std::io::{Read, Write};
 
 use crate::error::DexError;
 use crate::endianness::DexCursor;
+use crate::adler32;
 
 #[derive(Debug)]
 pub struct DexHeader {
@@ -48,7 +49,10 @@ impl DexHeader {
         version[2] = magic[6];
 
         let checksum = dex_cursor.read_u32().unwrap();
-        println!("{:X?}", checksum);
+        match adler32::verify_from_bytes(&dex_cursor.bytes, checksum) {
+            Ok(val) => {println!("OK OK {val}");},
+            Err(err) => {panic!("{}", err);},
+        }
 
         let mut signature = [0; 20];
         let _ = dex_cursor.bytes.take(20).read(&mut signature);
