@@ -1,11 +1,15 @@
 use std::fs::File;
-use std::io::Read;
+use std::io::{Read, Cursor, Seek, SeekFrom};
 
 pub mod dex_file;
+pub mod map_list;
 pub mod error;
 pub mod endianness;
 pub mod adler32;
+pub mod constants;
+use crate::endianness::DexCursor;
 use crate::dex_file::DexHeader;
+use crate::map_list::MapList;
 
 fn main() {
     // TODO: CLI arg
@@ -18,6 +22,20 @@ fn main() {
     file.read_to_end(&mut raw_dex)
         .unwrap_or_else(|err| panic!("Could not read input file: {err}"));
 
-    let dex_header = DexHeader::new(&raw_dex);
+    /* First check endianness */
+    let mut bytes = Cursor::new(&raw_dex);
+    let bytes_len = bytes.seek(SeekFrom::End(0)).unwrap();
+    bytes.rewind().unwrap();
+    let endianness = DexCursor::check_endianness(&raw_dex).unwrap();
+    let mut dex_cursor = DexCursor {
+        bytes,
+        bytes_len,
+        endianness
+    };
+
+    let dex_header = DexHeader::new(&mut dex_cursor).unwrap();
     println!("{dex_header:#?}");
+
+    let map_list = MapList::build(&mut dex_cursor, dex_header.map_off);
+    println!("{map_list:#?}");
 }

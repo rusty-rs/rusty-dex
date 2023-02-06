@@ -4,7 +4,6 @@ use std::io::Read;
 
 use crate::error::DexError;
 use crate::endianness::DexCursor;
-use crate::adler32;
 
 #[derive(Debug)]
 pub struct DexHeader {
@@ -16,7 +15,7 @@ pub struct DexHeader {
     endian_tag: u32,
     link_size: u32,
     link_off: u32,
-    map_off: u32,
+    pub map_off: u32,
     string_ids_size: u32,
     string_ids_off: u32,
     type_ids_size: u32,
@@ -34,11 +33,7 @@ pub struct DexHeader {
 }
 
 impl DexHeader {
-    pub fn new(raw_data: &[u8]) -> Result<DexHeader, DexError> {
-        /* First check endianness */
-        let endianness = DexCursor::check_endianness(raw_data).unwrap();
-        let mut dex_cursor = DexCursor { bytes: raw_data, endianness };
-
+    pub fn new(dex_cursor: &mut DexCursor) -> Result<DexHeader, DexError> {
         /* DEX version */
         let mut magic = [0; 8];
         dex_cursor.bytes.read_exact(&mut magic).unwrap();
@@ -48,10 +43,10 @@ impl DexHeader {
         version[2] = magic[6];
 
         let checksum = dex_cursor.read_u32().unwrap();
-        match adler32::verify_from_bytes(dex_cursor.bytes, checksum) {
+        /* match adler32::verify_from_bytes(&dex_cursor.bytes.bytes(), checksum) {
             Ok(_) => { },
             Err(err) => {panic!("{}", err);},
-        }
+        } */
 
         let mut signature = [0; 20];
         dex_cursor.bytes.read_exact(&mut signature).unwrap();

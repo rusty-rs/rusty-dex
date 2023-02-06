@@ -1,3 +1,4 @@
+use std::io::Cursor;
 use byteorder::{BigEndian, LittleEndian, ReadBytesExt};
 
 use crate::error::DexError;
@@ -14,7 +15,8 @@ pub enum DexEndianness {
 
 #[derive(Debug)]
 pub struct DexCursor<'a> {
-    pub bytes: &'a [u8],
+    pub bytes: Cursor<&'a Vec<u8>>,
+    pub bytes_len: u64,
     pub endianness: DexEndianness,
 }
 
@@ -36,7 +38,7 @@ impl <'a> DexCursor<'a> {
     }
 
     pub fn read_u8(&mut self) -> Result<u8, DexError> {
-        if self.bytes.is_empty() {
+        if self.bytes.position() == self.bytes_len {
             return Err(DexError::new("Error: no data left to read"));
         }
 
@@ -44,7 +46,7 @@ impl <'a> DexCursor<'a> {
     }
 
     pub fn read_u16(&mut self) -> Result<u16, DexError> {
-        if self.bytes.len() < 2 {
+        if self.bytes_len - self.bytes.position() < 2 {
             return Err(DexError::new("Error: no data left to read"));
         }
 
@@ -55,7 +57,7 @@ impl <'a> DexCursor<'a> {
     }
 
     pub fn read_u32(&mut self) -> Result<u32, DexError> {
-        if self.bytes.len() < 4 {
+        if self.bytes_len - self.bytes.position() < 4 {
             return Err(DexError::new("Error: no data left to read"));
         }
 
