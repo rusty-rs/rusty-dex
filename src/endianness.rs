@@ -19,7 +19,7 @@ pub struct DexCursor<'a> {
 }
 
 impl <'a> DexCursor<'a> {
-    pub fn get_endianness(bytes: &[u8]) -> Result<DexEndianness, DexError> {
+    pub fn check_endianness(bytes: &[u8]) -> Result<DexEndianness, DexError> {
         if bytes.len() < 44 {
             return Err(DexError::new("Error: DEX header too short"));
         }

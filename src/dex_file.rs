@@ -35,7 +35,7 @@ pub struct DexHeader {
 impl DexHeader {
     pub fn new(mut raw_data: &[u8]) -> Result<DexHeader, DexError> {
         /* First check endianness */
-        let endianness = DexCursor::get_endianness(&raw_data).unwrap();
+        let endianness = DexCursor::check_endianness(&raw_data).unwrap();
         println!("{:?}", endianness);
         let mut dex_cursor = DexCursor { bytes: raw_data, endianness: endianness };
 
