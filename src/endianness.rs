@@ -66,4 +66,64 @@ impl <'a> DexCursor<'a> {
             DexEndianness::LittleEndian => Ok(self.bytes.read_u32::<LittleEndian>().unwrap()),
         }
     }
+
+    pub fn read_uleb128(&mut self) -> Result<(u32, usize), DexError> {
+        let mut bytes_read: usize = 0;
+        let mut result: u32 = 0;
+        let mut shift = 0;
+
+        loop {
+            let byte = self.bytes.read_u8().unwrap() as u32;
+            bytes_read += 1;
+            let payload = byte & 0b0111_111;
+            result |= payload << shift;
+            shift += 7;
+
+            if (byte & 0b1000_0000) == 0 {
+                break;
+            }
+
+            if bytes_read >= 5 {
+                return Err(DexError::new("Error: too many bytes in unsigned LEB128 value"));
+            }
+        }
+
+        Ok((result, bytes_read))
+    }
+
+    pub fn read_sleb128(&mut self) -> Result<(i32, usize), DexError> {
+        let mut bytes_read: usize = 0;
+        let mut result: u32 = 0;
+        let mut shift = 0;
+        let mut byte = 0;
+
+        loop {
+            byte = self.bytes.read_u8().unwrap() as u32;
+            bytes_read += 1;
+            let payload = byte & 0b0111_111;
+            result |= payload << shift;
+            shift += 7;
+
+            if (byte & 0b1000_0000) == 0 {
+                break;
+            }
+
+            if bytes_read >= 5 {
+                return Err(DexError::new("Error: too many bytes in unsigned LEB128 value"));
+            }
+        }
+
+        let mut result = result as i32;
+        if (shift < bytes_read * 7) && (byte & 0b0100_0000 == 1) {
+            /* sign extend */
+            result |= -(1 << shift);
+        }
+
+        Ok((result, bytes_read))
+    }
+
+    pub fn read_uleb128p1(&mut self) -> Result<(i32, usize), DexError> {
+        let (uleb128, bytes_read) = self.read_uleb128().unwrap();
+        Ok(((uleb128 as i32) - 1, bytes_read))
+    }
 }
