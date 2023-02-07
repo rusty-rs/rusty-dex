@@ -14,13 +14,13 @@ pub enum DexEndianness {
 }
 
 #[derive(Debug)]
-pub struct DexCursor<'a> {
+pub struct DexReader<'a> {
     pub bytes: Cursor<&'a Vec<u8>>,
     pub bytes_len: u64,
     pub endianness: DexEndianness,
 }
 
-impl <'a> DexCursor<'a> {
+impl <'a> DexReader<'a> {
     pub fn check_endianness(bytes: &[u8]) -> Result<DexEndianness, DexError> {
         // Cannot use self here as we need to know the endianness before anything else
 

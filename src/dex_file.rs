@@ -3,7 +3,7 @@
 use std::io::Read;
 
 use crate::error::DexError;
-use crate::endianness::DexCursor;
+use crate::dex_reader::DexReader;
 
 #[derive(Debug)]
 pub struct DexHeader {
@@ -33,7 +33,7 @@ pub struct DexHeader {
 }
 
 impl DexHeader {
-    pub fn new(dex_cursor: &mut DexCursor) -> Result<DexHeader, DexError> {
+    pub fn new(dex_cursor: &mut DexReader) -> Result<DexHeader, DexError> {
         /* DEX version */
         let mut magic = [0; 8];
         dex_cursor.bytes.read_exact(&mut magic).unwrap();

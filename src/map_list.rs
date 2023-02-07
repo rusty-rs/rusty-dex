@@ -3,7 +3,7 @@
 use std::io::{Seek, SeekFrom};
 use std::collections::HashMap;
 
-use crate::endianness::DexCursor;
+use crate::dex_reader::DexReader;
 
 #[derive(Debug)]
 pub struct MapListItem {
@@ -19,7 +19,7 @@ pub struct MapList {
 }
 
 impl MapList {
-    pub fn build(dex_cursor: &mut DexCursor, offset: u32) -> Self {
+    pub fn build(dex_cursor: &mut DexReader, offset: u32) -> Self {
         /* Move to start of map list */
         dex_cursor.bytes.seek(SeekFrom::Start(offset.into())).unwrap();
 

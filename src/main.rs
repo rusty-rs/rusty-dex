@@ -4,10 +4,10 @@ use std::io::{Read, Cursor, Seek, SeekFrom};
 pub mod dex_file;
 pub mod map_list;
 pub mod error;
-pub mod endianness;
+pub mod dex_reader;
 pub mod adler32;
 pub mod constants;
-use crate::endianness::DexCursor;
+use crate::dex_reader::DexReader;
 use crate::dex_file::DexHeader;
 use crate::map_list::MapList;
 
@@ -26,8 +26,8 @@ fn main() {
     let mut bytes = Cursor::new(&raw_dex);
     let bytes_len = bytes.seek(SeekFrom::End(0)).unwrap();
     bytes.rewind().unwrap();
-    let endianness = DexCursor::check_endianness(&raw_dex).unwrap();
-    let mut dex_cursor = DexCursor {
+    let endianness = DexReader::check_endianness(&raw_dex).unwrap();
+    let mut dex_cursor = DexReader {
         bytes,
         bytes_len,
         endianness
