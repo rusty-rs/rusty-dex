@@ -64,8 +64,7 @@ fn main() {
 
     let _proto_ids_list = ProtoIdList::build(&mut dex_cursor,
                                             dex_header.proto_ids_off,
-                                            dex_header.proto_ids_size,
-                                            &strings_list);
+                                            dex_header.proto_ids_size);
     // println!("{proto_ids_list:#?}");
 
     let _field_ids_list = FieldIdList::build(&mut dex_cursor,

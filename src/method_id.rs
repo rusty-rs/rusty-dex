@@ -22,10 +22,11 @@ impl MethodIdList {
 
         let mut methods = Vec::new();
 
-        for i in 0..size {
+        for _ in 0..size {
             let class_idx = dex_reader.read_u16().unwrap();
             let proto_idx = dex_reader.read_u16().unwrap();
             let name_idx = dex_reader.read_u32().unwrap();
+
             methods.push(MethodIdItem { 
                 class_idx,
                 proto_idx,

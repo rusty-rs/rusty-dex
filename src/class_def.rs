@@ -27,7 +27,7 @@ impl ClassDefList {
 
         let mut methods = Vec::new();
 
-        for i in 0..size {
+        for _ in 0..size {
             let class_idx = dex_reader.read_u32().unwrap();
             let access_flags = dex_reader.read_u32().unwrap();
             let superclass_idx = dex_reader.read_u32().unwrap();
@@ -36,6 +36,7 @@ impl ClassDefList {
             let annotations_off = dex_reader.read_u32().unwrap();
             let class_data_off = dex_reader.read_u32().unwrap();
             let static_value_off = dex_reader.read_u32().unwrap();
+
             methods.push(ClassDefItem { 
                 class_idx,
                 access_flags,
