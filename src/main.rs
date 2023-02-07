@@ -11,6 +11,7 @@ pub mod strings;
 pub mod type_id;
 pub mod proto_id;
 pub mod field_id;
+pub mod method_id;
 use crate::dex_reader::DexReader;
 use crate::dex_file::DexHeader;
 use crate::map_list::MapList;
@@ -18,6 +19,7 @@ use crate::strings::StringData;
 use crate::type_id::TypeIdList;
 use crate::proto_id::ProtoIdList;
 use crate::field_id::FieldIdList;
+use crate::method_id::MethodIdList;
 
 fn main() {
     // TODO: CLI arg
@@ -68,4 +70,9 @@ fn main() {
                                             dex_header.fields_ids_off,
                                             dex_header.fields_ids_size);
     // println!("{_field_ids_list:#?}");
+
+    let _method_ids_list = MethodIdList::build(&mut dex_cursor,
+                                              dex_header.method_ids_off,
+                                              dex_header.method_ids_size);
+    // println!("{_method_ids_list:#?}");
 }
