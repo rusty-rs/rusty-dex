@@ -1,5 +1,4 @@
 use std::io::{Seek, SeekFrom};
-use std::io::BufRead;
 use std::collections::HashMap;
 
 use crate::dex_reader::DexReader;
