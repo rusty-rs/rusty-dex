@@ -5,6 +5,7 @@ use std::io::Read;
 use crate::error::DexError;
 use crate::dex_reader::DexReader;
 
+// TODO: some offsets can be 0 if there is no data (even strings). Need to properly handle this.
 #[derive(Debug)]
 pub struct DexHeader {
     version: [u8; 3],
