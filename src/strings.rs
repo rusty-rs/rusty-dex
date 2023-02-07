@@ -1,9 +1,7 @@
 #![allow(dead_code)]
 
-use std::io::{Read, Seek, SeekFrom};
+use std::io::{Seek, SeekFrom};
 use std::io::BufRead;
-use std::collections::HashMap;
-use std::str;
 
 use crate::dex_reader::DexReader;
 
@@ -28,17 +26,16 @@ impl StringData {
 
         let mut strings = Vec::new();
 
-        let mut current_offset = dex_reader.bytes.position();
-        for i in 0..size {
+        for _ in 0..size {
             let string_offset = dex_reader.read_u32().unwrap();
-            current_offset = dex_reader.bytes.position();
+            let current_offset = dex_reader.bytes.position();
 
             dex_reader.bytes.seek(SeekFrom::Start(string_offset.into())).unwrap();
 
             let (utf16_size, _) = dex_reader.read_uleb128().unwrap();
             if utf16_size > 0 {
                 let mut raw_string = Vec::with_capacity(utf16_size as usize);
-                dex_reader.bytes.read_until(0, &mut raw_string);
+                dex_reader.bytes.read_until(0, &mut raw_string).unwrap();
                 raw_string.pop();
 
                 let (decoded, is_raw) = match String::from_utf8(raw_string) {
@@ -54,7 +51,7 @@ impl StringData {
                 });
             }
 
-            dex_reader.bytes.seek(SeekFrom::Start(current_offset.into())).unwrap();
+            dex_reader.bytes.seek(SeekFrom::Start(current_offset)).unwrap();
 
         }
 

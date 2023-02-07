@@ -95,7 +95,7 @@ impl <'a> DexReader<'a> {
         let mut bytes_read: usize = 0;
         let mut result: u32 = 0;
         let mut shift = 0;
-        let mut byte = 0;
+        let mut byte;
 
         loop {
             byte = self.bytes.read_u8().unwrap() as u32;
