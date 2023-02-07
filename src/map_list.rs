@@ -38,7 +38,6 @@ impl MapList {
                 offset: item_offset
             });
         }
-        println!("{items:#?}");
 
         MapList { size, items }
     }

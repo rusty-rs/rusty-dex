@@ -7,9 +7,11 @@ pub mod error;
 pub mod dex_reader;
 pub mod adler32;
 pub mod constants;
+pub mod strings;
 use crate::dex_reader::DexReader;
 use crate::dex_file::DexHeader;
 use crate::map_list::MapList;
+use crate::strings::StringData;
 
 fn main() {
     // TODO: CLI arg
@@ -37,5 +39,10 @@ fn main() {
     println!("{dex_header:#?}");
 
     let map_list = MapList::build(&mut dex_cursor, dex_header.map_off);
-    println!("{map_list:#?}");
+    // println!("{map_list:#?}");
+
+    let strings_list = StringData::build(&mut dex_cursor,
+                                         dex_header.string_ids_off,
+                                         dex_header.string_ids_size);
+    // println!("{strings_list:#?}");
 }
