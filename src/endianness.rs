@@ -73,9 +73,9 @@ impl <'a> DexCursor<'a> {
         let mut shift = 0;
 
         loop {
-            let byte = self.bytes.read_u8().unwrap() as u32;
+            let byte = self.bytes.read_u8().unwrap();
             bytes_read += 1;
-            let payload = byte & 0b0111_111;
+            let payload = (byte & 0b0111_1111) as u32;
             result |= payload << shift;
             shift += 7;
 
@@ -100,8 +100,9 @@ impl <'a> DexCursor<'a> {
         loop {
             byte = self.bytes.read_u8().unwrap() as u32;
             bytes_read += 1;
-            let payload = byte & 0b0111_111;
+            let payload = byte & 0b0111_1111;
             result |= payload << shift;
+
             shift += 7;
 
             if (byte & 0b1000_0000) == 0 {
@@ -114,7 +115,7 @@ impl <'a> DexCursor<'a> {
         }
 
         let mut result = result as i32;
-        if (shift < bytes_read * 7) && (byte & 0b0100_0000 == 1) {
+        if (byte & 0b0100_0000) == 0b0100_0000 {
             /* sign extend */
             result |= -(1 << shift);
         }
