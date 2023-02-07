@@ -8,10 +8,12 @@ pub mod dex_reader;
 pub mod adler32;
 pub mod constants;
 pub mod strings;
+pub mod type_id;
 use crate::dex_reader::DexReader;
 use crate::dex_file::DexHeader;
 use crate::map_list::MapList;
 use crate::strings::StringData;
+use crate::type_id::TypeIdList;
 
 fn main() {
     // TODO: CLI arg
@@ -41,8 +43,14 @@ fn main() {
     let _map_list = MapList::build(&mut dex_cursor, dex_header.map_off);
     // println!("{map_list:#?}");
 
-    let _strings_list = StringData::build(&mut dex_cursor,
+    let strings_list = StringData::build(&mut dex_cursor,
                                          dex_header.string_ids_off,
                                          dex_header.string_ids_size);
     // println!("{strings_list:#?}");
+
+    let type_ids_list = TypeIdList::build(&mut dex_cursor,
+                                          dex_header.type_ids_off,
+                                          dex_header.type_ids_size,
+                                          &strings_list);
+    println!("{type_ids_list:#?}");
 }

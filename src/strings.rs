@@ -11,7 +11,7 @@ pub struct StringDataItem {
     offset: u32,
     is_raw: bool,  // sometimes decoding fails but we still need an entry
                    // in the list so we keep the raw bytes
-    string: String
+    pub string: String
 }
 
 #[derive(Debug)]
