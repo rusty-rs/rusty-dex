@@ -10,12 +10,14 @@ pub mod constants;
 pub mod strings;
 pub mod type_id;
 pub mod proto_id;
+pub mod field_id;
 use crate::dex_reader::DexReader;
 use crate::dex_file::DexHeader;
 use crate::map_list::MapList;
 use crate::strings::StringData;
 use crate::type_id::TypeIdList;
 use crate::proto_id::ProtoIdList;
+use crate::field_id::FieldIdList;
 
 fn main() {
     // TODO: CLI arg
@@ -61,4 +63,9 @@ fn main() {
                                             dex_header.proto_ids_size,
                                             &strings_list);
     // println!("{proto_ids_list:#?}");
+
+    let _field_ids_list = FieldIdList::build(&mut dex_cursor,
+                                            dex_header.fields_ids_off,
+                                            dex_header.fields_ids_size);
+    // println!("{_field_ids_list:#?}");
 }
