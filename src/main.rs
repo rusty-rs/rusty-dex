@@ -12,6 +12,7 @@ pub mod type_id;
 pub mod proto_id;
 pub mod field_id;
 pub mod method_id;
+pub mod class_def;
 use crate::dex_reader::DexReader;
 use crate::dex_file::DexHeader;
 use crate::map_list::MapList;
@@ -20,6 +21,7 @@ use crate::type_id::TypeIdList;
 use crate::proto_id::ProtoIdList;
 use crate::field_id::FieldIdList;
 use crate::method_id::MethodIdList;
+use crate::class_def::ClassDefList;
 
 fn main() {
     // TODO: CLI arg
@@ -75,4 +77,9 @@ fn main() {
                                               dex_header.method_ids_off,
                                               dex_header.method_ids_size);
     // println!("{_method_ids_list:#?}");
+
+    let _class_defs_list = ClassDefList::build(&mut dex_cursor,
+                                              dex_header.class_defs_off,
+                                              dex_header.class_defs_size);
+    // println!("{_class_defs_list:#?}");
 }
