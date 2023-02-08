@@ -1,0 +1,11 @@
+[package]
+name = "android_emulator"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+byteorder = "1.4.3"
+zip = "0.6.4"
+
+# [build-dependencies]
+# bindgen = "0.63.0"
