@@ -4,6 +4,8 @@ use std::env;
 use std::process::exit;
 use zip::ZipArchive;
 
+pub mod logging;
+
 pub mod dex_file;
 pub mod map_list;
 pub mod error;
@@ -16,6 +18,9 @@ pub mod proto_id;
 pub mod field_id;
 pub mod method_id;
 pub mod class_def;
+
+use crate::logging::Logger;
+
 use crate::dex_reader::DexReader;
 use crate::dex_file::DexHeader;
 use crate::map_list::MapList;
@@ -30,6 +35,8 @@ use crate::call_site::CallSiteList;
 use crate::constants::MapItemType;
 
 fn main() {
+    let logger = Logger::new(3);
+
     /* Check CLI arguments */
     let args: Vec<String> = env::args().collect();
     if args.len() != 2 {
