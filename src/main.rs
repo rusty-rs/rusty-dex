@@ -104,11 +104,4 @@ fn main() {
     let class_defs_list = ClassDefList::build(&mut dex_cursor,
                                               dex_header.class_defs_off,
                                               dex_header.class_defs_size);
-
-    // let call_site_offset = _map_list.items.get(&MapItemType::CALL_SITE_ID_ITEM).unwrap();
-    // println!("{call_site_offset:?}");
-    // let _call_site_list = CallSiteList::build(&mut dex_cursor,
-                                             // map.call_site_off,
-                                             // dex_header.call_site_size);
-    // println!("{_call_site_list:#?}");
 }
