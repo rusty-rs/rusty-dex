@@ -1,3 +1,5 @@
+#[allow(dead_code)]
+
 use std::fs::File;
 use std::io::{Read, Cursor, Seek, SeekFrom};
 use std::env;
@@ -76,37 +78,37 @@ fn main() {
     let dex_header = DexHeader::new(&mut dex_cursor).unwrap();
     println!("{dex_header:#?}");
 
-    let _map_list = MapList::build(&mut dex_cursor, dex_header.map_off);
-    // println!("{map_list:#?}");
+    let map_list = MapList::build(&mut dex_cursor, dex_header.map_off);
 
     let strings_list = StringData::build(&mut dex_cursor,
                                          dex_header.string_ids_off,
                                          dex_header.string_ids_size);
-    // println!("{strings_list:#?}");
 
-    let _type_ids_list = TypeIdList::build(&mut dex_cursor,
+    let type_ids_list = TypeIdList::build(&mut dex_cursor,
                                           dex_header.type_ids_off,
                                           dex_header.type_ids_size,
                                           &strings_list);
-    // println!("{type_ids_list:#?}");
 
-    let _proto_ids_list = ProtoIdList::build(&mut dex_cursor,
+    let proto_ids_list = ProtoIdList::build(&mut dex_cursor,
                                             dex_header.proto_ids_off,
                                             dex_header.proto_ids_size);
-    // println!("{proto_ids_list:#?}");
 
-    let _field_ids_list = FieldIdList::build(&mut dex_cursor,
+    let field_ids_list = FieldIdList::build(&mut dex_cursor,
                                             dex_header.fields_ids_off,
                                             dex_header.fields_ids_size);
-    // println!("{_field_ids_list:#?}");
 
-    let _method_ids_list = MethodIdList::build(&mut dex_cursor,
+    let method_ids_list = MethodIdList::build(&mut dex_cursor,
                                               dex_header.method_ids_off,
                                               dex_header.method_ids_size);
-    // println!("{_method_ids_list:#?}");
 
-    let _class_defs_list = ClassDefList::build(&mut dex_cursor,
+    let class_defs_list = ClassDefList::build(&mut dex_cursor,
                                               dex_header.class_defs_off,
                                               dex_header.class_defs_size);
-    // println!("{_class_defs_list:#?}");
+
+    // let call_site_offset = _map_list.items.get(&MapItemType::CALL_SITE_ID_ITEM).unwrap();
+    // println!("{call_site_offset:?}");
+    // let _call_site_list = CallSiteList::build(&mut dex_cursor,
+                                             // map.call_site_off,
+                                             // dex_header.call_site_size);
+    // println!("{_call_site_list:#?}");
 }
