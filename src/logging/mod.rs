@@ -28,7 +28,7 @@ impl Logger {
         Logger { log_level }
     }
 
-    pub fn error(&self, msg: &str) {
+    pub fn error(&self, msg: String) {
         /* Error are always printed, regardless of the log level */
         let now = Local::now();
         println!("[{}] {} {}", now.format(DATETIME_FORMAT),
@@ -36,7 +36,7 @@ impl Logger {
                                msg);
     }
 
-    pub fn warning(&self, msg: &str) {
+    pub fn warning(&self, msg: String) {
         let now = Local::now();
         match self.log_level {
             LogLevel::Warning   |
@@ -50,7 +50,7 @@ impl Logger {
         }
     }
 
-    pub fn info(&self, msg: &str) {
+    pub fn info(&self, msg: String) {
         let now = Local::now();
         match self.log_level {
             LogLevel::Info      |
@@ -63,7 +63,7 @@ impl Logger {
         }
     }
 
-    pub fn debug(&self, msg: &str) {
+    pub fn debug(&self, msg: String) {
         let now = Local::now();
         if let LogLevel::Debug = self.log_level {
             println!("[{}] [DEBUG] {}",

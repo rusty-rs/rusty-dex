@@ -43,19 +43,19 @@ fn main() {
     /* Check CLI arguments */
     let args: Vec<String> = env::args().collect();
     if args.len() != 2 {
-        println!("Usage: ./{:} [APK]", args[0]);
+        logger.error(format!("Usage: ./{} [APK]", args[0]));
         exit(22);   /* Invalid arg */
     }
 
     let apk_path = &args[1];
-    println!("[+] Parsing {}", apk_path);
+    logger.info(format!("Parsing {}", apk_path));
 
     let mut raw_file = File::open(apk_path)
         .unwrap_or_else(|err| panic!("Could not open input file: {err}"));
     let mut zip_file = ZipArchive::new(raw_file)
         .unwrap_or_else(|err| panic!("Error: cannot create ZipArchive object: {err}"));
 
-    println!("[+] Loading classes.dex from the APK");
+    logger.info("Loading classes.dex from the APK".to_string());
 
     /* TODO: support merging of multiple DEX files */
     let mut dex_entry = zip_file.by_name("classes.dex")
