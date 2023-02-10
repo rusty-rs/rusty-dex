@@ -20,6 +20,7 @@ pub mod proto_id;
 pub mod field_id;
 pub mod method_id;
 pub mod class_def;
+pub mod method_handle;
 
 use crate::logging::Logger;
 
@@ -32,7 +33,7 @@ use crate::proto_id::ProtoIdList;
 use crate::field_id::FieldIdList;
 use crate::method_id::MethodIdList;
 use crate::class_def::ClassDefList;
-use crate::call_site::CallSiteList;
+use crate::method_handle::MethodHandleList;
 
 use crate::constants::MapItemType;
 
@@ -104,4 +105,10 @@ fn main() {
     let class_defs_list = ClassDefList::build(&mut dex_cursor,
                                               dex_header.class_defs_off,
                                               dex_header.class_defs_size);
+
+    if let Some(map) = map_list.items.get(&MapItemType::METHOD_HANDLE_ITEM) {
+        let method_handles_list = MethodHandleList::build(&mut dex_cursor,
+                                                          map.offset,
+                                                          map.size);
+    }
 }

@@ -8,7 +8,7 @@ use crate::dex_reader::DexReader;
 #[derive(Debug)]
 pub struct MapListItem {
     item_type: u16,
-    size: u32,
+    pub size: u32,
     pub offset: u32
 }
 
