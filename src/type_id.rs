@@ -2,18 +2,18 @@ use std::io::{Seek, SeekFrom};
 use std::collections::HashMap;
 
 use crate::dex_reader::DexReader;
-use crate::strings::StringData;
+use crate::strings::DexStrings;
 
 #[derive(Debug)]
-pub struct TypeIdList{
+pub struct DexTypes{
     pub items: HashMap<u32, String>
 }
 
-impl TypeIdList {
+impl DexTypes {
     pub fn build(dex_reader: &mut DexReader,
                  offset: u32,
                  size: u32,
-                 strings_list: &StringData) -> Self {
+                 strings_list: &DexStrings) -> Self {
         dex_reader.bytes.seek(SeekFrom::Start(offset.into())).unwrap();
 
         let mut types = HashMap::new();
@@ -23,6 +23,6 @@ impl TypeIdList {
             types.insert(offset,
                          strings_list.strings[offset as usize].string.clone());
         }
-        TypeIdList { items: types }
+        DexTypes { items: types }
     }
 }

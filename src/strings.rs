@@ -6,7 +6,7 @@ use std::io::BufRead;
 use crate::dex_reader::DexReader;
 
 #[derive(Debug)]
-pub struct StringDataItem {
+pub struct DexStringsItem {
     utf16_size: u32,
     offset: u32,
     is_raw: bool,  // sometimes decoding fails but we still need an entry
@@ -15,11 +15,11 @@ pub struct StringDataItem {
 }
 
 #[derive(Debug)]
-pub struct StringData {
-    pub strings: Vec<StringDataItem>
+pub struct DexStrings {
+    pub strings: Vec<DexStringsItem>
 }
 
-impl StringData {
+impl DexStrings {
     pub fn build(dex_reader: &mut DexReader, offset: u32, size: u32) -> Self {
         /* Move to start of map list */
         dex_reader.bytes.seek(SeekFrom::Start(offset.into())).unwrap();
@@ -44,7 +44,7 @@ impl StringData {
                     Err(_) => (String::from(""), true)
                 };
 
-                strings.push(StringDataItem {
+                strings.push(DexStringsItem {
                     utf16_size,
                     offset: string_offset,
                     is_raw,
@@ -56,6 +56,6 @@ impl StringData {
 
         }
 
-        StringData { strings }
+        DexStrings { strings }
     }
 }

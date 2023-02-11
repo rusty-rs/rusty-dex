@@ -15,11 +15,11 @@ pub struct ClassDefItem {
 }
 
 #[derive(Debug)]
-pub struct ClassDefList {
+pub struct DexClasses {
     pub items: Vec<ClassDefItem>
 }
 
-impl ClassDefList {
+impl DexClasses {
     pub fn build(dex_reader: &mut DexReader,
                  offset: u32,
                  size: u32) -> Self {
@@ -49,6 +49,6 @@ impl ClassDefList {
             });
         }
 
-        ClassDefList { items: methods }
+        DexClasses { items: methods }
     }
 }

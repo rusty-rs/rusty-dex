@@ -10,11 +10,11 @@ pub struct ProtoIdItem {
 }
 
 #[derive(Debug)]
-pub struct ProtoIdList {
+pub struct DexProtos {
     pub items: Vec<ProtoIdItem>
 }
 
-impl ProtoIdList {
+impl DexProtos {
     pub fn build(dex_reader: &mut DexReader,
                  offset: u32,
                  size: u32) -> Self {
@@ -34,6 +34,6 @@ impl ProtoIdList {
             });
         }
 
-        ProtoIdList { items: protos }
+        DexProtos { items: protos }
     }
 }

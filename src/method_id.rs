@@ -10,11 +10,11 @@ pub struct MethodIdItem {
 }
 
 #[derive(Debug)]
-pub struct MethodIdList {
+pub struct DexMethods {
     pub items: Vec<MethodIdItem>
 }
 
-impl MethodIdList {
+impl DexMethods {
     pub fn build(dex_reader: &mut DexReader,
                  offset: u32,
                  size: u32) -> Self {
@@ -34,6 +34,6 @@ impl MethodIdList {
             });
         }
 
-        MethodIdList { items: methods }
+        DexMethods { items: methods }
     }
 }

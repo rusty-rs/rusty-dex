@@ -10,11 +10,11 @@ pub struct FieldIdItem {
 }
 
 #[derive(Debug)]
-pub struct FieldIdList {
+pub struct DexFields {
     pub items: Vec<FieldIdItem>
 }
 
-impl FieldIdList {
+impl DexFields {
     pub fn build(dex_reader: &mut DexReader,
                  offset: u32,
                  size: u32) -> Self {
@@ -34,6 +34,6 @@ impl FieldIdList {
             });
         }
 
-        FieldIdList { items: fields }
+        DexFields { items: fields }
     }
 }

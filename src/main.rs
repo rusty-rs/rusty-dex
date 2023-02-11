@@ -8,6 +8,7 @@ use zip::ZipArchive;
 
 pub mod logging;
 
+pub mod dex_header;
 pub mod dex_file;
 pub mod map_list;
 pub mod error;
@@ -25,14 +26,15 @@ pub mod method_handle;
 use crate::logging::Logger;
 
 use crate::dex_reader::DexReader;
-use crate::dex_file::DexHeader;
+use crate::dex_file::DexFile;
+use crate::dex_header::DexHeader;
 use crate::map_list::MapList;
-use crate::strings::StringData;
-use crate::type_id::TypeIdList;
-use crate::proto_id::ProtoIdList;
-use crate::field_id::FieldIdList;
-use crate::method_id::MethodIdList;
-use crate::class_def::ClassDefList;
+use crate::strings::DexStrings;
+use crate::type_id::DexTypes;
+use crate::proto_id::DexProtos;
+use crate::field_id::DexFields;
+use crate::method_id::DexMethods;
+use crate::class_def::DexClasses;
 use crate::method_handle::MethodHandleList;
 
 use crate::constants::MapItemType;
@@ -81,28 +83,28 @@ fn main() {
 
     let map_list = MapList::build(&mut dex_cursor, dex_header.map_off);
 
-    let strings_list = StringData::build(&mut dex_cursor,
+    let strings_list = DexStrings::build(&mut dex_cursor,
                                          dex_header.string_ids_off,
                                          dex_header.string_ids_size);
 
-    let type_ids_list = TypeIdList::build(&mut dex_cursor,
+    let type_ids_list = DexTypes::build(&mut dex_cursor,
                                           dex_header.type_ids_off,
                                           dex_header.type_ids_size,
                                           &strings_list);
 
-    let proto_ids_list = ProtoIdList::build(&mut dex_cursor,
+    let proto_ids_list = DexProtos::build(&mut dex_cursor,
                                             dex_header.proto_ids_off,
                                             dex_header.proto_ids_size);
 
-    let field_ids_list = FieldIdList::build(&mut dex_cursor,
+    let field_ids_list = DexFields::build(&mut dex_cursor,
                                             dex_header.fields_ids_off,
                                             dex_header.fields_ids_size);
 
-    let method_ids_list = MethodIdList::build(&mut dex_cursor,
+    let method_ids_list = DexMethods::build(&mut dex_cursor,
                                               dex_header.method_ids_off,
                                               dex_header.method_ids_size);
 
-    let class_defs_list = ClassDefList::build(&mut dex_cursor,
+    let class_defs_list = DexClasses::build(&mut dex_cursor,
                                               dex_header.class_defs_off,
                                               dex_header.class_defs_size);
 
@@ -111,4 +113,16 @@ fn main() {
                                                           map.offset,
                                                           map.size);
     }
+
+    let dex_file = DexFile {
+        header: dex_header,
+        strings: strings_list,
+        types: type_ids_list,
+        protos: proto_ids_list,
+        fields: field_ids_list,
+        methods: method_ids_list,
+        classes: class_defs_list,
+    };
+
+    println!("{dex_file:#?}");
 }
