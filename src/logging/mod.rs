@@ -1,74 +1,132 @@
-use chrono::offset::Local;
-use colored::Colorize;
+pub extern crate chrono;
+pub extern crate colored;
 
-const DATETIME_FORMAT: &str = "%F %T";
+// TODO: add a stacktrace!() to print the stacktrace?
+
+pub const DATETIME_FORMAT: &str = "%F %T";
+pub static mut LOG_LEVEL: LogLevel = LogLevel::Error;
 
 #[derive(Debug)]
-enum LogLevel {
+pub enum LogLevel {
     Error,
     Warning,
     Info,
     Debug,
 }
 
-pub struct Logger {
-    log_level: LogLevel,
+#[macro_export]
+macro_rules! error
+{
+    ($($arg:tt), *) => {{
+        use $crate::logging::DATETIME_FORMAT;
+        use $crate::logging::colored::Colorize;
+
+        let time_now = $crate::logging::chrono::offset::Local::now();
+        eprint!("[{}] {} [{}:{}] | ", time_now.format(DATETIME_FORMAT),
+                                      "[ERROR]".red(),
+                                      file!(),
+                                      line!());
+        eprintln!($($arg),*);
+    }}
 }
 
-impl Logger {
-    pub fn new(log_level: u8) -> Self {
-        let log_level = match log_level {
+#[macro_export]
+macro_rules! warning
+{
+    ($($arg:tt), *) => {{
+        use $crate::logging::{
+            LOG_LEVEL,
+            DATETIME_FORMAT,
+            LogLevel
+        };
+        use $crate::logging::colored::Colorize;
+
+        let time_now = $crate::logging::chrono::offset::Local::now();
+        match unsafe { &LOG_LEVEL } {
+            LogLevel::Warning   |
+                LogLevel::Info  |
+                LogLevel::Debug => {
+                    eprint!("[{}] {} [{}:{}] | ",
+                            time_now.format(DATETIME_FORMAT),
+                            "[WARNING]".yellow(),
+                            file!(),
+                            line!());
+                    eprintln!($($arg),*);
+                },
+            _ => { },
+        }
+    }}
+}
+
+#[macro_export]
+macro_rules! info
+{
+    ($($arg:tt), *) => {{
+        use $crate::logging::{
+            LOG_LEVEL,
+            DATETIME_FORMAT,
+            LogLevel
+        };
+        use $crate::logging::colored::Colorize;
+
+        let time_now = $crate::logging::chrono::offset::Local::now();
+        match unsafe { &LOG_LEVEL } {
+            LogLevel::Info      |
+                LogLevel::Debug => {
+                    eprint!("[{}] {} [{}:{}] | ",
+                            time_now.format(DATETIME_FORMAT),
+                            "[INFO]".green(),
+                            file!(),
+                            line!());
+                    eprintln!($($arg),*);
+                },
+            _ => { },
+        }
+    }}
+}
+
+#[macro_export]
+macro_rules! debug
+{
+    ($($arg:tt), *) => {{
+        use $crate::logging::{
+            LOG_LEVEL,
+            DATETIME_FORMAT,
+            LogLevel
+        };
+
+        let time_now = $crate::logging::chrono::offset::Local::now();
+        if let LogLevel::Debug = unsafe { &LOG_LEVEL } {
+            eprint!("[{}] {} [{}:{}] | ", time_now.format(DATETIME_FORMAT),
+                                          "[DEBUG]",
+                                          file!(),
+                                          line!());
+            eprintln!($($arg),*);
+        }
+    }}
+}
+
+pub fn set_log_level(level: u8) {
+    unsafe {
+        LOG_LEVEL = match level {
             0     => LogLevel::Error,
             1     => LogLevel::Warning,
             2     => LogLevel::Info,
             3     => LogLevel::Debug,
-            other => panic!("Error: unknown log level {other}")
+            other => {
+                use std::process;
+                error!("unknown log level {other}");
+                describe_log_levels();
+                std::process::exit(1);
+            }
         };
+    };
+}
 
-        Logger { log_level }
-    }
-
-    pub fn error(&self, msg: String) {
-        /* Error are always printed, regardless of the log level */
-        let now = Local::now();
-        println!("[{}] {} {}", now.format(DATETIME_FORMAT),
-                               "[ERROR]".red(),
-                               msg);
-    }
-
-    pub fn warning(&self, msg: String) {
-        let now = Local::now();
-        match self.log_level {
-            LogLevel::Warning   |
-                LogLevel::Info  |
-                LogLevel::Debug => {
-                println!("[{}] {} {}", now.format(DATETIME_FORMAT),
-                                       "[WARNING]".yellow(),
-                                       msg);
-                },
-            _               => { }
-        }
-    }
-
-    pub fn info(&self, msg: String) {
-        let now = Local::now();
-        match self.log_level {
-            LogLevel::Info      |
-                LogLevel::Debug => {
-                println!("[{}] {} {}", now.format(DATETIME_FORMAT),
-                                       "[INFO]".green(),
-                                       msg);
-                },
-            _                     => { }
-        }
-    }
-
-    pub fn debug(&self, msg: String) {
-        let now = Local::now();
-        if let LogLevel::Debug = self.log_level {
-            println!("[{}] [DEBUG] {}",
-                     now.format(DATETIME_FORMAT),
-                     msg);
-        }
-    }
+fn describe_log_levels() {
+    println!("\nAvailable log levels:\n");
+    println!("\tError   (0): only show unrecoverable errors (default value)");
+    println!("\tWarning (1): show both recoverable and unrecoverable errors");
+    println!("\tInfo    (2): show errors and info about the current execution");
+    println!("\tDebug   (3): show everything, including verbose debug messages\n");
 }

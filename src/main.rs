@@ -23,8 +23,6 @@ pub mod method_id;
 pub mod class_def;
 pub mod method_handle;
 
-use crate::logging::Logger;
-
 use crate::dex_reader::DexReader;
 use crate::dex_file::DexFile;
 use crate::dex_header::DexHeader;
@@ -40,24 +38,30 @@ use crate::method_handle::MethodHandleList;
 use crate::constants::MapItemType;
 
 fn main() {
-    let logger = Logger::new(3);
+    logging::set_log_level(34);
+    error!("error");
+    debug!("test debug");
+    info!("test info");
+    warning!("test warning");
+    error!("test");
+    panic!("Not actually panicking");
 
     /* Check CLI arguments */
     let args: Vec<String> = env::args().collect();
     if args.len() != 2 {
-        logger.error(format!("Usage: ./{} [APK]", args[0]));
+        error!("Usage: cargo run [APK]");
         exit(22);   /* Invalid arg */
     }
 
     let apk_path = &args[1];
-    logger.info(format!("Parsing {}", apk_path));
+    info!("Parsing {}", apk_path);
 
     let mut raw_file = File::open(apk_path)
         .unwrap_or_else(|err| panic!("Could not open input file: {err}"));
     let mut zip_file = ZipArchive::new(raw_file)
         .unwrap_or_else(|err| panic!("Error: cannot create ZipArchive object: {err}"));
 
-    logger.info("Loading classes.dex from the APK".to_string());
+    info!("Loading classes.dex from the APK");
 
     /* TODO: support merging of multiple DEX files */
     let mut dex_entry = zip_file.by_name("classes.dex")
