@@ -2,7 +2,7 @@ use std::io::{Seek, SeekFrom};
 use std::collections::HashMap;
 
 use crate::dex_reader::DexReader;
-use crate::strings::DexStrings;
+use crate::dex_strings::DexStrings;
 
 #[derive(Debug)]
 pub struct DexTypes{
