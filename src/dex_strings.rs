@@ -56,6 +56,7 @@ impl DexStrings {
 
         }
 
+        strings.sort_by(|a, b| a.string.to_lowercase().cmp(&b.string));
         DexStrings { strings }
     }
 }
