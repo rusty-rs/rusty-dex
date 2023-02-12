@@ -114,7 +114,6 @@ pub fn set_log_level(level: u8) {
             2     => LogLevel::Info,
             3     => LogLevel::Debug,
             other => {
-                use std::process;
                 error!("unknown log level {other}");
                 describe_log_levels();
                 std::process::exit(1);
