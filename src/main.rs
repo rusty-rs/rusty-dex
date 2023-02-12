@@ -38,13 +38,8 @@ use crate::method_handle::MethodHandleList;
 use crate::constants::MapItemType;
 
 fn main() {
-    logging::set_log_level(34);
-    error!("error");
-    debug!("test debug");
-    info!("test info");
-    warning!("test warning");
-    error!("test");
-    panic!("Not actually panicking");
+    // TODO: use CLI arg
+    logging::set_log_level(3);
 
     /* Check CLI arguments */
     let args: Vec<String> = env::args().collect();
