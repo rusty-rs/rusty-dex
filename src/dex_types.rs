@@ -4,6 +4,12 @@ use crate::dex_reader::DexReader;
 use crate::dex_strings::DexStrings;
 
 #[derive(Debug)]
+pub struct DexTypeItem {
+    offset: u32,
+    pub str_type: String,
+}
+
+#[derive(Debug)]
 pub struct DexTypes{
     pub items: Vec<String>
 }
@@ -19,9 +25,18 @@ impl DexTypes {
 
         for _ in 0..size {
             let offset = dex_reader.read_u32().unwrap();
-            types.push(strings_list.strings[offset as usize].string.clone());
+            types.push(DexTypeItem {
+                offset,
+                str_type: strings_list.strings[offset as usize].string.clone()
+            });
         }
-        types.sort_by(|a, b| a.to_lowercase().cmp(&b.to_lowercase()));
-        DexTypes { items: types }
+        types.sort_by(|a, b| a.offset.cmp(&b.offset));
+        let mut items = Vec::new();
+        for dex_type in types.iter() {
+            if ! items.contains(&dex_type.str_type) {
+                items.push(dex_type.str_type.clone());
+            }
+        }
+        DexTypes { items }
     }
 }
