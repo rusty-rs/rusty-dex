@@ -3,6 +3,8 @@
 use std::io::{Seek, SeekFrom};
 use std::io::BufRead;
 
+use mutf8;
+
 use crate::dex_reader::DexReader;
 
 #[derive(Debug)]
@@ -39,8 +41,8 @@ impl DexStrings {
                 dex_reader.bytes.read_until(0, &mut raw_string).unwrap();
                 raw_string.pop();
 
-                let (decoded, is_raw) = match String::from_utf8(raw_string) {
-                    Ok(decoded) => (decoded, false),
+                let (decoded, is_raw) = match mutf8::decode(&raw_string) {
+                    Ok(decoded) => (decoded.into_owned(), false),
                     Err(_) => (String::from(""), true)
                 };
 

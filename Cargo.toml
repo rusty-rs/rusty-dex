@@ -8,6 +8,7 @@ byteorder = "1.4.3"
 chrono = "0.4.23"
 colored = "2.0.0"
 zip = "0.6.4"
+residua-mutf8 = "2"
 
 # [build-dependencies]
 # bindgen = "0.63.0"
