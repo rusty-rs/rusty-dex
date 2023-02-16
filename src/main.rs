@@ -92,8 +92,9 @@ fn main() {
                                           &strings_list);
 
     let proto_ids_list = DexProtos::build(&mut dex_cursor,
-                                            dex_header.proto_ids_off,
-                                            dex_header.proto_ids_size);
+                                          dex_header.proto_ids_off,
+                                          dex_header.proto_ids_size,
+                                          &type_ids_list);
 
     let field_ids_list = DexFields::build(&mut dex_cursor,
                                             dex_header.fields_ids_off,
