@@ -50,6 +50,13 @@ impl DexStrings {
                     is_raw,
                     string: decoded,
                 });
+            } else {
+                strings.push(DexStringsItem {
+                    utf16_size,
+                    offset: string_offset,
+                    is_raw: false,
+                    string: String::new(),
+                });
             }
 
             dex_reader.bytes.seek(SeekFrom::Start(current_offset)).unwrap();
