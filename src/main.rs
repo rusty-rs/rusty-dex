@@ -123,5 +123,5 @@ fn main() {
         classes: class_defs_list,
     };
 
-    println!("{dex_file:#?}");
+    println!("{:#?}", dex_file.types);
 }

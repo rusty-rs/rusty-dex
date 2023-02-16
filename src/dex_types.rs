@@ -1,12 +1,11 @@
 use std::io::{Seek, SeekFrom};
-use std::collections::HashMap;
 
 use crate::dex_reader::DexReader;
 use crate::dex_strings::DexStrings;
 
 #[derive(Debug)]
 pub struct DexTypes{
-    pub items: HashMap<u32, String>
+    pub items: Vec<String>
 }
 
 impl DexTypes {
@@ -16,13 +15,13 @@ impl DexTypes {
                  strings_list: &DexStrings) -> Self {
         dex_reader.bytes.seek(SeekFrom::Start(offset.into())).unwrap();
 
-        let mut types = HashMap::new();
+        let mut types = Vec::new();
 
         for _ in 0..size {
             let offset = dex_reader.read_u32().unwrap();
-            types.insert(offset,
-                         strings_list.strings[offset as usize].string.clone());
+            types.push(strings_list.strings[offset as usize].string.clone());
         }
+        types.sort_by(|a, b| a.to_lowercase().cmp(&b.to_lowercase()));
         DexTypes { items: types }
     }
 }
