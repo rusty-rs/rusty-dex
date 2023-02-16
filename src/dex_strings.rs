@@ -63,7 +63,12 @@ impl DexStrings {
 
         }
 
-        strings.sort_by(|a, b| a.string.to_lowercase().cmp(&b.string.to_lowercase()));
+        strings.sort_by(|a, b| a.string
+                                .encode_utf16()
+                                .collect::<Vec<u16>>()
+                                .cmp(&b.string
+                                       .encode_utf16()
+                                       .collect::<Vec<u16>>()));
         DexStrings { strings }
     }
 }
