@@ -123,6 +123,4 @@ fn main() {
         methods: method_ids_list,
         classes: class_defs_list,
     };
-
-    println!("{:#?}", dex_file.types);
 }

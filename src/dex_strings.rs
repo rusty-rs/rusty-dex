@@ -35,7 +35,6 @@ impl DexStrings {
             dex_reader.bytes.seek(SeekFrom::Start(string_offset.into())).unwrap();
 
             let (utf16_size, _) = dex_reader.read_uleb128().unwrap();
-            // TODO: make sure we are properly handling the case of U+0000
             if utf16_size > 0 {
                 let mut raw_string = Vec::with_capacity(utf16_size as usize);
                 dex_reader.bytes.read_until(0, &mut raw_string).unwrap();

@@ -43,7 +43,6 @@ impl DexProtos {
                 // Decode the parameters
                 dex_reader.bytes.seek(SeekFrom::Start(parameters_off.into())).unwrap();
 
-                // TODO: handle basic types
                 proto.push('(');
                 let params_size = dex_reader.read_u32().unwrap();
                 for idx in 0..params_size {
