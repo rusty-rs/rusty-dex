@@ -49,7 +49,7 @@ impl DexProtos {
                     let offset = dex_reader.read_u16().unwrap();
                     proto.push_str(types_list.items.get(return_type_idx as usize).unwrap());
                     if idx < params_size - 1 {
-                        proto.push_str("; ")
+                        proto.push(' ');
                     }
                 }
                 proto.push(')');
