@@ -1,4 +1,5 @@
 use std::io::{Seek, SeekFrom};
+use std::cmp::Ordering;
 
 use crate::dex_reader::DexReader;
 use crate::dex_strings::DexStrings;
@@ -9,15 +10,28 @@ pub struct ProtoIdItem {
     shorty_idx: u32,
     return_type_idx: u32,
     parameters_off: u32,
+    parameters_off_list: Vec<u16>,  // used to sort items
     pub proto: String,
 }
 
 #[derive(Debug)]
 pub struct DexProtos {
-    pub items: Vec<ProtoIdItem>
+    pub items: Vec<String>
 }
 
 impl DexProtos {
+    fn sort(a: &ProtoIdItem, b: &ProtoIdItem) -> Ordering {
+        // First sort by return type
+        let sort_return = a.return_type_idx.cmp(&b.return_type_idx);
+
+        if sort_return == Ordering::Equal {
+            // Same return type, sort by params offsets
+            return a.parameters_off_list.cmp(&b.parameters_off_list);
+        }
+
+        sort_return
+    }
+
     pub fn build(dex_reader: &mut DexReader,
                  offset: u32,
                  size: u32,
@@ -33,6 +47,7 @@ impl DexProtos {
 
             // Decode the prototype
             let mut proto = String::new();
+            let mut parameters_off_list = Vec::new();
             if parameters_off == 0 {
                 // No parameters in this prototype
                 proto.push_str("()");
@@ -47,6 +62,8 @@ impl DexProtos {
                 let params_size = dex_reader.read_u32().unwrap();
                 for idx in 0..params_size {
                     let offset = dex_reader.read_u16().unwrap();
+                    parameters_off_list.push(offset);
+
                     proto.push_str(types_list.items.get(offset as usize).unwrap());
                     if idx < params_size - 1 {
                         proto.push(' ');
@@ -63,10 +80,19 @@ impl DexProtos {
                 shorty_idx,
                 return_type_idx,
                 parameters_off,
+                parameters_off_list,
                 proto
             });
         }
 
-        DexProtos { items: protos }
+
+        protos.sort_by(|a, b| DexProtos::sort(&a, &b));
+        let mut items = Vec::new();
+        for dex_proto in protos.iter() {
+            if ! items.contains(&dex_proto.proto) {
+                items.push(dex_proto.proto.clone());
+            }
+        }
+        DexProtos { items }
     }
 }
