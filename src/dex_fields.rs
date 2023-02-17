@@ -1,4 +1,5 @@
 use std::io::{Seek, SeekFrom};
+use std::cmp::Ordering;
 
 use crate::dex_reader::DexReader;
 use crate::dex_types::DexTypes;
@@ -64,7 +65,7 @@ impl DexFields {
             });
         }
 
-        protos.sort_by(|a, b| DexFields::sort(&a, &b));
+        fields.sort_by(|a, b| DexFields::sort(&a, &b));
 
         let mut items = Vec::new();
         for dex_field in fields.iter() {
