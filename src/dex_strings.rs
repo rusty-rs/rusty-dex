@@ -70,6 +70,7 @@ impl DexStrings {
                                 .cmp(&b.string
                                        .encode_utf16()
                                        .collect::<Vec<u16>>()));
+        // TODO: remove duplicates
         DexStrings { strings }
     }
 }

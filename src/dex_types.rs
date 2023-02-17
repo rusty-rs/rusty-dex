@@ -31,12 +31,13 @@ impl DexTypes {
             });
         }
         types.sort_by(|a, b| a.offset.cmp(&b.offset));
+
         let mut items = Vec::new();
         for dex_type in types.iter() {
-            if ! items.contains(&dex_type.str_type) {
-                items.push(dex_type.str_type.clone());
-            }
+            items.push(dex_type.str_type.clone());
         }
+        items.dedup();
+
         DexTypes { items }
     }
 }

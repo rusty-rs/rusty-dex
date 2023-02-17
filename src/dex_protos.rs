@@ -87,12 +87,13 @@ impl DexProtos {
 
 
         protos.sort_by(|a, b| DexProtos::sort(&a, &b));
+
         let mut items = Vec::new();
         for dex_proto in protos.iter() {
-            if ! items.contains(&dex_proto.proto) {
-                items.push(dex_proto.proto.clone());
-            }
+            items.push(dex_proto.proto.clone());
         }
+        items.dedup();
+
         DexProtos { items }
     }
 }
