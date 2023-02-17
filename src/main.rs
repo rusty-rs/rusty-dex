@@ -101,8 +101,11 @@ fn main() {
                                             dex_header.fields_ids_size);
 
     let method_ids_list = DexMethods::build(&mut dex_cursor,
-                                              dex_header.method_ids_off,
-                                              dex_header.method_ids_size);
+                                            dex_header.method_ids_off,
+                                            dex_header.method_ids_size,
+                                            &type_ids_list,
+                                            &proto_ids_list,
+                                            &strings_list);
 
     let class_defs_list = DexClasses::build(&mut dex_cursor,
                                               dex_header.class_defs_off,
