@@ -97,8 +97,10 @@ fn main() {
                                           &type_ids_list);
 
     let field_ids_list = DexFields::build(&mut dex_cursor,
-                                            dex_header.fields_ids_off,
-                                            dex_header.fields_ids_size);
+                                          dex_header.fields_ids_off,
+                                          dex_header.fields_ids_size,
+                                          &type_ids_list,
+                                          &strings_list);
 
     let method_ids_list = DexMethods::build(&mut dex_cursor,
                                             dex_header.method_ids_off,
