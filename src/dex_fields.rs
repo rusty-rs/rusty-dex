@@ -73,7 +73,6 @@ impl DexFields {
         }
         items.dedup();
 
-        println!("{items:#?}");
         DexFields { items }
     }
 }
