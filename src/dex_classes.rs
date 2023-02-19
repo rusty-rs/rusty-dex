@@ -18,13 +18,14 @@ pub struct ClassDefItem {
     source_file_idx: u32,
     annotations_off: u32,
     class_data_off: u32,
-    static_value_off: u32
+    static_value_off: u32,
+    class_data: Option<ClassDataItem>
 }
 
 #[derive(Debug)]
 pub struct EncodedField {
-    field_idx_diff: u32,
-    access_flags: u32,
+    field: String,
+    access_flags: Vec<AccessFlag>,
 }
 
 #[derive(Debug)]
@@ -73,85 +74,91 @@ impl DexClasses {
             let class_data_off = dex_reader.read_u32().unwrap();
             let static_value_off = dex_reader.read_u32().unwrap();
 
-            if class_data_off == 0 {
-                // No class data
-                continue;
+            // If class_data_off == 0 then we have no class data
+            if class_data_off != 0 {
+                // Start parse class data
+
+                // Keep track of current stream position
+                let current_offset = dex_reader.bytes.position();
+
+                // Go to class data offset
+                dex_reader.bytes.seek(SeekFrom::Start(class_data_off.into())).unwrap();
+
+                let (static_fields_size, _)   = dex_reader.read_uleb128().unwrap();
+                let (instance_fields_size, _) = dex_reader.read_uleb128().unwrap();
+                let (direct_methods_size, _)  = dex_reader.read_uleb128().unwrap();
+                let (virtual_methods_size, _) = dex_reader.read_uleb128().unwrap();
+
+                let mut static_fields   = Vec::<EncodedField>::with_capacity(static_fields_size as usize);
+                let mut instance_fields = Vec::<EncodedField>::with_capacity(instance_fields_size as usize);
+                let mut direct_methods  = Vec::<String>::with_capacity(direct_methods_size as usize);
+                let mut virtual_methods = Vec::<String>::with_capacity(virtual_methods_size as usize);
+
+                // Encoded fields
+                let mut field_idx = 0;
+                for _ in 0..static_fields_size {
+                    let (idx, read) = dex_reader.read_uleb128().unwrap();
+                    let (access_flags, _) = dex_reader.read_uleb128().unwrap();
+
+                    field_idx += idx;
+
+                    let decoded_field = fields_list.items.get(field_idx as usize)
+                                                         .unwrap()
+                                                         .to_string();
+                    let decoded_flags = AccessFlag::parse(access_flags, true);
+                    static_fields.push(EncodedField {
+                        field: decoded_field,
+                        access_flags: decoded_flags
+                    });
+                }
+
+                let mut field_idx = 0;
+                for _ in 0..instance_fields_size {
+                    let (idx, _) = dex_reader.read_uleb128().unwrap();
+                    let (access_flags, _) = dex_reader.read_uleb128().unwrap();
+
+                    field_idx += idx;
+
+                    let decoded_field = fields_list.items.get(field_idx as usize)
+                                                         .unwrap()
+                                                         .to_string();
+                    let decoded_flags = AccessFlag::parse(access_flags, true);
+                    instance_fields.push(EncodedField {
+                        field: decoded_field,
+                        access_flags: decoded_flags
+                    });
+                }
+
+                // Encoded methods
+                let mut method_idx = 0;
+                for _ in 0..direct_methods_size {
+                    let (idx, _) = dex_reader.read_uleb128().unwrap();
+                    let (access_flags, _) = dex_reader.read_uleb128().unwrap();
+                    let (code_offset, _) = dex_reader.read_uleb128().unwrap();
+
+                    method_idx += idx;
+
+                    direct_methods.push(methods_list.items.get(method_idx as usize)
+                                                        .unwrap()
+                                                        .to_string());
+                }
+
+                let mut method_idx = 0;
+                for _ in 0..virtual_methods_size {
+                    let (idx, _) = dex_reader.read_uleb128().unwrap();
+                    let (access_flags, _) = dex_reader.read_uleb128().unwrap();
+                    let (code_offset, _) = dex_reader.read_uleb128().unwrap();
+
+                    method_idx += idx;
+
+                    virtual_methods.push(methods_list.items.get(method_idx as usize)
+                                                        .unwrap()
+                                                        .to_string());
+                }
+
+                // Go back to the previous offset
+                dex_reader.bytes.seek(SeekFrom::Start(current_offset)).unwrap();
             }
-
-            // Start parse class data
-
-            // Keep track of current stream position
-            let current_offset = dex_reader.bytes.position();
-
-            // Go to class data offset
-            dex_reader.bytes.seek(SeekFrom::Start(class_data_off.into())).unwrap();
-
-            let (static_fields_size, _)   = dex_reader.read_uleb128().unwrap();
-            let (instance_fields_size, _) = dex_reader.read_uleb128().unwrap();
-            let (direct_methods_size, _)  = dex_reader.read_uleb128().unwrap();
-            let (virtual_methods_size, _) = dex_reader.read_uleb128().unwrap();
-
-            // TODO maybe store a struct EncodedField/EncodedMethod
-            // instance to keep track of access flags as well
-            let mut static_fields   = Vec::<String>::with_capacity(static_fields_size as usize);
-            let mut instance_fields = Vec::<String>::with_capacity(instance_fields_size as usize);
-            let mut direct_methods  = Vec::<String>::with_capacity(direct_methods_size as usize);
-            let mut virtual_methods = Vec::<String>::with_capacity(virtual_methods_size as usize);
-
-            // Encoded fields
-            let mut field_idx = 0;
-            for _ in 0..static_fields_size {
-                let (idx, read) = dex_reader.read_uleb128().unwrap();
-                let (access_flags, _) = dex_reader.read_uleb128().unwrap();
-
-                field_idx += idx;
-
-                static_fields.push(fields_list.items.get(field_idx as usize)
-                                                    .unwrap()
-                                                    .to_string());
-            }
-
-            let mut field_idx = 0;
-            for _ in 0..instance_fields_size {
-                let (idx, _) = dex_reader.read_uleb128().unwrap();
-                let (access_flags, _) = dex_reader.read_uleb128().unwrap();
-
-                field_idx += idx;
-
-                instance_fields.push(fields_list.items.get(field_idx as usize)
-                                                      .unwrap()
-                                                      .to_string());
-            }
-
-            // Encoded methods
-            let mut method_idx = 0;
-            for _ in 0..direct_methods_size {
-                let (idx, _) = dex_reader.read_uleb128().unwrap();
-                let (access_flags, _) = dex_reader.read_uleb128().unwrap();
-                let (code_offset, _) = dex_reader.read_uleb128().unwrap();
-
-                method_idx += idx;
-
-                direct_methods.push(methods_list.items.get(method_idx as usize)
-                                                      .unwrap()
-                                                      .to_string());
-            }
-
-            let mut method_idx = 0;
-            for _ in 0..virtual_methods_size {
-                let (idx, _) = dex_reader.read_uleb128().unwrap();
-                let (access_flags, _) = dex_reader.read_uleb128().unwrap();
-                let (code_offset, _) = dex_reader.read_uleb128().unwrap();
-
-                method_idx += idx;
-
-                virtual_methods.push(methods_list.items.get(method_idx as usize)
-                                                       .unwrap()
-                                                       .to_string());
-            }
-
-            // Go back to the previous offset
-            dex_reader.bytes.seek(SeekFrom::Start(current_offset)).unwrap();
 
             methods.push(ClassDefItem { 
                 class_idx,
@@ -161,7 +168,8 @@ impl DexClasses {
                 source_file_idx,
                 annotations_off,
                 class_data_off,
-                static_value_off
+                static_value_off,
+                class_data: None
             });
         }
 
