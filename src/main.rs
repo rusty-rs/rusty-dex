@@ -23,6 +23,7 @@ pub mod dex_methods;
 pub mod dex_classes;
 pub mod access_flags;
 pub mod method_handle;
+pub mod code_item;
 
 use crate::dex_reader::DexReader;
 use crate::dex_file::DexFile;
@@ -35,6 +36,7 @@ use crate::dex_fields::DexFields;
 use crate::dex_methods::DexMethods;
 use crate::dex_classes::DexClasses;
 use crate::method_handle::MethodHandleList;
+use crate::code_item::CodeItem;
 
 use crate::constants::MapItemType;
 

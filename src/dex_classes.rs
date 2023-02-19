@@ -6,6 +6,7 @@ use crate::dex_fields::DexFields;
 use crate::dex_methods::DexMethods;
 use crate::dex_strings::DexStrings;
 use crate::access_flags::AccessFlag;
+use crate::code_item::CodeItem;
 
 const NO_INDEX: u32 = 0xffffffff;
 
@@ -30,9 +31,9 @@ pub struct EncodedField {
 
 #[derive(Debug)]
 pub struct EncodedMethod {
-    method_idx_diff: u32,
-    access_flags: u32,
-    code_off: u32,
+    proto: String,
+    access_flags: Vec<AccessFlag>,
+    code_item: Option<CodeItem>,
 }
 
 #[derive(Debug)]
@@ -91,7 +92,7 @@ impl DexClasses {
 
                 let mut static_fields   = Vec::<EncodedField>::with_capacity(static_fields_size as usize);
                 let mut instance_fields = Vec::<EncodedField>::with_capacity(instance_fields_size as usize);
-                let mut direct_methods  = Vec::<String>::with_capacity(direct_methods_size as usize);
+                let mut direct_methods  = Vec::<EncodedMethod>::with_capacity(direct_methods_size as usize);
                 let mut virtual_methods = Vec::<String>::with_capacity(virtual_methods_size as usize);
 
                 // Encoded fields
@@ -106,6 +107,7 @@ impl DexClasses {
                                                          .unwrap()
                                                          .to_string();
                     let decoded_flags = AccessFlag::parse(access_flags, true);
+
                     static_fields.push(EncodedField {
                         field: decoded_field,
                         access_flags: decoded_flags
@@ -123,6 +125,7 @@ impl DexClasses {
                                                          .unwrap()
                                                          .to_string();
                     let decoded_flags = AccessFlag::parse(access_flags, true);
+
                     instance_fields.push(EncodedField {
                         field: decoded_field,
                         access_flags: decoded_flags
@@ -138,9 +141,31 @@ impl DexClasses {
 
                     method_idx += idx;
 
-                    direct_methods.push(methods_list.items.get(method_idx as usize)
-                                                        .unwrap()
-                                                        .to_string());
+                    let proto = methods_list.items.get(method_idx as usize)
+                                                  .unwrap()
+                                                  .to_string();
+                    let decoded_flags = AccessFlag::parse(access_flags, true);
+
+                    if code_offset == 0 {
+                        // Abstract or native methods have no code
+                        direct_methods.push(EncodedMethod {
+                            proto,
+                            access_flags: decoded_flags,
+                            code_item: None
+                        });
+                    } else {
+                        println!("{proto}");
+                        let current_offset = dex_reader.bytes.position();
+                        let code_item = CodeItem::build(dex_reader, code_offset);
+                        println!("{code_item:#?}");
+                        dex_reader.bytes.seek(SeekFrom::Start(current_offset)).unwrap();
+
+                        direct_methods.push(EncodedMethod {
+                            proto,
+                            access_flags: decoded_flags,
+                            code_item: Some(code_item),
+                        });
+                    }
                 }
 
                 let mut method_idx = 0;
