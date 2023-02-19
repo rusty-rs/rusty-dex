@@ -21,6 +21,7 @@ pub mod dex_protos;
 pub mod dex_fields;
 pub mod dex_methods;
 pub mod dex_classes;
+pub mod access_flags;
 pub mod method_handle;
 
 use crate::dex_reader::DexReader;

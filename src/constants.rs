@@ -49,31 +49,6 @@ impl MethodHandleType {
     pub const METHOD_HANDLE_TYPE_INVOKE_INTERFACE  : u16 = 0x08;
 }
 
-/* Bitfields of these flags are used to indicate the accessibility
- * and overall properties of classes and class members. */
-pub struct AccessFlags;
-impl AccessFlags {
-    pub const ACC_PUBLIC               : u32 = 0x1;
-    pub const ACC_PRIVATE              : u32 = 0x2;
-    pub const ACC_PROTECTED            : u32 = 0x4;
-    pub const ACC_STATIC               : u32 = 0x8;
-    pub const ACC_FINAL                : u32 = 0x10;
-    pub const ACC_SYNCHRONIZED         : u32 = 0x20;
-    pub const ACC_VOLATILE             : u32 = 0x40;
-    pub const ACC_BRIDGE               : u32 = 0x40;
-    pub const ACC_TRANSIENT            : u32 = 0x80;
-    pub const ACC_VARARGS              : u32 = 0x80;
-    pub const ACC_NATIVE               : u32 = 0x100;
-    pub const ACC_INTERFACE            : u32 = 0x200;
-    pub const ACC_ABSTRACT             : u32 = 0x400;
-    pub const ACC_STRICT               : u32 = 0x800;
-    pub const ACC_SYNTHETIC            : u32 = 0x1000;
-    pub const ACC_ANNOTATION           : u32 = 0x2000;
-    pub const ACC_ENUM                 : u32 = 0x4000;
-    pub const ACC_CONSTRUCTOR          : u32 = 0x10000;
-    pub const ACC_DECLARED_SYNCHRONIZED: u32 = 0x20000;
-}
-
 /* An encoded value is an encoded piece of (nearly) arbitrary
  * hierarchically structured data. The encoding is meant to be
  * both compact and straightforward to parse. */

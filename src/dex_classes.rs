@@ -5,6 +5,7 @@ use crate::dex_types::DexTypes;
 use crate::dex_fields::DexFields;
 use crate::dex_methods::DexMethods;
 use crate::dex_strings::DexStrings;
+use crate::access_flags::AccessFlag;
 
 const NO_INDEX: u32 = 0xffffffff;
 
