@@ -110,8 +110,12 @@ fn main() {
                                             &strings_list);
 
     let class_defs_list = DexClasses::build(&mut dex_cursor,
-                                              dex_header.class_defs_off,
-                                              dex_header.class_defs_size);
+                                            dex_header.class_defs_off,
+                                            dex_header.class_defs_size,
+                                            &type_ids_list,
+                                            &field_ids_list,
+                                            &method_ids_list,
+                                            &strings_list);
 
     if let Some(map) = map_list.items.get(&MapItemType::METHOD_HANDLE_ITEM) {
         let method_handles_list = MethodHandleList::build(&mut dex_cursor,
