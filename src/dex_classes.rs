@@ -91,7 +91,7 @@ impl DexClasses {
                 let mut static_fields   = Vec::<EncodedField>::with_capacity(static_fields_size as usize);
                 let mut instance_fields = Vec::<EncodedField>::with_capacity(instance_fields_size as usize);
                 let mut direct_methods  = Vec::<EncodedMethod>::with_capacity(direct_methods_size as usize);
-                let mut virtual_methods = Vec::<String>::with_capacity(virtual_methods_size as usize);
+                let mut virtual_methods = Vec::<EncodedMethod>::with_capacity(virtual_methods_size as usize);
 
                 // Encoded fields
                 let mut field_idx = 0;
@@ -174,9 +174,31 @@ impl DexClasses {
 
                     method_idx += idx;
 
-                    virtual_methods.push(methods_list.items.get(method_idx as usize)
-                                                        .unwrap()
-                                                        .to_string());
+                    let proto = methods_list.items.get(method_idx as usize)
+                                                  .unwrap()
+                                                  .to_string();
+                    let decoded_flags = AccessFlag::parse(access_flags, true);
+
+                    if code_offset == 0 {
+                        // Abstract or native methods have no code
+                        virtual_methods.push(EncodedMethod {
+                            proto,
+                            access_flags: decoded_flags,
+                            code_item: None
+                        });
+                    } else {
+                        let current_offset = dex_reader.bytes.position();
+                        let code_item = CodeItem::build(dex_reader,
+                                                        code_offset,
+                                                        types_list);
+                        dex_reader.bytes.seek(SeekFrom::Start(current_offset)).unwrap();
+
+                        virtual_methods.push(EncodedMethod {
+                            proto,
+                            access_flags: decoded_flags,
+                            code_item: Some(code_item),
+                        });
+                    }
                 }
 
                 // Go back to the previous offset
