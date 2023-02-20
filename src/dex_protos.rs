@@ -2,7 +2,6 @@ use std::io::{Seek, SeekFrom};
 use std::cmp::Ordering;
 
 use crate::dex_reader::DexReader;
-use crate::dex_strings::DexStrings;
 use crate::dex_types::DexTypes;
 
 #[derive(Debug)]

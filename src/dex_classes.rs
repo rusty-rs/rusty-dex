@@ -1,10 +1,9 @@
 use std::io::{Seek, SeekFrom};
 
 use crate::dex_reader::DexReader;
-use crate::dex_types::DexTypes;
 use crate::dex_fields::DexFields;
+use crate::dex_types::DexTypes;
 use crate::dex_methods::DexMethods;
-use crate::dex_strings::DexStrings;
 use crate::access_flags::AccessFlag;
 use crate::code_item::CodeItem;
 
@@ -57,10 +56,9 @@ impl DexClasses {
     pub fn build(dex_reader: &mut DexReader,
                  offset: u32,
                  size: u32,
-                 types_list: &DexTypes,
                  fields_list: &DexFields,
-                 methods_list: &DexMethods,
-                 strings_list: &DexStrings) -> Self {
+                 types_list: &DexTypes,
+                 methods_list: &DexMethods) -> Self {
         dex_reader.bytes.seek(SeekFrom::Start(offset.into())).unwrap();
 
         let mut methods = Vec::new();
@@ -98,7 +96,7 @@ impl DexClasses {
                 // Encoded fields
                 let mut field_idx = 0;
                 for _ in 0..static_fields_size {
-                    let (idx, read) = dex_reader.read_uleb128().unwrap();
+                    let (idx, _) = dex_reader.read_uleb128().unwrap();
                     let (access_flags, _) = dex_reader.read_uleb128().unwrap();
 
                     field_idx += idx;
@@ -154,10 +152,10 @@ impl DexClasses {
                             code_item: None
                         });
                     } else {
-                        println!("{proto}");
                         let current_offset = dex_reader.bytes.position();
-                        let code_item = CodeItem::build(dex_reader, code_offset);
-                        println!("{code_item:#?}");
+                        let code_item = CodeItem::build(dex_reader,
+                                                        code_offset,
+                                                        types_list);
                         dex_reader.bytes.seek(SeekFrom::Start(current_offset)).unwrap();
 
                         direct_methods.push(EncodedMethod {

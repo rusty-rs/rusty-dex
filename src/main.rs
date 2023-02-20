@@ -36,7 +36,6 @@ use crate::dex_fields::DexFields;
 use crate::dex_methods::DexMethods;
 use crate::dex_classes::DexClasses;
 use crate::method_handle::MethodHandleList;
-use crate::code_item::CodeItem;
 
 use crate::constants::MapItemType;
 
@@ -54,7 +53,7 @@ fn main() {
     let apk_path = &args[1];
     info!("Parsing {}", apk_path);
 
-    let mut raw_file = File::open(apk_path)
+    let raw_file = File::open(apk_path)
         .unwrap_or_else(|err| panic!("Could not open input file: {err}"));
     let mut zip_file = ZipArchive::new(raw_file)
         .unwrap_or_else(|err| panic!("Error: cannot create ZipArchive object: {err}"));
@@ -115,18 +114,17 @@ fn main() {
     let class_defs_list = DexClasses::build(&mut dex_cursor,
                                             dex_header.class_defs_off,
                                             dex_header.class_defs_size,
-                                            &type_ids_list,
                                             &field_ids_list,
-                                            &method_ids_list,
-                                            &strings_list);
+                                            &type_ids_list,
+                                            &method_ids_list);
 
     if let Some(map) = map_list.items.get(&MapItemType::METHOD_HANDLE_ITEM) {
-        let method_handles_list = MethodHandleList::build(&mut dex_cursor,
+        let _method_handles_list = MethodHandleList::build(&mut dex_cursor,
                                                           map.offset,
                                                           map.size);
     }
 
-    let dex_file = DexFile {
+    let _dex_file = DexFile {
         header: dex_header,
         strings: strings_list,
         types: type_ids_list,

@@ -92,7 +92,7 @@ impl CodeItem {
 
             for _ in 0..handlers_list_size {
                 let (handler_size, _) = dex_reader.read_sleb128().unwrap();
-                let mut type_add_pairs = Vec::with_capacity(handler_size.abs() as usize);
+                let mut type_add_pairs = Vec::with_capacity(handler_size.unsigned_abs() as usize);
 
                 for _ in 0..handler_size.abs() {
                     let (type_idx, _) = dex_reader.read_uleb128().unwrap();

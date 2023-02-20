@@ -1,5 +1,4 @@
 use crate::dex_header::DexHeader;
-use crate::map_list::MapList;
 use crate::dex_strings::DexStrings;
 use crate::dex_types::DexTypes;
 use crate::dex_protos::DexProtos;
