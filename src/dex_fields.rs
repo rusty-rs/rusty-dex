@@ -65,7 +65,7 @@ impl DexFields {
             });
         }
 
-        fields.sort_by(|a, b| DexFields::sort(&a, &b));
+        fields.sort_by(DexFields::sort);
 
         let mut items = Vec::new();
         for dex_field in fields.iter() {

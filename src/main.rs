@@ -1,4 +1,4 @@
-#[allow(dead_code)]
+#![allow(dead_code)]
 
 use std::fs::File;
 use std::io::{Read, Cursor, Seek, SeekFrom};

@@ -66,7 +66,7 @@ impl DexMethods {
             });
         }
 
-        methods.sort_by(|a, b| DexMethods::sort(&a, &b));
+        methods.sort_by(DexMethods::sort);
 
         let mut items = Vec::new();
         for dex_method in methods.iter() {

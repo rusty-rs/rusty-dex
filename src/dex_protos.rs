@@ -86,7 +86,7 @@ impl DexProtos {
         }
 
 
-        protos.sort_by(|a, b| DexProtos::sort(&a, &b));
+        protos.sort_by(DexProtos::sort);
 
         let mut items = Vec::new();
         for dex_proto in protos.iter() {
