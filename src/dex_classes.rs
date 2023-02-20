@@ -74,6 +74,7 @@ impl DexClasses {
             let static_value_off = dex_reader.read_u32().unwrap();
 
             // If class_data_off == 0 then we have no class data
+            let mut class_data = None;
             if class_data_off != 0 {
                 // Start parse class data
 
@@ -203,6 +204,17 @@ impl DexClasses {
 
                 // Go back to the previous offset
                 dex_reader.bytes.seek(SeekFrom::Start(current_offset)).unwrap();
+
+                class_data = Some(ClassDataItem {
+                    static_fields_size,
+                    instance_fields_size,
+                    direct_methods_size,
+                    virtual_methods_size,
+                    static_fields,
+                    instance_fields,
+                    direct_methods,
+                    virtual_methods,
+                });
             }
 
             methods.push(ClassDefItem { 
@@ -214,7 +226,7 @@ impl DexClasses {
                 annotations_off,
                 class_data_off,
                 static_value_off,
-                class_data: None
+                class_data
             });
         }
 
