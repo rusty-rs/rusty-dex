@@ -4,7 +4,7 @@ use crate::dex_reader::DexReader;
 use crate::dex_fields::DexFields;
 use crate::dex_types::DexTypes;
 use crate::dex_methods::DexMethods;
-use crate::access_flags::AccessFlag;
+use crate::access_flags::{ AccessFlag, AccessFlagType };
 use crate::code_item::CodeItem;
 
 const NO_INDEX: u32 = 0xffffffff;
@@ -66,6 +66,9 @@ impl DexClasses {
         for _ in 0..size {
             let class_idx = dex_reader.read_u32().unwrap();
             let access_flags = dex_reader.read_u32().unwrap();
+            let access_flags_decoded = AccessFlag::parse(access_flags,
+                                                         AccessFlagType::Class);
+
             let superclass_idx = dex_reader.read_u32().unwrap();
             let interfaces_off = dex_reader.read_u32().unwrap();
             let source_file_idx = dex_reader.read_u32().unwrap();
@@ -105,7 +108,8 @@ impl DexClasses {
                     let decoded_field = fields_list.items.get(field_idx as usize)
                                                          .unwrap()
                                                          .to_string();
-                    let decoded_flags = AccessFlag::parse(access_flags, true);
+                    let decoded_flags = AccessFlag::parse(access_flags,
+                                                          AccessFlagType::Field);
 
                     static_fields.push(EncodedField {
                         field: decoded_field,
@@ -123,7 +127,8 @@ impl DexClasses {
                     let decoded_field = fields_list.items.get(field_idx as usize)
                                                          .unwrap()
                                                          .to_string();
-                    let decoded_flags = AccessFlag::parse(access_flags, true);
+                    let decoded_flags = AccessFlag::parse(access_flags,
+                                                          AccessFlagType::Field);
 
                     instance_fields.push(EncodedField {
                         field: decoded_field,
@@ -143,7 +148,8 @@ impl DexClasses {
                     let proto = methods_list.items.get(method_idx as usize)
                                                   .unwrap()
                                                   .to_string();
-                    let decoded_flags = AccessFlag::parse(access_flags, true);
+                    let decoded_flags = AccessFlag::parse(access_flags,
+                                                          AccessFlagType::Method);
 
                     if code_offset == 0 {
                         // Abstract or native methods have no code
@@ -178,7 +184,8 @@ impl DexClasses {
                     let proto = methods_list.items.get(method_idx as usize)
                                                   .unwrap()
                                                   .to_string();
-                    let decoded_flags = AccessFlag::parse(access_flags, true);
+                    let decoded_flags = AccessFlag::parse(access_flags,
+                                                          AccessFlagType::Method);
 
                     if code_offset == 0 {
                         // Abstract or native methods have no code
