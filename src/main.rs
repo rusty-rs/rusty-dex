@@ -24,6 +24,8 @@ pub mod dex_classes;
 pub mod access_flags;
 pub mod method_handle;
 pub mod code_item;
+pub mod opcodes;
+pub mod instructions;
 
 use crate::dex_reader::DexReader;
 use crate::dex_file::DexFile;
@@ -38,6 +40,8 @@ use crate::dex_classes::DexClasses;
 use crate::method_handle::MethodHandleList;
 
 use crate::constants::MapItemType;
+
+use crate::instructions::*;
 
 fn main() {
     // TODO: use CLI arg
@@ -133,4 +137,13 @@ fn main() {
         methods: method_ids_list,
         classes: class_defs_list,
     };
+
+    let bytes = [0x12, 0xff];
+    let inst = Instruction::parse(&bytes);
+    println!("{:#?}", inst);
+    println!("len: {}", inst.handler.length());
+    println!("ins: {}", inst.handler.inst_format());
+    println!("vA: {:#04X?}", inst.handler.a(inst.bytes).unwrap());
+    println!("vB: {:#04X?}", inst.handler.b(inst.bytes).unwrap());
+    println!("vC: {:#04X?}", inst.handler.c(inst.bytes).unwrap());
 }

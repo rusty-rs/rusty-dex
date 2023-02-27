@@ -2,6 +2,7 @@ use std::io::{Seek, SeekFrom};
 
 use crate::dex_reader::DexReader;
 use crate::dex_types::DexTypes;
+use crate::instructions::Instruction;
 
 #[derive(Debug)]
 pub struct TryItem {
@@ -62,7 +63,11 @@ impl CodeItem {
         // FIXME: no pretty but i'm tired. doing it like this to make sure we use the right
         // endianess when reading the bytecode
         for _ in 0..insns_size {
-            insns.push(dex_reader.read_u16().unwrap());
+            // insns.push(dex_reader.read_u16().unwrap());
+            let ins = dex_reader.read_u16().unwrap();
+            insns.push(ins);
+            // TODO: create some kind of reader here that parses the
+            // instructions with the right number of 16 bits words
         }
 
         /* Check if there is some padding */
