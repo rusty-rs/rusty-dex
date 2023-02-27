@@ -17,7 +17,7 @@ pub enum LogLevel {
 #[macro_export]
 macro_rules! error
 {
-    ($($arg:tt), *) => {{
+    ($($arg:tt)*) => {{
         use $crate::logging::DATETIME_FORMAT;
         use $crate::logging::colored::Colorize;
 
@@ -26,14 +26,14 @@ macro_rules! error
                                       "[ERROR]".red(),
                                       file!(),
                                       line!());
-        eprintln!($($arg),*);
+        eprintln!($($arg)*);
     }}
 }
 
 #[macro_export]
 macro_rules! warning
 {
-    ($($arg:tt), *) => {{
+    ($($arg:tt)*) => {{
         use $crate::logging::{
             LOG_LEVEL,
             DATETIME_FORMAT,
@@ -51,7 +51,7 @@ macro_rules! warning
                             "[WARNING]".yellow(),
                             file!(),
                             line!());
-                    eprintln!($($arg),*);
+                    eprintln!($($arg)*);
                 },
             _ => { },
         }
@@ -61,7 +61,7 @@ macro_rules! warning
 #[macro_export]
 macro_rules! info
 {
-    ($($arg:tt), *) => {{
+    ($($arg:tt)*) => {{
         use $crate::logging::{
             LOG_LEVEL,
             DATETIME_FORMAT,
@@ -78,7 +78,7 @@ macro_rules! info
                             "[INFO]".green(),
                             file!(),
                             line!());
-                    eprintln!($($arg),*);
+                    eprintln!($($arg)*);
                 },
             _ => { },
         }
@@ -88,7 +88,7 @@ macro_rules! info
 #[macro_export]
 macro_rules! debug
 {
-    ($($arg:tt), *) => {{
+    ($($arg:tt)*) => {{
         use $crate::logging::{
             LOG_LEVEL,
             DATETIME_FORMAT,
@@ -101,7 +101,7 @@ macro_rules! debug
                                           "[DEBUG]",
                                           file!(),
                                           line!());
-            eprintln!($($arg),*);
+            eprintln!($($arg)*);
         }
     }}
 }
