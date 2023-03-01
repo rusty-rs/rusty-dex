@@ -3,18 +3,32 @@ use core::fmt::Debug;
 use crate::error;
 use crate::opcodes::OpCode;
 
+// TODO: for now we print the decompiled bytecode but we might
+// want to return a parsed version or something
+pub fn parse_bytecode(bytecode: &[u16]) {
+    println!("{bytecode:?}");
+    println!("len before: {}", bytecode.len());
+    let ins = Instruction::parse(&bytecode);
+    println!("{ins:#?}");
+    // println!("{}", ins.handler.to_string(&ins.bytes));
+    let bytecode = &bytecode[ins.handler.length()..];
+    println!("len after: {}", bytecode.len());
+    println!("{bytecode:?}");
+    // panic!("not a girl");
+}
+
 #[derive(Debug)]
 pub struct Instruction<'a>
 {
-    pub bytes: &'a[u8],
+    pub bytes: &'a[u16],
     pub opcode: OpCode,
     pub handler: Box<dyn InstructionHandler>,
 }
 
 impl<'a> Instruction<'a>
 {
-    pub fn parse(bytes: &'a [u8]) -> Self {
-        let opcode = match OpCode::parse(bytes[0]) {
+    pub fn parse(bytes: &'a [u16]) -> Self {
+        let opcode = match OpCode::parse((bytes[0] & 0xff).try_into().unwrap()) {
             Some(code) => code,
             None => panic!("Cannot parse instruction from: {bytes:#?}")
         };
@@ -183,7 +197,7 @@ impl<'a> Instruction<'a>
         };
 
         Instruction {
-            bytes,
+            bytes: &bytes[..handler.length()],
             opcode,
             handler,
         }
@@ -196,11 +210,6 @@ impl<'a> Instruction<'a>
     fn to_str(&self) -> &str {
         todo!();
     }
-}
-
-/// utils
-fn shift_n(byte: u8, shift: usize) -> u64 {
-    (byte as u64) << shift
 }
 
 struct Instruction10t;
@@ -244,42 +253,42 @@ pub trait InstructionHandler {
      */
     // TODO: u64 is the size of the largest possible arg, but is only used
     // const-wide. We could use smaller uints for some of these methods.
-    fn a(&self, data: &[u8]) -> Option<u64> {
+    fn a(&self, data: &[u16]) -> Option<u64> {
         error!("Attempt to access register vA from {} instruction", self.inst_format());
         None
     }
 
-    fn b(&self, data: &[u8]) -> Option<u64> {
+    fn b(&self, data: &[u16]) -> Option<u64> {
         error!("Attempt to access register vB from {} instruction", self.inst_format());
         None
     }
 
-    fn c(&self, data: &[u8]) -> Option<u64> {
+    fn c(&self, data: &[u16]) -> Option<u64> {
         error!("Attempt to access register vC from {} instruction", self.inst_format());
         None
     }
 
-    fn d(&self, data: &[u8]) -> Option<u64> {
+    fn d(&self, data: &[u16]) -> Option<u64> {
         error!("Attempt to access register vD from {} instruction", self.inst_format());
         None
     }
 
-    fn e(&self, data: &[u8]) -> Option<u64> {
+    fn e(&self, data: &[u16]) -> Option<u64> {
         error!("Attempt to access register vE from {} instruction", self.inst_format());
         None
     }
 
-    fn f(&self, data: &[u8]) -> Option<u64> {
+    fn f(&self, data: &[u16]) -> Option<u64> {
         error!("Attempt to access register vF from {} instruction", self.inst_format());
         None
     }
 
-    fn g(&self, data: &[u8]) -> Option<u64> {
+    fn g(&self, data: &[u16]) -> Option<u64> {
         error!("Attempt to access register vG from {} instruction", self.inst_format());
         None
     }
 
-    fn h(&self, data: &[u8]) -> Option<u64> {
+    fn h(&self, data: &[u16]) -> Option<u64> {
         error!("Attempt to access register vH from {} instruction", self.inst_format());
         None
     }
@@ -287,14 +296,14 @@ pub trait InstructionHandler {
 
 impl Debug for dyn InstructionHandler {
     fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
-        write!(f, "InstructionHandler{{{} {}}}",self.inst_format(), self.length())
+        write!(f, "InstructionHandler{{{}}}", self.inst_format())
     }
 }
 
 /// 00|op
 impl InstructionHandler for Instruction10x {
     fn length(&self) -> usize {
-        2
+        1
     }
 
     fn inst_format(&self) -> &str {
@@ -305,66 +314,66 @@ impl InstructionHandler for Instruction10x {
 /// B|A|op
 impl InstructionHandler for Instruction11n {
     fn length(&self) -> usize {
-        2
+        1
     }
 
     fn inst_format(&self) -> &str {
         "Instruction11n"
     }
 
-    fn a(&self, data: &[u8]) -> Option<u64> {
-        Some((data[1] & 0x0f) as u64)
+    fn a(&self, data: &[u16]) -> Option<u64> {
+        Some((data[0] & 0x0f00) as u64)
     }
 
-    fn b(&self, data: &[u8]) -> Option<u64> {
-        Some((data[1] >> 4) as u64)
+    fn b(&self, data: &[u16]) -> Option<u64> {
+        Some((data[0] & 0xf000) as u64)
     }
 }
 
 impl InstructionHandler for Instruction12x {
     fn length(&self) -> usize {
-        2
+        1
     }
 
     fn inst_format(&self) -> &str {
         "Instruction12x"
     }
 
-    fn a(&self, data: &[u8]) -> Option<u64> {
-        Some((data[1] & 0x0f) as u64)
+    fn a(&self, data: &[u16]) -> Option<u64> {
+        Some((data[0] & 0x0f00) as u64)
     }
 
-    fn b(&self, data: &[u8]) -> Option<u64> {
-        Some((data[1] >> 4) as u64)
+    fn b(&self, data: &[u16]) -> Option<u64> {
+        Some((data[0] & 0xf000) as u64)
     }
 }
 
 /// AA|op
 impl InstructionHandler for Instruction11x {
     fn length(&self) -> usize {
-        2
+        1
     }
 
     fn inst_format(&self) -> &str {
         "Instruction11x"
     }
 
-    fn a(&self, data: &[u8]) -> Option<u64> {
-        Some(data[1] as u64)
+    fn a(&self, data: &[u16]) -> Option<u64> {
+        Some((data[0] as u64) >> 8)
     }
 }
 
 impl InstructionHandler for Instruction10t {
     fn length(&self) -> usize {
-        2
+        1
     }
 
     fn inst_format(&self) -> &str {
         "Instruction10t"
     }
 
-    fn a(&self, data: &[u8]) -> Option<u64> {
-        Some(data[1] as u64)
+    fn a(&self, data: &[u16]) -> Option<u64> {
+        Some((data[0] as u64) >> 8)
     }
 }
 
@@ -372,15 +381,15 @@ impl InstructionHandler for Instruction10t {
 /// AAAA
 impl InstructionHandler for Instruction20t {
     fn length(&self) -> usize {
-        4
+        2
     }
 
     fn inst_format(&self) -> &str {
         "Instruction20t"
     }
 
-    fn a(&self, data: &[u8]) -> Option<u64> {
-        Some(data[2] as u64 + shift_n(data[3], 8))
+    fn a(&self, data: &[u16]) -> Option<u64> {
+        Some(data[1] as u64)
     }
 }
 
@@ -388,91 +397,91 @@ impl InstructionHandler for Instruction20t {
 /// BBBB
 impl InstructionHandler for Instruction21c {
     fn length(&self) -> usize {
-        4
+        2
     }
 
     fn inst_format(&self) -> &str {
         "Instruction21c"
     }
 
-    fn a(&self, data: &[u8]) -> Option<u64> {
-        Some(data[1] as u64)
+    fn a(&self, data: &[u16]) -> Option<u64> {
+        Some((data[0] as u64) >> 8)
     }
 
-    fn b(&self, data: &[u8]) -> Option<u64> {
-        Some(data[2] as u64 + shift_n(data[3], 8))
+    fn b(&self, data: &[u16]) -> Option<u64> {
+        Some(data[1] as u64)
     }
 }
 
 impl InstructionHandler for Instruction21h {
     fn length(&self) -> usize {
-        4
+        2
     }
 
     fn inst_format(&self) -> &str {
         "Instruction21h"
     }
 
-    fn a(&self, data: &[u8]) -> Option<u64> {
-        Some(data[1] as u64)
+    fn a(&self, data: &[u16]) -> Option<u64> {
+        Some((data[0] as u64) >> 8)
     }
 
-    fn b(&self, data: &[u8]) -> Option<u64> {
-        Some(data[2] as u64 + shift_n(data[3], 8))
+    fn b(&self, data: &[u16]) -> Option<u64> {
+        Some(data[1] as u64)
     }
 }
 
 impl InstructionHandler for Instruction21s {
     fn length(&self) -> usize {
-        4
+        2
     }
 
     fn inst_format(&self) -> &str {
         "Instruction21s"
     }
 
-    fn a(&self, data: &[u8]) -> Option<u64> {
-        Some(data[1] as u64)
+    fn a(&self, data: &[u16]) -> Option<u64> {
+        Some((data[0] as u64) >> 8)
     }
 
-    fn b(&self, data: &[u8]) -> Option<u64> {
-        Some(data[2] as u64 + shift_n(data[3], 8))
+    fn b(&self, data: &[u16]) -> Option<u64> {
+        Some(data[1] as u64)
     }
 }
 
 impl InstructionHandler for Instruction21t {
     fn length(&self) -> usize {
-        4
+        2
     }
 
     fn inst_format(&self) -> &str {
         "Instruction21t"
     }
 
-    fn a(&self, data: &[u8]) -> Option<u64> {
-        Some(data[1] as u64)
+    fn a(&self, data: &[u16]) -> Option<u64> {
+        Some((data[0] as u64) >> 8)
     }
 
-    fn b(&self, data: &[u8]) -> Option<u64> {
-        Some(data[2] as u64 + shift_n(data[3], 8))
+    fn b(&self, data: &[u16]) -> Option<u64> {
+        Some(data[1] as u64)
     }
 }
 
 impl InstructionHandler for Instruction22x {
     fn length(&self) -> usize {
-        4
+        2
     }
 
     fn inst_format(&self) -> &str {
         "Instruction22x"
     }
 
-    fn a(&self, data: &[u8]) -> Option<u64> {
-        Some(data[1] as u64)
+    fn a(&self, data: &[u16]) -> Option<u64> {
+        Some((data[0] as u64) >> 8)
     }
 
-    fn b(&self, data: &[u8]) -> Option<u64> {
-        Some(data[2] as u64 + shift_n(data[3], 8))
+    fn b(&self, data: &[u16]) -> Option<u64> {
+        Some(data[1] as u64)
     }
 }
 
@@ -480,45 +489,45 @@ impl InstructionHandler for Instruction22x {
 /// BB|CC
 impl InstructionHandler for Instruction23x {
     fn length(&self) -> usize {
-        4
+        2
     }
 
     fn inst_format(&self) -> &str {
         "Instruction23x"
     }
 
-    fn a(&self, data: &[u8]) -> Option<u64> {
-        Some(data[1] as u64)
+    fn a(&self, data: &[u16]) -> Option<u64> {
+        Some((data[0] as u64) >> 8)
     }
 
-    fn b(&self, data: &[u8]) -> Option<u64> {
-        Some(data[3] as u64)
+    fn b(&self, data: &[u16]) -> Option<u64> {
+        Some((data[1] as u64) >> 8)
     }
 
-    fn c(&self, data: &[u8]) -> Option<u64> {
-        Some(data[2] as u64)
+    fn c(&self, data: &[u16]) -> Option<u64> {
+        Some((data[1] & 0xff) as u64)
     }
 }
 
 impl InstructionHandler for Instruction22b {
     fn length(&self) -> usize {
-        4
+        2
     }
 
     fn inst_format(&self) -> &str {
         "Instruction22b"
     }
 
-    fn a(&self, data: &[u8]) -> Option<u64> {
-        Some(data[1] as u64)
+    fn a(&self, data: &[u16]) -> Option<u64> {
+        Some((data[0] as u64) >> 8)
     }
 
-    fn b(&self, data: &[u8]) -> Option<u64> {
-        Some(data[3] as u64)
+    fn b(&self, data: &[u16]) -> Option<u64> {
+        Some((data[1] as u64) >> 8)
     }
 
-    fn c(&self, data: &[u8]) -> Option<u64> {
-        Some(data[2] as u64)
+    fn c(&self, data: &[u16]) -> Option<u64> {
+        Some((data[1] & 0xff) as u64)
     }
 }
 
@@ -526,67 +535,67 @@ impl InstructionHandler for Instruction22b {
 /// CCCC
 impl InstructionHandler for Instruction22c {
     fn length(&self) -> usize {
-        4
+        2
     }
 
     fn inst_format(&self) -> &str {
         "Instruction22c"
     }
 
-    fn a(&self, data: &[u8]) -> Option<u64> {
-        Some((data[1] & 0x0f) as u64)
+    fn a(&self, data: &[u16]) -> Option<u64> {
+        Some((data[0] & 0x0f00) as u64)
     }
 
-    fn b(&self, data: &[u8]) -> Option<u64> {
-        Some((data[1] >> 4) as u64)
+    fn b(&self, data: &[u16]) -> Option<u64> {
+        Some((data[0] & 0xf000) as u64)
     }
 
-    fn c(&self, data: &[u8]) -> Option<u64> {
-        Some(data[2] as u64 + shift_n(data[3], 8))
+    fn c(&self, data: &[u16]) -> Option<u64> {
+        Some(data[1] as u64)
     }
 }
 
 impl InstructionHandler for Instruction22s {
     fn length(&self) -> usize {
-        4
+        2
     }
 
     fn inst_format(&self) -> &str {
         "Instruction22s"
     }
 
-    fn a(&self, data: &[u8]) -> Option<u64> {
-        Some((data[1] & 0x0f) as u64)
+    fn a(&self, data: &[u16]) -> Option<u64> {
+        Some((data[0] & 0x0f00) as u64)
     }
 
-    fn b(&self, data: &[u8]) -> Option<u64> {
-        Some((data[1] >> 4) as u64)
+    fn b(&self, data: &[u16]) -> Option<u64> {
+        Some((data[0] & 0xf000) as u64)
     }
 
-    fn c(&self, data: &[u8]) -> Option<u64> {
-        Some(data[2] as u64 + shift_n(data[3], 8))
+    fn c(&self, data: &[u16]) -> Option<u64> {
+        Some(data[1] as u64)
     }
 }
 
 impl InstructionHandler for Instruction22t {
     fn length(&self) -> usize {
-        4
+        2
     }
 
     fn inst_format(&self) -> &str {
         "Instruction22t"
     }
 
-    fn a(&self, data: &[u8]) -> Option<u64> {
-        Some((data[1] & 0x0f) as u64)
+    fn a(&self, data: &[u16]) -> Option<u64> {
+        Some((data[0] & 0x0f00) as u64)
     }
 
-    fn b(&self, data: &[u8]) -> Option<u64> {
-        Some((data[1] >> 4) as u64)
+    fn b(&self, data: &[u16]) -> Option<u64> {
+        Some((data[0] & 0xf000) as u64)
     }
 
-    fn c(&self, data: &[u8]) -> Option<u64> {
-        Some(data[2] as u64 + shift_n(data[3], 8))
+    fn c(&self, data: &[u16]) -> Option<u64> {
+        Some(data[1] as u64)
     }
 }
 
@@ -595,17 +604,15 @@ impl InstructionHandler for Instruction22t {
 /// AAAAhigh
 impl InstructionHandler for Instruction30t {
     fn length(&self) -> usize {
-        6
+        3
     }
 
     fn inst_format(&self) -> &str {
         "Instruction30t"
     }
 
-    fn a(&self, data: &[u8]) -> Option<u64> {
-        let low  = data[2] as u64 + shift_n(data[3], 8);
-        let high = data[4] as u64 + shift_n(data[5], 8);
-        Some(low + (high << 16))
+    fn a(&self, data: &[u16]) -> Option<u64> {
+        Some(data[1] as u64 + (data [2] as u64) << 16)
     }
 }
 
@@ -614,61 +621,55 @@ impl InstructionHandler for Instruction30t {
 /// BBBBhigh
 impl InstructionHandler for Instruction31c {
     fn length(&self) -> usize {
-        6
+        3
     }
 
     fn inst_format(&self) -> &str {
         "Instruction31c"
     }
 
-    fn a(&self, data: &[u8]) -> Option<u64> {
-        Some(data[1] as u64)
+    fn a(&self, data: &[u16]) -> Option<u64> {
+        Some((data[0] as u64) >> 8)
     }
 
-    fn b(&self, data: &[u8]) -> Option<u64> {
-        let low  = data[2] as u64 + shift_n(data[3], 8);
-        let high = data[4] as u64 + shift_n(data[5], 8);
-        Some(low + (high << 16))
+    fn b(&self, data: &[u16]) -> Option<u64> {
+        Some(data[1] as u64 + (data [2] as u64) << 16)
     }
 }
 
 impl InstructionHandler for Instruction31i {
     fn length(&self) -> usize {
-        6
+        3
     }
 
     fn inst_format(&self) -> &str {
         "Instruction31i"
     }
 
-    fn a(&self, data: &[u8]) -> Option<u64> {
-        Some(data[1] as u64)
+    fn a(&self, data: &[u16]) -> Option<u64> {
+        Some((data[0] as u64) >> 8)
     }
 
-    fn b(&self, data: &[u8]) -> Option<u64> {
-        let low  = data[2] as u64 + shift_n(data[3], 8);
-        let high = data[4] as u64 + shift_n(data[5], 8);
-        Some(low + (high << 16))
+    fn b(&self, data: &[u16]) -> Option<u64> {
+        Some(data[1] as u64 + (data [2] as u64) << 16)
     }
 }
 
 impl InstructionHandler for Instruction31t {
     fn length(&self) -> usize {
-        6
+        3
     }
 
     fn inst_format(&self) -> &str {
         "Instruction31t"
     }
 
-    fn a(&self, data: &[u8]) -> Option<u64> {
-        Some(data[1] as u64)
+    fn a(&self, data: &[u16]) -> Option<u64> {
+        Some((data[0] as u64) >> 8)
     }
 
-    fn b(&self, data: &[u8]) -> Option<u64> {
-        let low  = data[2] as u64 + shift_n(data[3], 8);
-        let high = data[4] as u64 + shift_n(data[5], 8);
-        Some(low + (high << 16))
+    fn b(&self, data: &[u16]) -> Option<u64> {
+        Some(data[1] as u64 + (data [2] as u64) << 16)
     }
 }
 
@@ -677,19 +678,19 @@ impl InstructionHandler for Instruction31t {
 /// BBBB
 impl InstructionHandler for Instruction32x {
     fn length(&self) -> usize {
-        6
+        3
     }
 
     fn inst_format(&self) -> &str {
         "Instruction32x"
     }
 
-    fn a(&self, data: &[u8]) -> Option<u64> {
-        Some(data[2] as u64 + shift_n(data[3], 8))
+    fn a(&self, data: &[u16]) -> Option<u64> {
+        Some(data[1] as u64)
     }
 
-    fn b(&self, data: &[u8]) -> Option<u64> {
-        Some(data[4] as u64 + shift_n(data[5], 8))
+    fn b(&self, data: &[u16]) -> Option<u64> {
+        Some(data[2] as u64)
     }
 }
 
@@ -698,39 +699,39 @@ impl InstructionHandler for Instruction32x {
 /// F|E|D|C
 impl InstructionHandler for Instruction35c {
     fn length(&self) -> usize {
-        6
+        3
     }
 
     fn inst_format(&self) -> &str {
         "Instruction35c"
     }
 
-    fn a(&self, data: &[u8]) -> Option<u64> {
-        Some((data[1] as u64) >> 4)
+    fn a(&self, data: &[u16]) -> Option<u64> {
+        Some((data[0] & 0xf000) as u64)
     }
 
-    fn b(&self, data: &[u8]) -> Option<u64> {
-        Some(data[2] as u64 + shift_n(data[3], 8))
+    fn b(&self, data: &[u16]) -> Option<u64> {
+        Some(data[1] as u64)
     }
 
-    fn c(&self, data: &[u8]) -> Option<u64> {
-        Some((data[4] & 0x0f) as u64)
+    fn c(&self, data: &[u16]) -> Option<u64> {
+        Some((data[2] & 0x000f) as u64)
     }
 
-    fn d(&self, data: &[u8]) -> Option<u64> {
-        Some((data[4] as u64) >> 4)
+    fn d(&self, data: &[u16]) -> Option<u64> {
+        Some((data[2] & 0x00f0) as u64)
     }
 
-    fn e(&self, data: &[u8]) -> Option<u64> {
-        Some((data[5] & 0x0f) as u64)
+    fn e(&self, data: &[u16]) -> Option<u64> {
+        Some((data[2] & 0x0f00) as u64)
     }
 
-    fn f(&self, data: &[u8]) -> Option<u64> {
-        Some((data[5] as u64) >> 4)
+    fn f(&self, data: &[u16]) -> Option<u64> {
+        Some((data[2] & 0xf000) as u64)
     }
 
-    fn g(&self, data: &[u8]) -> Option<u64> {
-        Some((data[1] & 0x0f) as u64)
+    fn g(&self, data: &[u16]) -> Option<u64> {
+        Some((data[0] & 0x0f00) as u64)
     }
 }
 
@@ -739,23 +740,23 @@ impl InstructionHandler for Instruction35c {
 /// CCCC
 impl InstructionHandler for Instruction3rc {
     fn length(&self) -> usize {
-        6
+        3
     }
 
     fn inst_format(&self) -> &str {
         "Instruction3rc"
     }
 
-    fn a(&self, data: &[u8]) -> Option<u64> {
+    fn a(&self, data: &[u16]) -> Option<u64> {
+        Some((data[0] as u64) >> 8)
+    }
+
+    fn b(&self, data: &[u16]) -> Option<u64> {
         Some(data[1] as u64)
     }
 
-    fn b(&self, data: &[u8]) -> Option<u64> {
-        Some(data[2] as u64 + shift_n(data[3], 8))
-    }
-
-    fn c(&self, data: &[u8]) -> Option<u64> {
-        Some(data[4] as u64 + shift_n(data[5], 8))
+    fn c(&self, data: &[u16]) -> Option<u64> {
+        Some(data[2] as u64)
     }
 }
 
@@ -765,43 +766,15 @@ impl InstructionHandler for Instruction3rc {
 /// HHHH
 impl InstructionHandler for Instruction45cc {
     fn length(&self) -> usize {
-        8
+        4
     }
 
     fn inst_format(&self) -> &str {
         "Instruction45cc"
     }
 
-    fn a(&self, data: &[u8]) -> Option<u64> {
-        Some((data[1] as u64) >> 4)
-    }
-
-    fn b(&self, data: &[u8]) -> Option<u64> {
-        Some(data[2] as u64 + shift_n(data[3], 8))
-    }
-
-    fn c(&self, data: &[u8]) -> Option<u64> {
-        Some((data[4] & 0x0f) as u64)
-    }
-
-    fn d(&self, data: &[u8]) -> Option<u64> {
-        Some((data[4] as u64) >> 4)
-    }
-
-    fn e(&self, data: &[u8]) -> Option<u64> {
-        Some((data[5] & 0x0f) as u64)
-    }
-
-    fn f(&self, data: &[u8]) -> Option<u64> {
-        Some((data[5] as u64) >> 4)
-    }
-
-    fn g(&self, data: &[u8]) -> Option<u64> {
-        Some((data[1] & 0x0f) as u64)
-    }
-
-    fn h(&self, data: &[u8]) -> Option<u64> {
-        Some(data[6] as u64 + shift_n(data[7], 8))
+    fn h(&self, data: &[u16]) -> Option<u64> {
+        Some(data[3] as u64)
     }
 }
 
@@ -811,27 +784,27 @@ impl InstructionHandler for Instruction45cc {
 /// HHHH
 impl InstructionHandler for Instruction4rcc {
     fn length(&self) -> usize {
-        8
+        4
     }
 
     fn inst_format(&self) -> &str {
         "Instruction4rcc"
     }
 
-    fn a(&self, data: &[u8]) -> Option<u64> {
+    fn a(&self, data: &[u16]) -> Option<u64> {
+        Some((data[0] as u64) >> 8)
+    }
+
+    fn b(&self, data: &[u16]) -> Option<u64> {
         Some(data[1] as u64)
     }
 
-    fn b(&self, data: &[u8]) -> Option<u64> {
-        Some(data[2] as u64 + shift_n(data[3], 8))
+    fn c(&self, data: &[u16]) -> Option<u64> {
+        Some(data[2] as u64)
     }
 
-    fn c(&self, data: &[u8]) -> Option<u64> {
-        Some(data[4] as u64 + shift_n(data[5], 8))
-    }
-
-    fn h(&self, data: &[u8]) -> Option<u64> {
-        Some(data[6] as u64 + shift_n(data[7], 8))
+    fn h(&self, data: &[u16]) -> Option<u64> {
+        Some(data[3] as u64)
     }
 }
 
@@ -842,25 +815,21 @@ impl InstructionHandler for Instruction4rcc {
 /// BBBBhigh
 impl InstructionHandler for Instruction51l {
     fn length(&self) -> usize {
-        10
+        5
     }
 
     fn inst_format(&self) -> &str {
         "Instruction51l"
     }
 
-    fn a(&self, data: &[u8]) -> Option<u64> {
-        Some(data[1] as u64)
+    fn a(&self, data: &[u16]) -> Option<u64> {
+        Some((data[0] as u64) >> 8)
     }
 
-    fn b(&self, data: &[u8]) -> Option<u64> {
-        Some(data[2] as u64
-             + shift_n(data[3], 1)
-             + shift_n(data[4], 2)
-             + shift_n(data[5], 3)
-             + shift_n(data[6], 4)
-             + shift_n(data[7], 5)
-             + shift_n(data[8], 6)
-             + shift_n(data[9], 7))
+    fn b(&self, data: &[u16]) -> Option<u64> {
+        Some(data[1] as u64
+             + (data[2] as u64) << 16
+             + (data[3] as u64) << 32
+             + (data[4] as u64) << 48)
     }
 }

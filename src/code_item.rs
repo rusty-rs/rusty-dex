@@ -2,7 +2,7 @@ use std::io::{Seek, SeekFrom};
 
 use crate::dex_reader::DexReader;
 use crate::dex_types::DexTypes;
-use crate::instructions::Instruction;
+use crate::instructions::parse_bytecode;
 
 #[derive(Debug)]
 pub struct TryItem {
@@ -69,6 +69,9 @@ impl CodeItem {
             // TODO: create some kind of reader here that parses the
             // instructions with the right number of 16 bits words
         }
+
+        // XXX
+        parse_bytecode(&insns);
 
         /* Check if there is some padding */
         if tries_size != 0 && insns_size % 2 == 1 {

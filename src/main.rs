@@ -145,5 +145,4 @@ fn main() {
     println!("ins: {}", inst.handler.inst_format());
     println!("vA: {:#04X?}", inst.handler.a(inst.bytes).unwrap());
     println!("vB: {:#04X?}", inst.handler.b(inst.bytes).unwrap());
-    println!("vC: {:#04X?}", inst.handler.c(inst.bytes).unwrap());
 }
