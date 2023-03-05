@@ -71,7 +71,13 @@ impl CodeItem {
         }
 
         // XXX
-        parse_bytecode(&insns);
+        println!("registers_size {}", registers_size);
+        println!("ins_size {}", ins_size);
+        println!("outs_size {}", outs_size);
+        println!("tries_size {}", tries_size);
+        println!("debug_info_off {}", debug_info_off);
+        println!("insns_size {}", insns_size);
+        parse_bytecode(&insns, &dex_reader.endianness);
 
         /* Check if there is some padding */
         if tries_size != 0 && insns_size % 2 == 1 {
