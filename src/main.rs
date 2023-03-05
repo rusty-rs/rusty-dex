@@ -137,12 +137,4 @@ fn main() {
         methods: method_ids_list,
         classes: class_defs_list,
     };
-
-    let bytes = [0x12, 0xff];
-    let inst = Instruction::parse(&bytes);
-    println!("{:#?}", inst);
-    println!("len: {}", inst.handler.length());
-    println!("ins: {}", inst.handler.inst_format());
-    println!("vA: {:#04X?}", inst.handler.a(inst.bytes).unwrap());
-    println!("vB: {:#04X?}", inst.handler.b(inst.bytes).unwrap());
 }

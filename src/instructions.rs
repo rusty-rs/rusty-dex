@@ -2,20 +2,7 @@ use core::fmt::Debug;
 
 use crate::error;
 use crate::opcodes::OpCode;
-
-// TODO: for now we print the decompiled bytecode but we might
-// want to return a parsed version or something
-pub fn parse_bytecode(bytecode: &[u16]) {
-    println!("{bytecode:?}");
-    println!("len before: {}", bytecode.len());
-    let ins = Instruction::parse(&bytecode);
-    println!("{ins:#?}");
-    // println!("{}", ins.handler.to_string(&ins.bytes));
-    let bytecode = &bytecode[ins.handler.length()..];
-    println!("len after: {}", bytecode.len());
-    println!("{bytecode:?}");
-    // panic!("not a girl");
-}
+use crate::dex_reader::DexEndianness;
 
 #[derive(Debug)]
 pub struct Instruction<'a>
@@ -27,10 +14,22 @@ pub struct Instruction<'a>
 
 impl<'a> Instruction<'a>
 {
-    pub fn parse(bytes: &'a [u16]) -> Self {
-        let opcode = match OpCode::parse((bytes[0] & 0xff).try_into().unwrap()) {
+    pub fn parse(bytes: &'a [u16], offset: usize, endianness: &DexEndianness) -> Self {
+        // TODO: make this prettier
+        assert!(offset <= bytes.len());
+
+        let opcode = match OpCode::parse((bytes[offset] & 0xff).try_into().unwrap()) {
+            // Deal with the special cases of fill-array-data-payload,
+            // packed-switch-payload, and sparse-switch-payload
+            // Some(OpCode::NOP) => match bytes[offset] & 0xff00 {
+            Some(OpCode::NOP) => match bytes[offset] >> 8 {
+                0x01 => OpCode::PACKED_SWITCH_PAYLOAD,
+                0x02 => OpCode::SPARSE_SWITCH_PAYLOAD,
+                0x03 => OpCode::FILL_ARRAY_DATA_PAYLOAD,
+                _    => OpCode::NOP
+            },
             Some(code) => code,
-            None => panic!("Cannot parse instruction from: {bytes:#?}")
+            None => panic!("Cannot parse instruction from: 0x{:X?}", bytes[offset] & 0xff)
         };
 
         let handler: Box<dyn InstructionHandler> = match opcode {
@@ -194,21 +193,60 @@ impl<'a> Instruction<'a>
             OpCode::INVOKE_POLYMORPHIC_RANGE => Box::new(Instruction4rcc{ }),
 
             OpCode::CONST_WIDE => Box::new(Instruction51l{ }),
+
+            // TODO: refactor this shit
+            OpCode::PACKED_SWITCH_PAYLOAD
+                => match endianness {
+                    DexEndianness::LittleEndian => Box::new(PackedSwitchPayload {
+                        size: bytes[offset + 1],
+                        first_key: ((bytes[offset + 3] as i32) << 16) + bytes[offset + 2] as i32,
+                        targets: Vec::new()
+                    }),
+                    DexEndianness::BigEndian => Box::new(PackedSwitchPayload {
+                        size: bytes[offset + 1],
+                        first_key: ((bytes[offset + 2] as i32) << 16) + bytes[offset + 3] as i32,
+                        targets: Vec::new()
+                    })
+                },
+
+            OpCode::SPARSE_SWITCH_PAYLOAD
+                => match endianness {
+                    DexEndianness::LittleEndian => Box::new(SparseSwitchPayload {
+                        size: bytes[offset + 1],
+                        keys: Vec::new(),
+                        targets: Vec::new()
+                    }),
+                    DexEndianness::BigEndian => Box::new(SparseSwitchPayload {
+                        size: bytes[offset + 1],
+                        keys: Vec::new(),
+                        targets: Vec::new()
+                    })
+                },
+
+            OpCode::FILL_ARRAY_DATA_PAYLOAD
+                => match endianness {
+                    DexEndianness::LittleEndian => Box::new(FillArrayDataPayload {
+                        element_width: bytes[offset + 1],
+                        size: ((bytes[offset + 3] as u32) << 16) + bytes[offset + 2] as u32,
+                        data: Vec::new()
+                    }),
+                    DexEndianness::BigEndian => Box::new(FillArrayDataPayload {
+                        element_width: bytes[offset + 1],
+                        size: ((bytes[offset + 2] as u32) << 16) + bytes[offset + 3] as u32,
+                        data: Vec::new()
+                    })
+                },
         };
 
         Instruction {
-            bytes: &bytes[..handler.length()],
+            bytes: &bytes[offset..offset + handler.length()],
             opcode,
             handler,
         }
     }
 
-    fn opcode(&self) -> &OpCode {
-        &self.opcode
-    }
-
-    fn to_str(&self) -> &str {
-        todo!();
+    fn opcode(&self) -> OpCode {
+        self.opcode
     }
 }
 
@@ -832,4 +870,103 @@ impl InstructionHandler for Instruction51l {
              + (data[3] as u64) << 32
              + (data[4] as u64) << 48)
     }
+}
+
+// TODO: actually decode the payload
+struct PackedSwitchPayload {
+    size: u16,
+    first_key: i32,
+    targets: Vec<i32>
+}
+
+impl InstructionHandler for PackedSwitchPayload {
+    fn length(&self) -> usize {
+        // nb of entries in bytes + size of (opcode and size)
+        ((self.size * 2) + 4).into()
+    }
+
+    fn inst_format(&self) -> &str {
+        "PackedSwitchPayload"
+    }
+}
+
+// TODO: actually decode the payload
+struct SparseSwitchPayload {
+    size: u16,
+    keys: Vec<i32>,
+    targets: Vec<i32>
+}
+
+impl InstructionHandler for SparseSwitchPayload {
+    fn length(&self) -> usize {
+        ((self.size * 4) + 2).into()
+    }
+
+    fn inst_format(&self) -> &str {
+        "SparseSwitchPayload"
+    }
+}
+
+// TODO: actually decode the payload
+struct FillArrayDataPayload {
+    element_width: u16,
+    size: u32,
+    data: Vec<u8>
+}
+
+impl InstructionHandler for FillArrayDataPayload {
+    fn length(&self) -> usize {
+        ((self.size * self.element_width as u32 + 1) / 2 + 4) as usize
+    }
+
+    fn inst_format(&self) -> &str {
+        "FillArrayDataPayload"
+    }
+}
+
+#[derive(Debug)]
+pub struct InstructionsReader<'a>
+{
+    pub bytes: &'a [u16],
+    offset: usize,
+    length: usize,
+    endianness: &'a DexEndianness,
+}
+
+impl<'a> InstructionsReader<'a> {
+    pub fn new(bytes: &'a [u16], endianness: &'a DexEndianness) -> Self {
+        InstructionsReader {
+            bytes,
+            offset: 0,
+            length: bytes.len(),
+            endianness
+        }
+    }
+
+    fn update_offset(&mut self, offset: usize) {
+        self.offset = offset;
+    }
+
+    /// Parses an instruction from the bytecode and move the cursor parser
+    // TODO: print the disasm to make sure we are correctly reading the instructions here
+    // alternatively we could write tests lol
+    pub fn parse_inst(&mut self) { // -> Result<Instruction, &'static str> {
+        let mut instructions: Vec<Instruction> = Vec::new();
+
+        while self.offset < self.length {
+            let ins = Instruction::parse(self.bytes, self.offset, self.endianness);
+            println!("{0} {ins:?}", 2 * self.offset);
+            self.offset += ins.handler.length();
+            instructions.push(ins);
+        }
+        println!("'''''''''''''''''''''''''''''''''''''''''''''");
+        assert!(self.offset == self.length);
+    }
+}
+
+// TODO: for now we print the decompiled bytecode but we might
+// want to return a parsed version or something
+pub fn parse_bytecode(bytecode: &[u16], endianness: &DexEndianness) {
+    let mut reader = InstructionsReader::new(bytecode, endianness);
+    reader.parse_inst();
 }
