@@ -5,16 +5,18 @@ use crate::opcodes::OpCode;
 use crate::dex_reader::DexEndianness;
 
 #[derive(Debug)]
-pub struct Instruction<'a>
+pub struct Instruction
 {
-    pub bytes: &'a[u16],
+    pub bytes: Vec<u16>,
     pub opcode: OpCode,
     pub handler: Box<dyn InstructionHandler>,
 }
 
-impl<'a> Instruction<'a>
+impl Instruction
 {
-    pub fn parse(bytes: &'a [u16], offset: usize, endianness: &DexEndianness) -> Self {
+    pub fn parse(raw_bytes: &[u16], offset: usize, endianness: &DexEndianness) -> Self {
+        let bytes = raw_bytes.to_vec();
+
         // TODO: make this prettier
         assert!(offset <= bytes.len());
 
@@ -238,8 +240,9 @@ impl<'a> Instruction<'a>
                 },
         };
 
+        let ins_bytes = Vec::from(&bytes[offset..offset + handler.length()]);
         Instruction {
-            bytes: &bytes[offset..offset + handler.length()],
+            bytes: ins_bytes,
             opcode,
             handler,
         }
@@ -948,9 +951,7 @@ impl<'a> InstructionsReader<'a> {
     }
 
     /// Parses an instruction from the bytecode and move the cursor parser
-    // TODO: print the disasm to make sure we are correctly reading the instructions here
-    // alternatively we could write tests lol
-    pub fn parse_inst(&mut self) { // -> Result<Instruction, &'static str> {
+    pub fn parse_instructions(&mut self) -> Option<Vec<Instruction>> {
         let mut instructions: Vec<Instruction> = Vec::new();
 
         while self.offset < self.length {
@@ -959,14 +960,13 @@ impl<'a> InstructionsReader<'a> {
             self.offset += ins.handler.length();
             instructions.push(ins);
         }
-        println!("'''''''''''''''''''''''''''''''''''''''''''''");
-        assert!(self.offset == self.length);
-    }
-}
 
-// TODO: for now we print the decompiled bytecode but we might
-// want to return a parsed version or something
-pub fn parse_bytecode(bytecode: &[u16], endianness: &DexEndianness) {
-    let mut reader = InstructionsReader::new(bytecode, endianness);
-    reader.parse_inst();
+        // TODO: refactor this
+        assert!(self.offset == self.length);
+
+        match instructions.len() {
+            0 => None,
+            _ => Some(instructions)
+        }
+    }
 }

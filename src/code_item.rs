@@ -2,7 +2,7 @@ use std::io::{Seek, SeekFrom};
 
 use crate::dex_reader::DexReader;
 use crate::dex_types::DexTypes;
-use crate::instructions::parse_bytecode;
+use crate::instructions::{ Instruction, InstructionsReader };
 
 #[derive(Debug)]
 pub struct TryItem {
@@ -32,7 +32,7 @@ pub struct CodeItem {
     tries_size    : u16,
     debug_info_off: u32,
     insns_size    : u32,
-    insns         : Vec<u16>,
+    insns         : Option<Vec<Instruction>>,
     tries         : Option<Vec<TryItem>>,
     handlers      : Option<Vec<EncodedCatchHandler>>
 }
@@ -77,7 +77,8 @@ impl CodeItem {
         println!("tries_size {}", tries_size);
         println!("debug_info_off {}", debug_info_off);
         println!("insns_size {}", insns_size);
-        parse_bytecode(&insns, &dex_reader.endianness);
+        let mut reader = InstructionsReader::new(&insns, &dex_reader.endianness);
+        let parsed_ins = reader.parse_instructions();
 
         /* Check if there is some padding */
         if tries_size != 0 && insns_size % 2 == 1 {
@@ -147,7 +148,7 @@ impl CodeItem {
                 tries_size,
                 debug_info_off,
                 insns_size,
-                insns,
+                insns: parsed_ins,
                 tries: Some(tries),
                 handlers: Some(handlers)
             }
@@ -159,7 +160,7 @@ impl CodeItem {
                 tries_size,
                 debug_info_off,
                 insns_size,
-                insns,
+                insns: parsed_ins,
                 tries: None,
                 handlers: None
             }
