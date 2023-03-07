@@ -29,9 +29,7 @@ pub struct CodeItem {
     registers_size: u16,
     ins_size      : u16,
     outs_size     : u16,
-    tries_size    : u16,
     debug_info_off: u32,
-    insns_size    : u32,
     insns         : Option<Vec<Instruction>>,
     tries         : Option<Vec<TryItem>>,
     handlers      : Option<Vec<EncodedCatchHandler>>
@@ -46,37 +44,23 @@ impl CodeItem {
 
         /* Get the metadata */
         let registers_size = dex_reader.read_u16().unwrap();
-        // println!("---> registers_size {registers_size}");
         let ins_size       = dex_reader.read_u16().unwrap();
-        // println!("---> ins_size {ins_size}");
         let outs_size      = dex_reader.read_u16().unwrap();
-        // println!("---> outs_size {outs_size}");
         let tries_size     = dex_reader.read_u16().unwrap();
-        // println!("---> tries_size {tries_size}");
         let debug_info_off = dex_reader.read_u32().unwrap();
-        // println!("---> debug_info_off {debug_info_off}");
         let insns_size     = dex_reader.read_u32().unwrap();
-        // println!("---> insns_size {insns_size}");
 
         /* Get the actual bytecode */
         let mut insns = Vec::with_capacity(insns_size as usize);
-        // FIXME: no pretty but i'm tired. doing it like this to make sure we use the right
-        // endianess when reading the bytecode
         for _ in 0..insns_size {
-            // insns.push(dex_reader.read_u16().unwrap());
-            let ins = dex_reader.read_u16().unwrap();
-            insns.push(ins);
-            // TODO: create some kind of reader here that parses the
-            // instructions with the right number of 16 bits words
+            insns.push(dex_reader.read_u16().unwrap());
         }
 
         // XXX
         println!("registers_size {}", registers_size);
         println!("ins_size {}", ins_size);
         println!("outs_size {}", outs_size);
-        println!("tries_size {}", tries_size);
         println!("debug_info_off {}", debug_info_off);
-        println!("insns_size {}", insns_size);
         let mut reader = InstructionsReader::new(&insns, &dex_reader.endianness);
         let parsed_ins = reader.parse_instructions();
 
@@ -145,9 +129,7 @@ impl CodeItem {
                 registers_size,
                 ins_size,
                 outs_size,
-                tries_size,
                 debug_info_off,
-                insns_size,
                 insns: parsed_ins,
                 tries: Some(tries),
                 handlers: Some(handlers)
@@ -157,9 +139,7 @@ impl CodeItem {
                 registers_size,
                 ins_size,
                 outs_size,
-                tries_size,
                 debug_info_off,
-                insns_size,
                 insns: parsed_ins,
                 tries: None,
                 handlers: None
