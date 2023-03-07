@@ -12,9 +12,14 @@ pub struct Instruction
     pub handler: Box<dyn InstructionHandler>,
 }
 
+// TODO we might want to create a cursor over the bytes here, that
+// would simplify the reading for the special opcodes at the end
 impl Instruction
 {
-    pub fn parse(raw_bytes: &[u16], offset: usize, endianness: &DexEndianness) -> Self {
+    pub fn parse(raw_bytes: &[u16],
+                 offset: usize,
+                 endianness: &DexEndianness) -> Self
+    {
         let bytes = raw_bytes.to_vec();
 
         // TODO: make this prettier
@@ -198,46 +203,13 @@ impl Instruction
 
             // TODO: refactor this shit
             OpCode::PACKED_SWITCH_PAYLOAD
-                => match endianness {
-                    DexEndianness::LittleEndian => Box::new(PackedSwitchPayload {
-                        size: bytes[offset + 1],
-                        first_key: ((bytes[offset + 3] as i32) << 16) + bytes[offset + 2] as i32,
-                        targets: Vec::new()
-                    }),
-                    DexEndianness::BigEndian => Box::new(PackedSwitchPayload {
-                        size: bytes[offset + 1],
-                        first_key: ((bytes[offset + 2] as i32) << 16) + bytes[offset + 3] as i32,
-                        targets: Vec::new()
-                    })
-                },
+                => Box::new(PackedSwitchPayload::build(&bytes, offset, endianness)),
 
             OpCode::SPARSE_SWITCH_PAYLOAD
-                => match endianness {
-                    DexEndianness::LittleEndian => Box::new(SparseSwitchPayload {
-                        size: bytes[offset + 1],
-                        keys: Vec::new(),
-                        targets: Vec::new()
-                    }),
-                    DexEndianness::BigEndian => Box::new(SparseSwitchPayload {
-                        size: bytes[offset + 1],
-                        keys: Vec::new(),
-                        targets: Vec::new()
-                    })
-                },
+                => Box::new(SparseSwitchPayload::build(&bytes, offset, endianness)),
 
             OpCode::FILL_ARRAY_DATA_PAYLOAD
-                => match endianness {
-                    DexEndianness::LittleEndian => Box::new(FillArrayDataPayload {
-                        element_width: bytes[offset + 1],
-                        size: ((bytes[offset + 3] as u32) << 16) + bytes[offset + 2] as u32,
-                        data: Vec::new()
-                    }),
-                    DexEndianness::BigEndian => Box::new(FillArrayDataPayload {
-                        element_width: bytes[offset + 1],
-                        size: ((bytes[offset + 2] as u32) << 16) + bytes[offset + 3] as u32,
-                        data: Vec::new()
-                    })
-                },
+                => Box::new(FillArrayDataPayload::build(&bytes, offset, endianness)),
         };
 
         let ins_bytes = Vec::from(&bytes[offset..offset + handler.length()]);
@@ -875,11 +847,45 @@ impl InstructionHandler for Instruction51l {
     }
 }
 
-// TODO: actually decode the payload
+/// Utility functions to read i32 from [u16]
+fn read_i32(bytes: &[u16],
+            offset: usize,
+            endianness: &DexEndianness) -> i32
+{
+    match endianness {
+        DexEndianness::LittleEndian =>
+            ((bytes[offset + 1] as i32) << 16) + bytes[offset] as i32,
+        DexEndianness::BigEndian =>
+            ((bytes[offset] as i32) << 16) + bytes[offset + 1] as i32,
+    }
+}
+
 struct PackedSwitchPayload {
     size: u16,
     first_key: i32,
     targets: Vec<i32>
+}
+
+impl PackedSwitchPayload {
+    fn build(bytes: &[u16],
+             offset: usize,
+             endianness: &DexEndianness) -> Self 
+    {
+        let size = bytes[offset + 1];
+        let first_key = read_i32(&bytes, offset + 2, &endianness);
+        let mut targets = Vec::new();
+        let mut ioffset = 2;
+        for _ in 0..size {
+            targets.push(read_i32(&bytes, offset + ioffset, &endianness));
+            ioffset += 2;
+        }
+
+        PackedSwitchPayload {
+            size,
+            first_key,
+            targets
+        }
+    }
 }
 
 impl InstructionHandler for PackedSwitchPayload {
@@ -893,11 +899,39 @@ impl InstructionHandler for PackedSwitchPayload {
     }
 }
 
-// TODO: actually decode the payload
 struct SparseSwitchPayload {
     size: u16,
     keys: Vec<i32>,
     targets: Vec<i32>
+}
+
+impl SparseSwitchPayload {
+    fn build(bytes: &[u16],
+             offset: usize,
+             endianness: &DexEndianness) -> Self 
+    {
+        let size = bytes[offset + 1];
+
+        let mut keys = Vec::new();
+        let mut ioffset = 2;
+        for _ in 0..size {
+            keys.push(read_i32(&bytes, offset + ioffset, &endianness));
+            ioffset += 2;
+        }
+
+        let mut targets = Vec::new();
+        let mut ioffset = 2;
+        for _ in 0..size {
+            targets.push(read_i32(&bytes, offset + ioffset, &endianness));
+            ioffset += 2;
+        }
+
+        SparseSwitchPayload {
+            size,
+            keys,
+            targets
+        }
+    }
 }
 
 impl InstructionHandler for SparseSwitchPayload {
@@ -910,11 +944,49 @@ impl InstructionHandler for SparseSwitchPayload {
     }
 }
 
-// TODO: actually decode the payload
 struct FillArrayDataPayload {
     element_width: u16,
     size: u32,
     data: Vec<u8>
+}
+
+impl FillArrayDataPayload {
+    fn build(bytes: &[u16],
+             offset: usize,
+             endianness: &DexEndianness) -> Self 
+    {
+        let element_width = bytes[offset + 1];
+        let size = match endianness {
+            DexEndianness::LittleEndian =>
+                ((bytes[offset + 3] as u32) << 16) + bytes[offset + 2] as u32,
+            DexEndianness::BigEndian =>
+                ((bytes[offset + 2] as u32) << 16) + bytes[offset + 3] as u32,
+        };
+        let mut data = Vec::new();
+        let mut ioffset = 4;
+        match endianness {
+            DexEndianness::LittleEndian => 
+                for i in 0..(size / element_width as u32) / 2 { 
+                    let _b = bytes[offset + ioffset].to_le_bytes();
+                    data.push(_b[0]);
+                    data.push(_b[1]);
+                    ioffset += 1;
+                },
+            DexEndianness::BigEndian => 
+                for _ in 0..(size / element_width as u32) / 2 { 
+                    let _b = bytes[offset + ioffset].to_be_bytes();
+                    data.push(_b[0]);
+                    data.push(_b[1]);
+                    ioffset += 1;
+                },
+        };
+
+        FillArrayDataPayload {
+            element_width,
+            size,
+            data
+        }
+    }
 }
 
 impl InstructionHandler for FillArrayDataPayload {
