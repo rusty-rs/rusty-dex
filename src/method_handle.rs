@@ -29,7 +29,7 @@ impl MethodHandleList {
             let field_or_method_id = dex_reader.read_u16().unwrap();
             let _ = dex_reader.read_u16().unwrap();
 
-            handles.push(MethodHandleItem { 
+            handles.push(MethodHandleItem {
                 method_handle_type,
                 field_or_method_id
             });

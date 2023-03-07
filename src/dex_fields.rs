@@ -57,7 +57,7 @@ impl DexFields {
             decoded.push(':');
             decoded.push_str(types_list.items.get(type_idx as usize).unwrap());
 
-            fields.push(FieldIdItem { 
+            fields.push(FieldIdItem {
                 class_idx,
                 type_idx,
                 name_idx,

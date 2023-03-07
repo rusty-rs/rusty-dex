@@ -58,7 +58,7 @@ impl DexMethods {
             decoded.push_str(&strings_list.strings.get(name_idx as usize).unwrap().string);
             decoded.push_str(protos_list.items.get(proto_idx as usize).unwrap());
 
-            methods.push(MethodIdItem { 
+            methods.push(MethodIdItem {
                 class_idx,
                 proto_idx,
                 name_idx,

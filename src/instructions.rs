@@ -47,7 +47,7 @@ impl Instruction
             OpCode::CONST_4 => Box::new(Instruction11n{ }),
 
             OpCode::MONITOR_ENTER            | OpCode::MONITOR_EXIT
-                | OpCode::MOVE_EXCEPTION     | OpCode::MOVE_RESULT 
+                | OpCode::MOVE_EXCEPTION     | OpCode::MOVE_RESULT
                 | OpCode::MOVE_RESULT_OBJECT | OpCode::MOVE_RESULT_WIDE
                 | OpCode::RETURN             | OpCode::RETURN_OBJECT
                 | OpCode::RETURN_WIDE        | OpCode::THROW
@@ -869,7 +869,7 @@ struct PackedSwitchPayload {
 impl PackedSwitchPayload {
     fn build(bytes: &[u16],
              offset: usize,
-             endianness: &DexEndianness) -> Self 
+             endianness: &DexEndianness) -> Self
     {
         let size = bytes[offset + 1];
         let first_key = read_i32(&bytes, offset + 2, &endianness);
@@ -908,7 +908,7 @@ struct SparseSwitchPayload {
 impl SparseSwitchPayload {
     fn build(bytes: &[u16],
              offset: usize,
-             endianness: &DexEndianness) -> Self 
+             endianness: &DexEndianness) -> Self
     {
         let size = bytes[offset + 1];
 
@@ -953,7 +953,7 @@ struct FillArrayDataPayload {
 impl FillArrayDataPayload {
     fn build(bytes: &[u16],
              offset: usize,
-             endianness: &DexEndianness) -> Self 
+             endianness: &DexEndianness) -> Self
     {
         let element_width = bytes[offset + 1];
         let size = match endianness {
@@ -965,15 +965,15 @@ impl FillArrayDataPayload {
         let mut data = Vec::new();
         let mut ioffset = 4;
         match endianness {
-            DexEndianness::LittleEndian => 
-                for i in 0..(size / element_width as u32) / 2 { 
+            DexEndianness::LittleEndian =>
+                for i in 0..(size / element_width as u32) / 2 {
                     let _b = bytes[offset + ioffset].to_le_bytes();
                     data.push(_b[0]);
                     data.push(_b[1]);
                     ioffset += 1;
                 },
-            DexEndianness::BigEndian => 
-                for _ in 0..(size / element_width as u32) / 2 { 
+            DexEndianness::BigEndian =>
+                for _ in 0..(size / element_width as u32) / 2 {
                     let _b = bytes[offset + ioffset].to_be_bytes();
                     data.push(_b[0]);
                     data.push(_b[1]);

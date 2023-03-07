@@ -228,7 +228,7 @@ impl DexClasses {
                 });
             }
 
-            methods.push(ClassDefItem { 
+            methods.push(ClassDefItem {
                 class_idx,
                 access_flags,
                 superclass_idx,
