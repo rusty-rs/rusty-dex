@@ -12,7 +12,7 @@ const NO_INDEX: u32 = 0xffffffff;
 #[derive(Debug)]
 pub struct ClassDefItem {
     class_idx: u32,
-    access_flags: u32,
+    access_flags: Vec<AccessFlag>,
     superclass_idx: u32,
     interfaces_off: u32,
     source_file_idx: u32,
@@ -69,11 +69,11 @@ impl DexClasses {
             let access_flags_decoded = AccessFlag::parse(access_flags,
                                                          AccessFlagType::Class);
 
-            let superclass_idx = dex_reader.read_u32().unwrap();
-            let interfaces_off = dex_reader.read_u32().unwrap();
-            let source_file_idx = dex_reader.read_u32().unwrap();
-            let annotations_off = dex_reader.read_u32().unwrap();
-            let class_data_off = dex_reader.read_u32().unwrap();
+            let superclass_idx   = dex_reader.read_u32().unwrap();
+            let interfaces_off   = dex_reader.read_u32().unwrap();
+            let source_file_idx  = dex_reader.read_u32().unwrap();
+            let annotations_off  = dex_reader.read_u32().unwrap();
+            let class_data_off   = dex_reader.read_u32().unwrap();
             let static_value_off = dex_reader.read_u32().unwrap();
 
             // If class_data_off == 0 then we have no class data
@@ -230,7 +230,7 @@ impl DexClasses {
 
             methods.push(ClassDefItem {
                 class_idx,
-                access_flags,
+                access_flags: access_flags_decoded,
                 superclass_idx,
                 interfaces_off,
                 source_file_idx,
