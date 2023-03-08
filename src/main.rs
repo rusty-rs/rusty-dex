@@ -1,47 +1,26 @@
-#![allow(dead_code)]
-
 use std::fs::File;
 use std::io::{Read, Cursor, Seek, SeekFrom};
 use std::env;
 use std::process::exit;
 use zip::ZipArchive;
 
-pub mod logging;
+extern crate android_emulator;
 
-pub mod dex_header;
-pub mod dex_file;
-pub mod map_list;
-pub mod error;
-pub mod dex_reader;
-pub mod adler32;
-pub mod constants;
-pub mod dex_strings;
-pub mod dex_types;
-pub mod dex_protos;
-pub mod dex_fields;
-pub mod dex_methods;
-pub mod dex_classes;
-pub mod access_flags;
-pub mod method_handle;
-pub mod code_item;
-pub mod opcodes;
-pub mod instructions;
+use android_emulator::logging;
+use android_emulator::{info, error};
 
-use crate::dex_reader::DexReader;
-use crate::dex_file::DexFile;
-use crate::dex_header::DexHeader;
-use crate::map_list::MapList;
-use crate::dex_strings::DexStrings;
-use crate::dex_types::DexTypes;
-use crate::dex_protos::DexProtos;
-use crate::dex_fields::DexFields;
-use crate::dex_methods::DexMethods;
-use crate::dex_classes::DexClasses;
-use crate::method_handle::MethodHandleList;
-
-use crate::constants::MapItemType;
-
-use crate::instructions::*;
+use android_emulator::dex_reader::DexReader;
+use android_emulator::dex_file::DexFile;
+use android_emulator::dex_header::DexHeader;
+use android_emulator::map_list::MapList;
+use android_emulator::dex_strings::DexStrings;
+use android_emulator::dex_types::DexTypes;
+use android_emulator::dex_protos::DexProtos;
+use android_emulator::dex_fields::DexFields;
+use android_emulator::dex_methods::DexMethods;
+use android_emulator::dex_classes::DexClasses;
+use android_emulator::method_handle::MethodHandleList;
+use android_emulator::constants::MapItemType;
 
 fn main() {
     // TODO: use CLI arg
