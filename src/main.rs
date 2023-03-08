@@ -3,6 +3,7 @@ use std::io::{Read, Cursor, Seek, SeekFrom};
 use std::env;
 use std::process::exit;
 use zip::ZipArchive;
+use clap::Parser;
 
 extern crate android_emulator;
 
@@ -23,20 +24,13 @@ use android_emulator::method_handle::MethodHandleList;
 use android_emulator::constants::MapItemType;
 
 fn main() {
-    // TODO: use CLI arg
-    logging::set_log_level(3);
+    let cli_args = android_emulator::CliArgs::parse();
+    logging::set_log_level(cli_args.log_level);
+    info!("Set log level to {}", cli_args.log_level);
 
-    /* Check CLI arguments */
-    let args: Vec<String> = env::args().collect();
-    if args.len() != 2 {
-        error!("Usage: cargo run [APK]");
-        exit(22);   /* Invalid arg */
-    }
+    info!("Parsing {}", cli_args.apk);
 
-    let apk_path = &args[1];
-    info!("Parsing {}", apk_path);
-
-    let raw_file = File::open(apk_path)
+    let raw_file = File::open(cli_args.apk)
         .unwrap_or_else(|err| panic!("Could not open input file: {err}"));
     let mut zip_file = ZipArchive::new(raw_file)
         .unwrap_or_else(|err| panic!("Error: cannot create ZipArchive object: {err}"));

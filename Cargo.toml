@@ -9,6 +9,7 @@ chrono = "0.4.23"
 colored = "2.0.0"
 zip = "0.6.4"
 residua-mutf8 = "2"
+clap = { version = "4.1.8", features = ["derive"] }
 
 # [build-dependencies]
 # bindgen = "0.63.0"
