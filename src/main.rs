@@ -1,14 +1,12 @@
 use std::fs::File;
 use std::io::{Read, Cursor, Seek, SeekFrom};
-use std::env;
-use std::process::exit;
 use zip::ZipArchive;
 use clap::Parser;
 
 extern crate dex_parser;
 
 use dex_parser::logging;
-use dex_parser::{info, error};
+use dex_parser::{info};
 
 use dex_parser::dex_reader::DexReader;
 use dex_parser::dex_file::DexFile;
@@ -44,7 +42,7 @@ fn main() {
      * parsed the same way. Then we can merge all the data into
      * one `DexFile` struct by eliminating duplicates and
      * re-sorting the list of values.
-     * */
+     **/
     let mut dex_entry = zip_file.by_name("classes.dex")
                                 .expect("Error: cannot find classes.dex in the APK");
 

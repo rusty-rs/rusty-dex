@@ -966,7 +966,7 @@ impl FillArrayDataPayload {
         let mut ioffset = 4;
         match endianness {
             DexEndianness::LittleEndian =>
-                for i in 0..(size / element_width as u32) / 2 {
+                for _ in 0..(size / element_width as u32) / 2 {
                     let _b = bytes[offset + ioffset].to_le_bytes();
                     data.push(_b[0]);
                     data.push(_b[1]);
