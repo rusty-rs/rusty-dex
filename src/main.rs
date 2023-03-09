@@ -37,7 +37,14 @@ fn main() {
 
     info!("Loading classes.dex from the APK");
 
-    /* TODO: support merging of multiple DEX files */
+    /* TODO: support merging of multiple DEX files
+     * I dug around a little and it seems like this should be
+     * pretty straightforward. Each classes.dex file in apps apps
+     * with multiple DEX files are basically all valid and can be
+     * parsed the same way. Then we can merge all the data into
+     * one `DexFile` struct by eliminating duplicates and
+     * re-sorting the list of values.
+     * */
     let mut dex_entry = zip_file.by_name("classes.dex")
                                 .expect("Error: cannot find classes.dex in the APK");
 
