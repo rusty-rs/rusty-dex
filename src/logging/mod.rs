@@ -15,6 +15,15 @@ pub enum LogLevel {
 }
 
 #[macro_export]
+macro_rules! die
+{
+    ($($arg:tt)*) => {{
+        error!($($arg)*);
+        panic!();
+    }}
+}
+
+#[macro_export]
 macro_rules! error
 {
     ($($arg:tt)*) => {{

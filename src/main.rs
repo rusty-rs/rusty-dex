@@ -6,7 +6,7 @@ use clap::Parser;
 extern crate dex_parser;
 
 use dex_parser::logging;
-use dex_parser::{info};
+use dex_parser::{info, error, die};
 
 use dex_parser::dex_reader::DexReader;
 use dex_parser::dex_file::DexFile;
@@ -29,9 +29,9 @@ fn main() {
     info!("Parsing {}", cli_args.apk);
 
     let raw_file = File::open(cli_args.apk)
-        .unwrap_or_else(|err| panic!("Could not open input file: {err}"));
+        .unwrap_or_else(|err| die!("Could not open input file: {err}"));
     let mut zip_file = ZipArchive::new(raw_file)
-        .unwrap_or_else(|err| panic!("Error: cannot create ZipArchive object: {err}"));
+        .unwrap_or_else(|err| die!("Error: cannot create ZipArchive object: {err}"));
 
     info!("Loading classes.dex from the APK");
 
@@ -44,11 +44,11 @@ fn main() {
      * re-sorting the list of values.
      **/
     let mut dex_entry = zip_file.by_name("classes.dex")
-                                .expect("Error: cannot find classes.dex in the APK");
+                                .unwrap_or_else(|_| die!("Error: cannot find classes.dex in the APK"));
 
     let mut raw_dex = Vec::new();
     dex_entry.read_to_end(&mut raw_dex)
-             .unwrap_or_else(|err| panic!("Could not read input file: {err}"));
+             .unwrap_or_else(|err| die!("Could not read input file: {err}"));
 
     /* First check endianness */
     let mut bytes = Cursor::new(&raw_dex);
