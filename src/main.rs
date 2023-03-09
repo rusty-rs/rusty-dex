@@ -5,26 +5,26 @@ use std::process::exit;
 use zip::ZipArchive;
 use clap::Parser;
 
-extern crate android_emulator;
+extern crate dex_parser;
 
-use android_emulator::logging;
-use android_emulator::{info, error};
+use dex_parser::logging;
+use dex_parser::{info, error};
 
-use android_emulator::dex_reader::DexReader;
-use android_emulator::dex_file::DexFile;
-use android_emulator::dex_header::DexHeader;
-use android_emulator::map_list::MapList;
-use android_emulator::dex_strings::DexStrings;
-use android_emulator::dex_types::DexTypes;
-use android_emulator::dex_protos::DexProtos;
-use android_emulator::dex_fields::DexFields;
-use android_emulator::dex_methods::DexMethods;
-use android_emulator::dex_classes::DexClasses;
-use android_emulator::method_handle::MethodHandleList;
-use android_emulator::constants::MapItemType;
+use dex_parser::dex_reader::DexReader;
+use dex_parser::dex_file::DexFile;
+use dex_parser::dex_header::DexHeader;
+use dex_parser::map_list::MapList;
+use dex_parser::dex_strings::DexStrings;
+use dex_parser::dex_types::DexTypes;
+use dex_parser::dex_protos::DexProtos;
+use dex_parser::dex_fields::DexFields;
+use dex_parser::dex_methods::DexMethods;
+use dex_parser::dex_classes::DexClasses;
+use dex_parser::method_handle::MethodHandleList;
+use dex_parser::constants::MapItemType;
 
 fn main() {
-    let cli_args = android_emulator::CliArgs::parse();
+    let cli_args = dex_parser::CliArgs::parse();
     logging::set_log_level(cli_args.log_level);
     info!("Set log level to {}", cli_args.log_level);
 
