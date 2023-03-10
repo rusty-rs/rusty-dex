@@ -2,7 +2,7 @@ use std::io::{Seek, SeekFrom};
 
 use crate::dex_reader::DexReader;
 use crate::dex_types::DexTypes;
-use crate::instructions::{ Instruction, InstructionsReader };
+use crate::instructions::{ InstructionsReader, InstructionHandler };
 
 #[derive(Debug)]
 pub struct TryItem {
@@ -30,7 +30,7 @@ pub struct CodeItem {
     ins_size      : u16,
     outs_size     : u16,
     debug_info_off: u32,
-    insns         : Option<Vec<Instruction>>,
+    insns         : Option<Vec<Box<dyn InstructionHandler>>>,
     tries         : Option<Vec<TryItem>>,
     handlers      : Option<Vec<EncodedCatchHandler>>
 }
