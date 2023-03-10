@@ -18,6 +18,7 @@ pub enum LogLevel {
 macro_rules! die
 {
     ($($arg:tt)*) => {{
+        use $crate::error;
         error!($($arg)*);
         panic!();
     }}

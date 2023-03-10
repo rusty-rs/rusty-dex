@@ -6,7 +6,7 @@ use clap::Parser;
 extern crate dex_parser;
 
 use dex_parser::logging;
-use dex_parser::{info, error, die};
+use dex_parser::{info, die};
 
 use dex_parser::dex_reader::DexReader;
 use dex_parser::dex_file::DexFile;
