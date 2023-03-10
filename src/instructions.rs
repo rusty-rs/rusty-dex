@@ -414,11 +414,10 @@ pub trait InstructionHandler: Debug {
     }
 }
 
-
 /// 00|op
 impl InstructionHandler for Instruction10x {
     fn length(&self) -> usize {
-        1
+        self.length
     }
 
     fn inst_format(&self) -> &str {
@@ -429,7 +428,7 @@ impl InstructionHandler for Instruction10x {
 /// B|A|op
 impl InstructionHandler for Instruction11n {
     fn length(&self) -> usize {
-        1
+        self.length
     }
 
     fn inst_format(&self) -> &str {
@@ -447,7 +446,7 @@ impl InstructionHandler for Instruction11n {
 
 impl InstructionHandler for Instruction12x {
     fn length(&self) -> usize {
-        1
+        self.length
     }
 
     fn inst_format(&self) -> &str {
@@ -466,7 +465,7 @@ impl InstructionHandler for Instruction12x {
 /// AA|op
 impl InstructionHandler for Instruction11x {
     fn length(&self) -> usize {
-        1
+        self.length
     }
 
     fn inst_format(&self) -> &str {
@@ -480,7 +479,7 @@ impl InstructionHandler for Instruction11x {
 
 impl InstructionHandler for Instruction10t {
     fn length(&self) -> usize {
-        1
+        self.length
     }
 
     fn inst_format(&self) -> &str {
@@ -496,7 +495,7 @@ impl InstructionHandler for Instruction10t {
 /// AAAA
 impl InstructionHandler for Instruction20t {
     fn length(&self) -> usize {
-        2
+        self.length
     }
 
     fn inst_format(&self) -> &str {
@@ -512,7 +511,7 @@ impl InstructionHandler for Instruction20t {
 /// BBBB
 impl InstructionHandler for Instruction21c {
     fn length(&self) -> usize {
-        2
+        self.length
     }
 
     fn inst_format(&self) -> &str {
@@ -530,7 +529,7 @@ impl InstructionHandler for Instruction21c {
 
 impl InstructionHandler for Instruction21h {
     fn length(&self) -> usize {
-        2
+        self.length
     }
 
     fn inst_format(&self) -> &str {
@@ -548,7 +547,7 @@ impl InstructionHandler for Instruction21h {
 
 impl InstructionHandler for Instruction21s {
     fn length(&self) -> usize {
-        2
+        self.length
     }
 
     fn inst_format(&self) -> &str {
@@ -566,7 +565,7 @@ impl InstructionHandler for Instruction21s {
 
 impl InstructionHandler for Instruction21t {
     fn length(&self) -> usize {
-        2
+        self.length
     }
 
     fn inst_format(&self) -> &str {
@@ -584,7 +583,7 @@ impl InstructionHandler for Instruction21t {
 
 impl InstructionHandler for Instruction22x {
     fn length(&self) -> usize {
-        2
+        self.length
     }
 
     fn inst_format(&self) -> &str {
@@ -604,7 +603,7 @@ impl InstructionHandler for Instruction22x {
 /// BB|CC
 impl InstructionHandler for Instruction23x {
     fn length(&self) -> usize {
-        2
+        self.length
     }
 
     fn inst_format(&self) -> &str {
@@ -626,7 +625,7 @@ impl InstructionHandler for Instruction23x {
 
 impl InstructionHandler for Instruction22b {
     fn length(&self) -> usize {
-        2
+        self.length
     }
 
     fn inst_format(&self) -> &str {
@@ -650,7 +649,7 @@ impl InstructionHandler for Instruction22b {
 /// CCCC
 impl InstructionHandler for Instruction22c {
     fn length(&self) -> usize {
-        2
+        self.length
     }
 
     fn inst_format(&self) -> &str {
@@ -672,7 +671,7 @@ impl InstructionHandler for Instruction22c {
 
 impl InstructionHandler for Instruction22s {
     fn length(&self) -> usize {
-        2
+        self.length
     }
 
     fn inst_format(&self) -> &str {
@@ -694,7 +693,7 @@ impl InstructionHandler for Instruction22s {
 
 impl InstructionHandler for Instruction22t {
     fn length(&self) -> usize {
-        2
+        self.length
     }
 
     fn inst_format(&self) -> &str {
@@ -719,7 +718,7 @@ impl InstructionHandler for Instruction22t {
 /// AAAAhigh
 impl InstructionHandler for Instruction30t {
     fn length(&self) -> usize {
-        3
+        self.length
     }
 
     fn inst_format(&self) -> &str {
@@ -736,7 +735,7 @@ impl InstructionHandler for Instruction30t {
 /// BBBBhigh
 impl InstructionHandler for Instruction31c {
     fn length(&self) -> usize {
-        3
+        self.length
     }
 
     fn inst_format(&self) -> &str {
@@ -754,7 +753,7 @@ impl InstructionHandler for Instruction31c {
 
 impl InstructionHandler for Instruction31i {
     fn length(&self) -> usize {
-        3
+        self.length
     }
 
     fn inst_format(&self) -> &str {
@@ -772,7 +771,7 @@ impl InstructionHandler for Instruction31i {
 
 impl InstructionHandler for Instruction31t {
     fn length(&self) -> usize {
-        3
+        self.length
     }
 
     fn inst_format(&self) -> &str {
@@ -793,7 +792,7 @@ impl InstructionHandler for Instruction31t {
 /// BBBB
 impl InstructionHandler for Instruction32x {
     fn length(&self) -> usize {
-        3
+        self.length
     }
 
     fn inst_format(&self) -> &str {
@@ -814,7 +813,7 @@ impl InstructionHandler for Instruction32x {
 /// F|E|D|C
 impl InstructionHandler for Instruction35c {
     fn length(&self) -> usize {
-        3
+        self.length
     }
 
     fn inst_format(&self) -> &str {
@@ -855,7 +854,7 @@ impl InstructionHandler for Instruction35c {
 /// CCCC
 impl InstructionHandler for Instruction3rc {
     fn length(&self) -> usize {
-        3
+        self.length
     }
 
     fn inst_format(&self) -> &str {
@@ -881,7 +880,7 @@ impl InstructionHandler for Instruction3rc {
 /// HHHH
 impl InstructionHandler for Instruction45cc {
     fn length(&self) -> usize {
-        4
+        self.length
     }
 
     fn inst_format(&self) -> &str {
@@ -899,7 +898,7 @@ impl InstructionHandler for Instruction45cc {
 /// HHHH
 impl InstructionHandler for Instruction4rcc {
     fn length(&self) -> usize {
-        4
+        self.length
     }
 
     fn inst_format(&self) -> &str {
@@ -930,7 +929,7 @@ impl InstructionHandler for Instruction4rcc {
 /// BBBBhigh
 impl InstructionHandler for Instruction51l {
     fn length(&self) -> usize {
-        5
+        self.length
     }
 
     fn inst_format(&self) -> &str {
