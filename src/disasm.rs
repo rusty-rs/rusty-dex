@@ -1,13 +1,12 @@
 use crate::instructions::InstructionHandler;
 use crate::opcodes::OpCode;
 
-// TODO: not happy with the ?Sized here but it does work.
 pub fn disasm(ins: &(impl InstructionHandler + ?Sized)) -> String {
     match ins.opcode() {
         OpCode::GOTO | OpCode::GOTO_16
             | OpCode::GOTO_32 => format!("{} +{}",
                                             ins.opcode(),
-                                            ins.a(&ins.bytes()).unwrap()),
+                                            ins.a(&ins.bytes()).unwrap() * 2),
 
         OpCode::NOP => format!(""),
         OpCode::RETURN_VOID => format!("{}", ins.opcode()),
@@ -84,7 +83,7 @@ pub fn disasm(ins: &(impl InstructionHandler + ?Sized)) -> String {
             => format!("{} v{} +{}",
                         ins.opcode(),
                         ins.a(&ins.bytes()).unwrap(),
-                        ins.b(&ins.bytes()).unwrap()),
+                        ins.b(&ins.bytes()).unwrap() * 2),
 
         OpCode::ADD_INT_LIT8        | OpCode::AND_INT_LIT8
             | OpCode::DIV_INT_LIT8  | OpCode::MUL_INT_LIT8
@@ -117,7 +116,7 @@ pub fn disasm(ins: &(impl InstructionHandler + ?Sized)) -> String {
                         ins.opcode(),
                         ins.a(&ins.bytes()).unwrap(),
                         ins.b(&ins.bytes()).unwrap(),
-                        ins.c(&ins.bytes()).unwrap()),
+                        ins.c(&ins.bytes()).unwrap() * 2),
 
         OpCode::MOVE_FROM16 | OpCode::MOVE_OBJECT_FROM16
             | OpCode::MOVE_WIDE_FROM16
