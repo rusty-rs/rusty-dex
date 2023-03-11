@@ -1,4 +1,4 @@
-use std::io::Cursor;
+use std::io::{ Cursor, Seek, SeekFrom };
 use byteorder::{BigEndian, LittleEndian, ReadBytesExt};
 
 use crate::error::DexError;
@@ -14,13 +14,28 @@ pub enum DexEndianness {
 }
 
 #[derive(Debug)]
-pub struct DexReader<'a> {
-    pub bytes: Cursor<&'a Vec<u8>>,
+pub struct DexReader {
+    pub bytes: Cursor<Vec<u8>>,
     pub bytes_len: u64,
     pub endianness: DexEndianness,
 }
 
-impl <'a> DexReader<'a> {
+impl DexReader {
+    pub fn build(raw_dex: Vec<u8>) -> Self {
+        let endianness = DexReader::check_endianness(&raw_dex).unwrap();
+
+        let mut bytes = Cursor::new(raw_dex);
+
+        let bytes_len = bytes.seek(SeekFrom::End(0)).unwrap();
+        bytes.rewind().unwrap();
+
+        DexReader {
+            bytes,
+            bytes_len,
+            endianness
+        }
+    }
+
     pub fn check_endianness(bytes: &[u8]) -> Result<DexEndianness, DexError> {
         // Cannot use self here as we need to know the endianness before anything else
 
