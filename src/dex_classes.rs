@@ -165,6 +165,7 @@ impl DexClasses {
                         let code_item = CodeItem::build(dex_reader,
                                                         code_offset,
                                                         types_list);
+                        println!("{code_item:?}");
                         dex_reader.bytes.seek(SeekFrom::Start(current_offset)).unwrap();
 
                         direct_methods.push(EncodedMethod {
@@ -203,6 +204,7 @@ impl DexClasses {
                         let code_item = CodeItem::build(dex_reader,
                                                         code_offset,
                                                         types_list);
+                        println!("{code_item:?}");
                         dex_reader.bytes.seek(SeekFrom::Start(current_offset)).unwrap();
 
                         virtual_methods.push(EncodedMethod {

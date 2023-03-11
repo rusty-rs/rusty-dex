@@ -57,10 +57,10 @@ impl CodeItem {
         }
 
         // XXX
-        println!("registers_size {}", registers_size);
-        println!("ins_size {}", ins_size);
-        println!("outs_size {}", outs_size);
-        println!("debug_info_off {}", debug_info_off);
+        println!("registers_size {registers_size}");
+        println!("ins_size {ins_size}");
+        println!("outs_size {outs_size}");
+        println!("debug_info_off {debug_info_off}");
         let mut reader = InstructionsReader::new(&insns, &dex_reader.endianness);
         let parsed_ins = reader.parse_instructions();
 

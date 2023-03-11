@@ -867,7 +867,7 @@ impl InstructionHandler for Instruction30t {
     }
 
     fn a(&self, data: &[u16]) -> Option<u64> {
-        Some(data[1] as u64 + (data [2] as u64) << 16)
+        Some(data[1] as u64 + ((data [2] as u64) << 16))
     }
 }
 
@@ -896,7 +896,7 @@ impl InstructionHandler for Instruction31c {
     }
 
     fn b(&self, data: &[u16]) -> Option<u64> {
-        Some(data[1] as u64 + (data [2] as u64) << 16)
+        Some(data[1] as u64 + ((data [2] as u64) << 16))
     }
 }
 
@@ -922,7 +922,7 @@ impl InstructionHandler for Instruction31i {
     }
 
     fn b(&self, data: &[u16]) -> Option<u64> {
-        Some(data[1] as u64 + (data [2] as u64) << 16)
+        Some(data[1] as u64 + ((data [2] as u64) << 16))
     }
 }
 
@@ -948,7 +948,7 @@ impl InstructionHandler for Instruction31t {
     }
 
     fn b(&self, data: &[u16]) -> Option<u64> {
-        Some(data[1] as u64 + (data [2] as u64) << 16)
+        Some(data[1] as u64 + ((data [2] as u64) << 16))
     }
 }
 
@@ -1155,9 +1155,9 @@ impl InstructionHandler for Instruction51l {
 
     fn b(&self, data: &[u16]) -> Option<u64> {
         Some(data[1] as u64
-             + (data[2] as u64) << 16
-             + (data[3] as u64) << 32
-             + (data[4] as u64) << 48)
+             + ((data[2] as u64) << 16)
+             + ((data[3] as u64) << 32)
+             + ((data[4] as u64) << 48))
     }
 }
 
@@ -1187,11 +1187,11 @@ impl PackedSwitchPayload {
              endianness: &DexEndianness) -> Self
     {
         let size = bytes[offset + 1];
-        let first_key = read_i32(&bytes, offset + 2, &endianness);
+        let first_key = read_i32(bytes, offset + 2, endianness);
         let mut targets = Vec::new();
         let mut ioffset = 2;
         for _ in 0..size {
-            targets.push(read_i32(&bytes, offset + ioffset, &endianness));
+            targets.push(read_i32(bytes, offset + ioffset, endianness));
             ioffset += 2;
         }
 
@@ -1243,14 +1243,14 @@ impl SparseSwitchPayload {
         let mut keys = Vec::new();
         let mut ioffset = 2;
         for _ in 0..size {
-            keys.push(read_i32(&bytes, offset + ioffset, &endianness));
+            keys.push(read_i32(bytes, offset + ioffset, endianness));
             ioffset += 2;
         }
 
         let mut targets = Vec::new();
         let mut ioffset = 2;
         for _ in 0..size {
-            targets.push(read_i32(&bytes, offset + ioffset, &endianness));
+            targets.push(read_i32(bytes, offset + ioffset, endianness));
             ioffset += 2;
         }
 

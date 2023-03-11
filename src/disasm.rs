@@ -6,15 +6,15 @@ pub fn disasm(ins: &(impl InstructionHandler + ?Sized)) -> String {
         OpCode::GOTO | OpCode::GOTO_16
             | OpCode::GOTO_32 => format!("{} +{}",
                                             ins.opcode(),
-                                            ins.a(&ins.bytes()).unwrap() * 2),
+                                            ins.a(ins.bytes()).unwrap() * 2),
 
-        OpCode::NOP => format!(""),
+        OpCode::NOP => String::new(),
         OpCode::RETURN_VOID => format!("{}", ins.opcode()),
 
         OpCode::CONST_4 => format!("{} v{} {}",
                                     ins.opcode(),
-                                    ins.a(&ins.bytes()).unwrap(),
-                                    ins.b(&ins.bytes()).unwrap()),
+                                    ins.a(ins.bytes()).unwrap(),
+                                    ins.b(ins.bytes()).unwrap()),
 
         OpCode::MONITOR_ENTER            | OpCode::MONITOR_EXIT
             | OpCode::MOVE_EXCEPTION     | OpCode::MOVE_RESULT
@@ -23,7 +23,7 @@ pub fn disasm(ins: &(impl InstructionHandler + ?Sized)) -> String {
             | OpCode::RETURN_WIDE        | OpCode::THROW
             => format!("{} v{}",
                         ins.opcode(),
-                        ins.a(&ins.bytes()).unwrap()),
+                        ins.a(ins.bytes()).unwrap()),
 
         OpCode::ADD_DOUBLE_2ADDR      | OpCode::ADD_FLOAT_2ADDR
             | OpCode::ADD_INT_2ADDR   | OpCode::ADD_LONG_2ADDR
@@ -56,8 +56,8 @@ pub fn disasm(ins: &(impl InstructionHandler + ?Sized)) -> String {
             | OpCode::XOR_LONG_2ADDR
             => format!("{} v{} v{}",
                         ins.opcode(),
-                        ins.a(&ins.bytes()).unwrap(),
-                        ins.b(&ins.bytes()).unwrap()),
+                        ins.a(ins.bytes()).unwrap(),
+                        ins.b(ins.bytes()).unwrap()),
 
         OpCode::CHECK_CAST                | OpCode::CONST_CLASS
             | OpCode::CONST_METHOD_HANDLE | OpCode::CONST_METHOD_TYPE
@@ -82,8 +82,8 @@ pub fn disasm(ins: &(impl InstructionHandler + ?Sized)) -> String {
             | OpCode::IF_LTZ | OpCode::IF_NEZ
             => format!("{} v{} +{}",
                         ins.opcode(),
-                        ins.a(&ins.bytes()).unwrap(),
-                        ins.b(&ins.bytes()).unwrap() * 2),
+                        ins.a(ins.bytes()).unwrap(),
+                        ins.b(ins.bytes()).unwrap() * 2),
 
         OpCode::ADD_INT_LIT8        | OpCode::AND_INT_LIT8
             | OpCode::DIV_INT_LIT8  | OpCode::MUL_INT_LIT8
@@ -114,9 +114,9 @@ pub fn disasm(ins: &(impl InstructionHandler + ?Sized)) -> String {
             | OpCode::IF_LT | OpCode::IF_NE
             => format!("{} v{} v{} +{}",
                         ins.opcode(),
-                        ins.a(&ins.bytes()).unwrap(),
-                        ins.b(&ins.bytes()).unwrap(),
-                        ins.c(&ins.bytes()).unwrap() * 2),
+                        ins.a(ins.bytes()).unwrap(),
+                        ins.b(ins.bytes()).unwrap(),
+                        ins.c(ins.bytes()).unwrap() * 2),
 
         OpCode::MOVE_FROM16 | OpCode::MOVE_OBJECT_FROM16
             | OpCode::MOVE_WIDE_FROM16
