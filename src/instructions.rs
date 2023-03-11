@@ -362,6 +362,7 @@ struct Instruction51l  { opcode: OpCode, length: usize, bytes: Vec<u16> }
 #[allow(unused_variables)]
 pub trait InstructionHandler: Debug {
     fn length(&self) -> usize;
+    fn opcode(&self) -> OpCode;
     fn inst_format(&self) -> &str;
 
     /* Getters for registers
@@ -420,6 +421,10 @@ impl InstructionHandler for Instruction10x {
         self.length
     }
 
+    fn opcode(&self) -> OpCode {
+        self.opcode
+    }
+
     fn inst_format(&self) -> &str {
         "Instruction10x"
     }
@@ -429,6 +434,10 @@ impl InstructionHandler for Instruction10x {
 impl InstructionHandler for Instruction11n {
     fn length(&self) -> usize {
         self.length
+    }
+
+    fn opcode(&self) -> OpCode {
+        self.opcode
     }
 
     fn inst_format(&self) -> &str {
@@ -447,6 +456,10 @@ impl InstructionHandler for Instruction11n {
 impl InstructionHandler for Instruction12x {
     fn length(&self) -> usize {
         self.length
+    }
+
+    fn opcode(&self) -> OpCode {
+        self.opcode
     }
 
     fn inst_format(&self) -> &str {
@@ -468,6 +481,10 @@ impl InstructionHandler for Instruction11x {
         self.length
     }
 
+    fn opcode(&self) -> OpCode {
+        self.opcode
+    }
+
     fn inst_format(&self) -> &str {
         "Instruction11x"
     }
@@ -480,6 +497,10 @@ impl InstructionHandler for Instruction11x {
 impl InstructionHandler for Instruction10t {
     fn length(&self) -> usize {
         self.length
+    }
+
+    fn opcode(&self) -> OpCode {
+        self.opcode
     }
 
     fn inst_format(&self) -> &str {
@@ -498,6 +519,10 @@ impl InstructionHandler for Instruction20t {
         self.length
     }
 
+    fn opcode(&self) -> OpCode {
+        self.opcode
+    }
+
     fn inst_format(&self) -> &str {
         "Instruction20t"
     }
@@ -512,6 +537,10 @@ impl InstructionHandler for Instruction20t {
 impl InstructionHandler for Instruction21c {
     fn length(&self) -> usize {
         self.length
+    }
+
+    fn opcode(&self) -> OpCode {
+        self.opcode
     }
 
     fn inst_format(&self) -> &str {
@@ -532,6 +561,10 @@ impl InstructionHandler for Instruction21h {
         self.length
     }
 
+    fn opcode(&self) -> OpCode {
+        self.opcode
+    }
+
     fn inst_format(&self) -> &str {
         "Instruction21h"
     }
@@ -548,6 +581,10 @@ impl InstructionHandler for Instruction21h {
 impl InstructionHandler for Instruction21s {
     fn length(&self) -> usize {
         self.length
+    }
+
+    fn opcode(&self) -> OpCode {
+        self.opcode
     }
 
     fn inst_format(&self) -> &str {
@@ -568,6 +605,10 @@ impl InstructionHandler for Instruction21t {
         self.length
     }
 
+    fn opcode(&self) -> OpCode {
+        self.opcode
+    }
+
     fn inst_format(&self) -> &str {
         "Instruction21t"
     }
@@ -584,6 +625,10 @@ impl InstructionHandler for Instruction21t {
 impl InstructionHandler for Instruction22x {
     fn length(&self) -> usize {
         self.length
+    }
+
+    fn opcode(&self) -> OpCode {
+        self.opcode
     }
 
     fn inst_format(&self) -> &str {
@@ -606,6 +651,10 @@ impl InstructionHandler for Instruction23x {
         self.length
     }
 
+    fn opcode(&self) -> OpCode {
+        self.opcode
+    }
+
     fn inst_format(&self) -> &str {
         "Instruction23x"
     }
@@ -626,6 +675,10 @@ impl InstructionHandler for Instruction23x {
 impl InstructionHandler for Instruction22b {
     fn length(&self) -> usize {
         self.length
+    }
+
+    fn opcode(&self) -> OpCode {
+        self.opcode
     }
 
     fn inst_format(&self) -> &str {
@@ -652,6 +705,10 @@ impl InstructionHandler for Instruction22c {
         self.length
     }
 
+    fn opcode(&self) -> OpCode {
+        self.opcode
+    }
+
     fn inst_format(&self) -> &str {
         "Instruction22c"
     }
@@ -674,6 +731,10 @@ impl InstructionHandler for Instruction22s {
         self.length
     }
 
+    fn opcode(&self) -> OpCode {
+        self.opcode
+    }
+
     fn inst_format(&self) -> &str {
         "Instruction22s"
     }
@@ -694,6 +755,10 @@ impl InstructionHandler for Instruction22s {
 impl InstructionHandler for Instruction22t {
     fn length(&self) -> usize {
         self.length
+    }
+
+    fn opcode(&self) -> OpCode {
+        self.opcode
     }
 
     fn inst_format(&self) -> &str {
@@ -721,6 +786,10 @@ impl InstructionHandler for Instruction30t {
         self.length
     }
 
+    fn opcode(&self) -> OpCode {
+        self.opcode
+    }
+
     fn inst_format(&self) -> &str {
         "Instruction30t"
     }
@@ -736,6 +805,10 @@ impl InstructionHandler for Instruction30t {
 impl InstructionHandler for Instruction31c {
     fn length(&self) -> usize {
         self.length
+    }
+
+    fn opcode(&self) -> OpCode {
+        self.opcode
     }
 
     fn inst_format(&self) -> &str {
@@ -756,6 +829,10 @@ impl InstructionHandler for Instruction31i {
         self.length
     }
 
+    fn opcode(&self) -> OpCode {
+        self.opcode
+    }
+
     fn inst_format(&self) -> &str {
         "Instruction31i"
     }
@@ -772,6 +849,10 @@ impl InstructionHandler for Instruction31i {
 impl InstructionHandler for Instruction31t {
     fn length(&self) -> usize {
         self.length
+    }
+
+    fn opcode(&self) -> OpCode {
+        self.opcode
     }
 
     fn inst_format(&self) -> &str {
@@ -795,6 +876,10 @@ impl InstructionHandler for Instruction32x {
         self.length
     }
 
+    fn opcode(&self) -> OpCode {
+        self.opcode
+    }
+
     fn inst_format(&self) -> &str {
         "Instruction32x"
     }
@@ -814,6 +899,10 @@ impl InstructionHandler for Instruction32x {
 impl InstructionHandler for Instruction35c {
     fn length(&self) -> usize {
         self.length
+    }
+
+    fn opcode(&self) -> OpCode {
+        self.opcode
     }
 
     fn inst_format(&self) -> &str {
@@ -857,6 +946,10 @@ impl InstructionHandler for Instruction3rc {
         self.length
     }
 
+    fn opcode(&self) -> OpCode {
+        self.opcode
+    }
+
     fn inst_format(&self) -> &str {
         "Instruction3rc"
     }
@@ -883,6 +976,10 @@ impl InstructionHandler for Instruction45cc {
         self.length
     }
 
+    fn opcode(&self) -> OpCode {
+        self.opcode
+    }
+
     fn inst_format(&self) -> &str {
         "Instruction45cc"
     }
@@ -899,6 +996,10 @@ impl InstructionHandler for Instruction45cc {
 impl InstructionHandler for Instruction4rcc {
     fn length(&self) -> usize {
         self.length
+    }
+
+    fn opcode(&self) -> OpCode {
+        self.opcode
     }
 
     fn inst_format(&self) -> &str {
@@ -930,6 +1031,10 @@ impl InstructionHandler for Instruction4rcc {
 impl InstructionHandler for Instruction51l {
     fn length(&self) -> usize {
         self.length
+    }
+
+    fn opcode(&self) -> OpCode {
+        self.opcode
     }
 
     fn inst_format(&self) -> &str {
@@ -996,6 +1101,10 @@ impl InstructionHandler for PackedSwitchPayload {
         ((self.size * 2) + 4).into()
     }
 
+    fn opcode(&self) -> OpCode {
+        OpCode::PACKED_SWITCH_PAYLOAD
+    }
+
     fn inst_format(&self) -> &str {
         "PackedSwitchPayload"
     }
@@ -1040,6 +1149,10 @@ impl SparseSwitchPayload {
 impl InstructionHandler for SparseSwitchPayload {
     fn length(&self) -> usize {
         ((self.size * 4) + 2).into()
+    }
+
+    fn opcode(&self) -> OpCode {
+        OpCode::SPARSE_SWITCH_PAYLOAD
     }
 
     fn inst_format(&self) -> &str {
@@ -1096,6 +1209,10 @@ impl FillArrayDataPayload {
 impl InstructionHandler for FillArrayDataPayload {
     fn length(&self) -> usize {
         ((self.size * self.element_width as u32 + 1) / 2 + 4) as usize
+    }
+
+    fn opcode(&self) -> OpCode {
+        OpCode::FILL_ARRAY_DATA_PAYLOAD
     }
 
     fn inst_format(&self) -> &str {
