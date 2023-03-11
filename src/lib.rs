@@ -21,6 +21,7 @@ pub mod method_handle;
 pub mod code_item;
 pub mod opcodes;
 pub mod instructions;
+pub mod disasm;
 
 /* Actually unused for now but there should
  * be more options as things progress */

@@ -3,6 +3,7 @@ use core::fmt::Debug;
 use crate::error;
 use crate::opcodes::OpCode;
 use crate::dex_reader::DexEndianness;
+use crate::disasm;
 
 pub fn parse(raw_bytes: &[u16],
                 offset: usize,
@@ -361,8 +362,12 @@ struct Instruction51l  { opcode: OpCode, length: usize, bytes: Vec<u16> }
 
 #[allow(unused_variables)]
 pub trait InstructionHandler: Debug {
+    /* Getters for the instructions metadata */
     fn length(&self) -> usize;
     fn opcode(&self) -> OpCode;
+    /* TODO: should we use a slice here instead? We know
+     * the size in advance for a given instruction type. */
+    fn bytes(&self) -> &[u16]; // Vec<u16>;
     fn inst_format(&self) -> &str;
 
     /* Getters for registers
@@ -425,6 +430,10 @@ impl InstructionHandler for Instruction10x {
         self.opcode
     }
 
+    fn bytes(&self) -> &[u16] {
+        &self.bytes
+    }
+
     fn inst_format(&self) -> &str {
         "Instruction10x"
     }
@@ -438,6 +447,10 @@ impl InstructionHandler for Instruction11n {
 
     fn opcode(&self) -> OpCode {
         self.opcode
+    }
+
+    fn bytes(&self) -> &[u16] {
+        &self.bytes
     }
 
     fn inst_format(&self) -> &str {
@@ -460,6 +473,10 @@ impl InstructionHandler for Instruction12x {
 
     fn opcode(&self) -> OpCode {
         self.opcode
+    }
+
+    fn bytes(&self) -> &[u16] {
+        &self.bytes
     }
 
     fn inst_format(&self) -> &str {
@@ -485,6 +502,10 @@ impl InstructionHandler for Instruction11x {
         self.opcode
     }
 
+    fn bytes(&self) -> &[u16] {
+        &self.bytes
+    }
+
     fn inst_format(&self) -> &str {
         "Instruction11x"
     }
@@ -501,6 +522,10 @@ impl InstructionHandler for Instruction10t {
 
     fn opcode(&self) -> OpCode {
         self.opcode
+    }
+
+    fn bytes(&self) -> &[u16] {
+        &self.bytes
     }
 
     fn inst_format(&self) -> &str {
@@ -523,6 +548,10 @@ impl InstructionHandler for Instruction20t {
         self.opcode
     }
 
+    fn bytes(&self) -> &[u16] {
+        &self.bytes
+    }
+
     fn inst_format(&self) -> &str {
         "Instruction20t"
     }
@@ -541,6 +570,10 @@ impl InstructionHandler for Instruction21c {
 
     fn opcode(&self) -> OpCode {
         self.opcode
+    }
+
+    fn bytes(&self) -> &[u16] {
+        &self.bytes
     }
 
     fn inst_format(&self) -> &str {
@@ -565,6 +598,10 @@ impl InstructionHandler for Instruction21h {
         self.opcode
     }
 
+    fn bytes(&self) -> &[u16] {
+        &self.bytes
+    }
+
     fn inst_format(&self) -> &str {
         "Instruction21h"
     }
@@ -585,6 +622,10 @@ impl InstructionHandler for Instruction21s {
 
     fn opcode(&self) -> OpCode {
         self.opcode
+    }
+
+    fn bytes(&self) -> &[u16] {
+        &self.bytes
     }
 
     fn inst_format(&self) -> &str {
@@ -609,6 +650,10 @@ impl InstructionHandler for Instruction21t {
         self.opcode
     }
 
+    fn bytes(&self) -> &[u16] {
+        &self.bytes
+    }
+
     fn inst_format(&self) -> &str {
         "Instruction21t"
     }
@@ -629,6 +674,10 @@ impl InstructionHandler for Instruction22x {
 
     fn opcode(&self) -> OpCode {
         self.opcode
+    }
+
+    fn bytes(&self) -> &[u16] {
+        &self.bytes
     }
 
     fn inst_format(&self) -> &str {
@@ -655,6 +704,10 @@ impl InstructionHandler for Instruction23x {
         self.opcode
     }
 
+    fn bytes(&self) -> &[u16] {
+        &self.bytes
+    }
+
     fn inst_format(&self) -> &str {
         "Instruction23x"
     }
@@ -679,6 +732,10 @@ impl InstructionHandler for Instruction22b {
 
     fn opcode(&self) -> OpCode {
         self.opcode
+    }
+
+    fn bytes(&self) -> &[u16] {
+        &self.bytes
     }
 
     fn inst_format(&self) -> &str {
@@ -709,6 +766,10 @@ impl InstructionHandler for Instruction22c {
         self.opcode
     }
 
+    fn bytes(&self) -> &[u16] {
+        &self.bytes
+    }
+
     fn inst_format(&self) -> &str {
         "Instruction22c"
     }
@@ -735,6 +796,10 @@ impl InstructionHandler for Instruction22s {
         self.opcode
     }
 
+    fn bytes(&self) -> &[u16] {
+        &self.bytes
+    }
+
     fn inst_format(&self) -> &str {
         "Instruction22s"
     }
@@ -759,6 +824,10 @@ impl InstructionHandler for Instruction22t {
 
     fn opcode(&self) -> OpCode {
         self.opcode
+    }
+
+    fn bytes(&self) -> &[u16] {
+        &self.bytes
     }
 
     fn inst_format(&self) -> &str {
@@ -790,6 +859,10 @@ impl InstructionHandler for Instruction30t {
         self.opcode
     }
 
+    fn bytes(&self) -> &[u16] {
+        &self.bytes
+    }
+
     fn inst_format(&self) -> &str {
         "Instruction30t"
     }
@@ -809,6 +882,10 @@ impl InstructionHandler for Instruction31c {
 
     fn opcode(&self) -> OpCode {
         self.opcode
+    }
+
+    fn bytes(&self) -> &[u16] {
+        &self.bytes
     }
 
     fn inst_format(&self) -> &str {
@@ -833,6 +910,10 @@ impl InstructionHandler for Instruction31i {
         self.opcode
     }
 
+    fn bytes(&self) -> &[u16] {
+        &self.bytes
+    }
+
     fn inst_format(&self) -> &str {
         "Instruction31i"
     }
@@ -853,6 +934,10 @@ impl InstructionHandler for Instruction31t {
 
     fn opcode(&self) -> OpCode {
         self.opcode
+    }
+
+    fn bytes(&self) -> &[u16] {
+        &self.bytes
     }
 
     fn inst_format(&self) -> &str {
@@ -880,6 +965,10 @@ impl InstructionHandler for Instruction32x {
         self.opcode
     }
 
+    fn bytes(&self) -> &[u16] {
+        &self.bytes
+    }
+
     fn inst_format(&self) -> &str {
         "Instruction32x"
     }
@@ -903,6 +992,10 @@ impl InstructionHandler for Instruction35c {
 
     fn opcode(&self) -> OpCode {
         self.opcode
+    }
+
+    fn bytes(&self) -> &[u16] {
+        &self.bytes
     }
 
     fn inst_format(&self) -> &str {
@@ -950,6 +1043,10 @@ impl InstructionHandler for Instruction3rc {
         self.opcode
     }
 
+    fn bytes(&self) -> &[u16] {
+        &self.bytes
+    }
+
     fn inst_format(&self) -> &str {
         "Instruction3rc"
     }
@@ -980,6 +1077,10 @@ impl InstructionHandler for Instruction45cc {
         self.opcode
     }
 
+    fn bytes(&self) -> &[u16] {
+        &self.bytes
+    }
+
     fn inst_format(&self) -> &str {
         "Instruction45cc"
     }
@@ -1000,6 +1101,10 @@ impl InstructionHandler for Instruction4rcc {
 
     fn opcode(&self) -> OpCode {
         self.opcode
+    }
+
+    fn bytes(&self) -> &[u16] {
+        &self.bytes
     }
 
     fn inst_format(&self) -> &str {
@@ -1035,6 +1140,10 @@ impl InstructionHandler for Instruction51l {
 
     fn opcode(&self) -> OpCode {
         self.opcode
+    }
+
+    fn bytes(&self) -> &[u16] {
+        &self.bytes
     }
 
     fn inst_format(&self) -> &str {
@@ -1105,6 +1214,14 @@ impl InstructionHandler for PackedSwitchPayload {
         OpCode::PACKED_SWITCH_PAYLOAD
     }
 
+    // TODO: find a better fallback. This instruction
+    // does not have "bytes" like the others but we
+    // need to implement this function as part of the
+    // trait implementation.
+    fn bytes(&self) -> &[u16] {
+        &[]
+    }
+
     fn inst_format(&self) -> &str {
         "PackedSwitchPayload"
     }
@@ -1153,6 +1270,14 @@ impl InstructionHandler for SparseSwitchPayload {
 
     fn opcode(&self) -> OpCode {
         OpCode::SPARSE_SWITCH_PAYLOAD
+    }
+
+    // TODO: find a better fallback. This instruction
+    // does not have "bytes" like the others but we
+    // need to implement this function as part of the
+    // trait implementation.
+    fn bytes(&self) -> &[u16] {
+        &[]
     }
 
     fn inst_format(&self) -> &str {
@@ -1215,6 +1340,14 @@ impl InstructionHandler for FillArrayDataPayload {
         OpCode::FILL_ARRAY_DATA_PAYLOAD
     }
 
+    // TODO: find a better fallback. This instruction
+    // does not have "bytes" like the others but we
+    // need to implement this function as part of the
+    // trait implementation.
+    fn bytes(&self) -> &[u16] {
+        &[]
+    }
+
     fn inst_format(&self) -> &str {
         "FillArrayDataPayload"
     }
@@ -1250,6 +1383,7 @@ impl<'a> InstructionsReader<'a> {
         while self.offset < self.length {
             let ins = parse(self.bytes, self.offset, self.endianness);
             println!("{0} {ins:?}", 2 * self.offset);
+            println!("   ---> {}", disasm::disasm(ins.as_ref()));
             self.offset += ins.length();
             instructions.push(ins);
         }
