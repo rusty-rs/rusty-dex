@@ -3,7 +3,6 @@ use core::fmt::Debug;
 use crate::error;
 use crate::opcodes::OpCode;
 use crate::dex_reader::DexEndianness;
-use crate::disasm;
 
 pub fn parse(raw_bytes: &[u16],
                 offset: usize,
@@ -1382,8 +1381,6 @@ impl<'a> InstructionsReader<'a> {
 
         while self.offset < self.length {
             let ins = parse(self.bytes, self.offset, self.endianness);
-            println!("{0} {ins:?}", 2 * self.offset);
-            println!("   ---> {}", disasm::disasm(ins.as_ref()));
             self.offset += ins.length();
             instructions.push(ins);
         }
