@@ -160,12 +160,9 @@ impl DexClasses {
                         });
                     } else {
                         let current_offset = dex_reader.bytes.position();
-                        println!("------------> DIRECT {proto:?}");
-                        println!("------------> {decoded_flags:?}");
                         let code_item = CodeItem::build(dex_reader,
                                                         code_offset,
                                                         types_list);
-                        println!("{code_item:?}");
                         dex_reader.bytes.seek(SeekFrom::Start(current_offset)).unwrap();
 
                         direct_methods.push(EncodedMethod {
@@ -199,12 +196,9 @@ impl DexClasses {
                         });
                     } else {
                         let current_offset = dex_reader.bytes.position();
-                        println!("------------> VIRTUAL {proto:?}");
-                        println!("------------> {decoded_flags:?}");
                         let code_item = CodeItem::build(dex_reader,
                                                         code_offset,
                                                         types_list);
-                        println!("{code_item:?}");
                         dex_reader.bytes.seek(SeekFrom::Start(current_offset)).unwrap();
 
                         virtual_methods.push(EncodedMethod {
