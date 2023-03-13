@@ -1084,6 +1084,34 @@ impl InstructionHandler for Instruction45cc {
         "Instruction45cc"
     }
 
+    fn a(&self, data: &[u16]) -> Option<u64> {
+        Some(((data[0] & 0xf000) >> 12) as u64)
+    }
+
+    fn b(&self, data: &[u16]) -> Option<u64> {
+        Some(data[1] as u64)
+    }
+
+    fn c(&self, data: &[u16]) -> Option<u64> {
+        Some((data[2] & 0x000f) as u64)
+    }
+
+    fn d(&self, data: &[u16]) -> Option<u64> {
+        Some(((data[2] & 0x00f0) >> 4) as u64)
+    }
+
+    fn e(&self, data: &[u16]) -> Option<u64> {
+        Some(((data[2] & 0x0f00) >> 8) as u64)
+    }
+
+    fn f(&self, data: &[u16]) -> Option<u64> {
+        Some(((data[2] & 0xf000) >> 12) as u64)
+    }
+
+    fn g(&self, data: &[u16]) -> Option<u64> {
+        Some(((data[0] & 0x0f00) >> 8) as u64)
+    }
+
     fn h(&self, data: &[u16]) -> Option<u64> {
         Some(data[3] as u64)
     }
