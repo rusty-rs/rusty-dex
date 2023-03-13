@@ -457,11 +457,11 @@ impl InstructionHandler for Instruction11n {
     }
 
     fn a(&self, data: &[u16]) -> Option<u64> {
-        Some((data[0] & 0x0f00) as u64)
+        Some(((data[0] & 0x0f00) >> 8) as u64)
     }
 
     fn b(&self, data: &[u16]) -> Option<u64> {
-        Some((data[0] & 0xf000) as u64)
+        Some(((data[0] & 0xf000) >> 12) as u64)
     }
 }
 
@@ -483,11 +483,11 @@ impl InstructionHandler for Instruction12x {
     }
 
     fn a(&self, data: &[u16]) -> Option<u64> {
-        Some((data[0] & 0x0f00) as u64)
+        Some(((data[0] & 0x0f00) >> 8) as u64)
     }
 
     fn b(&self, data: &[u16]) -> Option<u64> {
-        Some((data[0] & 0xf000) as u64)
+        Some(((data[0] & 0xf000) >> 12) as u64)
     }
 }
 
@@ -774,11 +774,11 @@ impl InstructionHandler for Instruction22c {
     }
 
     fn a(&self, data: &[u16]) -> Option<u64> {
-        Some((data[0] & 0x0f00) as u64)
+        Some(((data[0] & 0x0f00) >> 8) as u64)
     }
 
     fn b(&self, data: &[u16]) -> Option<u64> {
-        Some((data[0] & 0xf000) as u64)
+        Some(((data[0] & 0xf000) >> 12) as u64)
     }
 
     fn c(&self, data: &[u16]) -> Option<u64> {
@@ -804,11 +804,11 @@ impl InstructionHandler for Instruction22s {
     }
 
     fn a(&self, data: &[u16]) -> Option<u64> {
-        Some((data[0] & 0x0f00) as u64)
+        Some(((data[0] & 0x0f00) >> 8) as u64)
     }
 
     fn b(&self, data: &[u16]) -> Option<u64> {
-        Some((data[0] & 0xf000) as u64)
+        Some(((data[0] & 0xf000) >> 12) as u64)
     }
 
     fn c(&self, data: &[u16]) -> Option<u64> {
@@ -834,11 +834,11 @@ impl InstructionHandler for Instruction22t {
     }
 
     fn a(&self, data: &[u16]) -> Option<u64> {
-        Some((data[0] & 0x0f00) as u64)
+        Some(((data[0] & 0x0f00) >> 8) as u64)
     }
 
     fn b(&self, data: &[u16]) -> Option<u64> {
-        Some((data[0] & 0xf000) as u64)
+        Some(((data[0] & 0xf000) >> 12) as u64)
     }
 
     fn c(&self, data: &[u16]) -> Option<u64> {
@@ -1002,7 +1002,7 @@ impl InstructionHandler for Instruction35c {
     }
 
     fn a(&self, data: &[u16]) -> Option<u64> {
-        Some((data[0] & 0xf000) as u64)
+        Some(((data[0] & 0xf000) >> 12) as u64)
     }
 
     fn b(&self, data: &[u16]) -> Option<u64> {
@@ -1014,19 +1014,19 @@ impl InstructionHandler for Instruction35c {
     }
 
     fn d(&self, data: &[u16]) -> Option<u64> {
-        Some((data[2] & 0x00f0) as u64)
+        Some(((data[2] & 0x00f0) >> 4) as u64)
     }
 
     fn e(&self, data: &[u16]) -> Option<u64> {
-        Some((data[2] & 0x0f00) as u64)
+        Some(((data[2] & 0x0f00) >> 8) as u64)
     }
 
     fn f(&self, data: &[u16]) -> Option<u64> {
-        Some((data[2] & 0xf000) as u64)
+        Some(((data[2] & 0xf000) >> 12) as u64)
     }
 
     fn g(&self, data: &[u16]) -> Option<u64> {
-        Some((data[0] & 0x0f00) as u64)
+        Some(((data[0] & 0x0f00) >> 8) as u64)
     }
 }
 
