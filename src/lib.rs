@@ -10,6 +10,7 @@ pub mod error;
 pub mod dex_reader;
 pub mod adler32;
 pub mod constants;
+pub mod mutf8;
 pub mod dex_strings;
 pub mod dex_types;
 pub mod dex_protos;
