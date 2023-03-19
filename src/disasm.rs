@@ -25,8 +25,11 @@ pub fn disasm_ins(ins: &(impl InstructionHandler + ?Sized),
         OpCode::NOP => String::new(),
         OpCode::RETURN_VOID => format!("{}", ins.opcode()),
 
-        OpCode::CONST_4 => format!("{} v{} {}",
-                                    ins.opcode(),
+        OpCode::CONST               | OpCode::CONST_4
+            | OpCode::CONST_16      | OpCode::CONST_HIGH16
+            | OpCode::CONST_WIDE    | OpCode::CONST_WIDE_16
+            | OpCode::CONST_WIDE_32 | OpCode::CONST_WIDE_HIGH16
+            => format!("{} v{} {}", ins.opcode(),
                                     ins.a(ins.bytes()).unwrap(),
                                     ins.b(ins.bytes()).unwrap()),
 
@@ -53,7 +56,10 @@ pub fn disasm_ins(ins: &(impl InstructionHandler + ?Sized),
             | OpCode::INT_TO_SHORT    | OpCode::LONG_TO_DOUBLE
             | OpCode::LONG_TO_FLOAT   | OpCode::LONG_TO_INT
             | OpCode::MOVE            | OpCode::MOVE_OBJECT
-            | OpCode::MOVE_WIDE       | OpCode::MUL_DOUBLE_2ADDR
+            | OpCode::MOVE_WIDE       | OpCode::MOVE_OBJECT_FROM16
+            | OpCode::MOVE_FROM16     | OpCode::MOVE_WIDE_FROM16
+            | OpCode::MOVE_16         | OpCode::MOVE_OBJECT_16
+            | OpCode::MOVE_WIDE_16    | OpCode::MUL_DOUBLE_2ADDR
             | OpCode::MUL_FLOAT_2ADDR | OpCode::MUL_INT_2ADDR
             | OpCode::MUL_LONG_2ADDR  | OpCode::NEG_DOUBLE
             | OpCode::NEG_FLOAT       | OpCode::NEG_INT
@@ -74,22 +80,28 @@ pub fn disasm_ins(ins: &(impl InstructionHandler + ?Sized),
                         ins.b(ins.bytes()).unwrap()),
 
         OpCode::CHECK_CAST                | OpCode::CONST_CLASS
-            | OpCode::CONST_METHOD_HANDLE | OpCode::CONST_METHOD_TYPE
-            | OpCode::CONST_STRING        | OpCode::NEW_INSTANCE
-            | OpCode::SGET_BOOLEAN        | OpCode::SGET_BYTE
+            | OpCode::NEW_INSTANCE => {
+                let class_name = &types.items[ins.b(ins.bytes()).unwrap() as usize];
+                format!("{} v{} {}",
+                        ins.opcode(),
+                        ins.a(ins.bytes()).unwrap(),
+                        class_name)
+            },
+
+        OpCode::SGET_BOOLEAN              | OpCode::SGET_BYTE
             | OpCode::SGET_CHAR           | OpCode::SGET
             | OpCode::SGET_OBJECT         | OpCode::SGET_SHORT
             | OpCode::SGET_WIDE           | OpCode::SPUT_BOOLEAN
             | OpCode::SPUT_BYTE           | OpCode::SPUT_CHAR
             | OpCode::SPUT                | OpCode::SPUT_OBJECT
             | OpCode::SPUT_SHORT          | OpCode::SPUT_WIDE
-            => format!("TODO {}", ins.opcode()),
-
-        OpCode::CONST_HIGH16 | OpCode::CONST_WIDE_HIGH16
-            => format!("TODO {}", ins.opcode()),
-
-        OpCode::CONST_16 | OpCode::CONST_WIDE_16
-            => format!("TODO {}", ins.opcode()),
+            => {
+                let field = &fields.items[ins.b(ins.bytes()).unwrap() as usize];
+                format!("{} v{} {}",
+                       ins.opcode(),
+                       ins.a(ins.bytes()).unwrap(),
+                       field)
+            },
 
         OpCode::IF_EQZ       | OpCode::IF_GEZ
             | OpCode::IF_GTZ | OpCode::IF_LEZ
@@ -98,14 +110,23 @@ pub fn disasm_ins(ins: &(impl InstructionHandler + ?Sized),
                         ins.opcode(),
                         ins.a(ins.bytes()).unwrap(),
                         ins.b(ins.bytes()).unwrap() * 2),
+                        // TODO: b() seems wrong, check shifts
 
         OpCode::ADD_INT_LIT8        | OpCode::AND_INT_LIT8
             | OpCode::DIV_INT_LIT8  | OpCode::MUL_INT_LIT8
             | OpCode::OR_INT_LIT8   | OpCode::REM_INT_LIT8
             | OpCode::RSUB_INT_LIT8 | OpCode::SHL_INT_LIT8
             | OpCode::SHR_INT_LIT8  | OpCode::USHR_INT_LIT8
-            | OpCode::XOR_INT_LIT8
-            => format!("TODO {}", ins.opcode()),
+            | OpCode::XOR_INT_LIT8  | OpCode::ADD_INT_LIT16
+            | OpCode::AND_INT_LIT16 | OpCode::DIV_INT_LIT16
+            | OpCode::MUL_INT_LIT16 | OpCode::OR_INT_LIT16
+            | OpCode::REM_INT_LIT16 | OpCode::RSUB_INT
+            | OpCode::XOR_INT_LIT16
+            => format!("{} v{} v{} #+{}",
+                       ins.opcode(),
+                        ins.a(ins.bytes()).unwrap(),
+                        ins.b(ins.bytes()).unwrap(),
+                        ins.c(ins.bytes()).unwrap()),
 
         OpCode::IGET_BOOLEAN       | OpCode::IGET_BYTE
             | OpCode::IGET_CHAR    | OpCode::IGET
@@ -114,14 +135,25 @@ pub fn disasm_ins(ins: &(impl InstructionHandler + ?Sized),
             | OpCode::IPUT_BOOLEAN | OpCode::IPUT_BYTE
             | OpCode::IPUT_CHAR    | OpCode::IPUT
             | OpCode::IPUT_OBJECT  | OpCode::IPUT_SHORT
-            | OpCode::IPUT_WIDE    | OpCode::NEW_ARRAY
-            => format!("TODO {}", ins.opcode()),
+            | OpCode::IPUT_WIDE
+            => {
+                let field = &fields.items[ins.c(ins.bytes()).unwrap() as usize];
+                format!("{} v{} v{} {}",
+                       ins.opcode(),
+                       ins.a(ins.bytes()).unwrap(),
+                       ins.b(ins.bytes()).unwrap(),
+                       field)
+            }
 
-        OpCode::ADD_INT_LIT16       | OpCode::AND_INT_LIT16
-            | OpCode::DIV_INT_LIT16 | OpCode::MUL_INT_LIT16
-            | OpCode::OR_INT_LIT16  | OpCode::REM_INT_LIT16
-            | OpCode::RSUB_INT      | OpCode::XOR_INT_LIT16
-            => format!("TODO {}", ins.opcode()),
+        OpCode::NEW_ARRAY
+            => {
+                let array_type = &types.items[ins.b(ins.bytes()).unwrap() as usize];
+                format!("{} v{} v{} {}",
+                        ins.opcode(),
+                        ins.a(ins.bytes()).unwrap(),
+                        ins.b(ins.bytes()).unwrap(),
+                        array_type)
+            },
 
         OpCode::IF_EQ       | OpCode::IF_GE
             | OpCode::IF_GT | OpCode::IF_LE
@@ -131,10 +163,6 @@ pub fn disasm_ins(ins: &(impl InstructionHandler + ?Sized),
                         ins.a(ins.bytes()).unwrap(),
                         ins.b(ins.bytes()).unwrap(),
                         ins.c(ins.bytes()).unwrap() * 2),
-
-        OpCode::MOVE_FROM16 | OpCode::MOVE_OBJECT_FROM16
-            | OpCode::MOVE_WIDE_FROM16
-            => format!("TODO {}", ins.opcode()),
 
         OpCode::ADD_DOUBLE         | OpCode::ADD_FLOAT
             | OpCode::ADD_INT      | OpCode::ADD_LONG
@@ -162,39 +190,140 @@ pub fn disasm_ins(ins: &(impl InstructionHandler + ?Sized),
             | OpCode::SUB_LONG     | OpCode::USHR_INT
             | OpCode::USHR_LONG    | OpCode::XOR_INT
             | OpCode::XOR_LONG
-            => format!("TODO {}", ins.opcode()),
+            => format!("{} v{} v{} v{}",
+                       ins.opcode(),
+                        ins.a(ins.bytes()).unwrap(),
+                        ins.b(ins.bytes()).unwrap(),
+                        ins.c(ins.bytes()).unwrap()),
 
-        OpCode::CONST_STRING_JUMBO => format!("TODO {}", ins.opcode()),
-
-        OpCode::CONST | OpCode::CONST_WIDE_32
-            => format!("TODO {}", ins.opcode()),
+        OpCode::CONST_STRING | OpCode::CONST_STRING_JUMBO
+            => {
+                let string = &strings.strings[ins.b(ins.bytes()).unwrap() as usize].string;
+                format!("{} v{} \"{}\"",
+                        ins.opcode(),
+                        ins.a(ins.bytes()).unwrap(),
+                        string)
+            },
 
         OpCode::FILL_ARRAY_DATA | OpCode::PACKED_SWITCH
-            | OpCode::SPARSE_SWITCH => format!("TODO {}", ins.opcode()),
+            | OpCode::SPARSE_SWITCH
+            => format!("{} v{} +{}",
+                       ins.opcode(),
+                       ins.a(ins.bytes()).unwrap(),
+                       ins.b(ins.bytes()).unwrap() * 2),
 
-        OpCode::MOVE_16 | OpCode::MOVE_OBJECT_16
-            | OpCode::MOVE_WIDE_16 => format!("TODO {}", ins.opcode()),
-
-        OpCode::FILLED_NEW_ARRAY    | OpCode::INVOKE_CUSTOM
-            | OpCode::INVOKE_DIRECT | OpCode::INVOKE_INTERFACE
+        OpCode::INVOKE_DIRECT       | OpCode::INVOKE_INTERFACE
             | OpCode::INVOKE_STATIC | OpCode::INVOKE_SUPER
             | OpCode::INVOKE_VIRTUAL
-            => format!("TODO {}", ins.opcode()),
+            => {
+                let proto = &methods.items[ins.b(ins.bytes()).unwrap() as usize];
+                let args = match ins.a(ins.bytes()).unwrap() {
+                    0 => String::from(""),
+                    1 => format!("v{}", ins.c(ins.bytes()).unwrap()),
+                    2 => format!("v{} v{}",
+                                 ins.c(ins.bytes()).unwrap(),
+                                 ins.d(ins.bytes()).unwrap()),
+                    3 => format!("v{} v{} v{}",
+                                 ins.c(ins.bytes()).unwrap(),
+                                 ins.d(ins.bytes()).unwrap(),
+                                 ins.e(ins.bytes()).unwrap()),
+                    4 => format!("v{} v{} v{} v{}",
+                                 ins.c(ins.bytes()).unwrap(),
+                                 ins.d(ins.bytes()).unwrap(),
+                                 ins.e(ins.bytes()).unwrap(),
+                                 ins.f(ins.bytes()).unwrap()),
+                    5 => format!("v{} v{} v{} v{} v{}",
+                                 ins.c(ins.bytes()).unwrap(),
+                                 ins.d(ins.bytes()).unwrap(),
+                                 ins.e(ins.bytes()).unwrap(),
+                                 ins.f(ins.bytes()).unwrap(),
+                                 ins.g(ins.bytes()).unwrap()),
+                    _ => {
+                        warning!("invalid args count in invoke-* instruction");
+                        warning!("computed count is: {}", ins.a(ins.bytes()).unwrap());
+                        warning!("defaulting to empty string");
+                        String::from("")
+                    }
+                };
 
-        OpCode::FILLED_NEW_ARRAY_RANGE    | OpCode::INVOKE_CUSTOM_RANGE
-            | OpCode::INVOKE_DIRECT_RANGE | OpCode::INVOKE_INTERFACE_RANGE
+                format!("{} {} {}", ins.opcode(), args, proto)
+            }
+
+        OpCode::INVOKE_DIRECT_RANGE       | OpCode::INVOKE_INTERFACE_RANGE
             | OpCode::INVOKE_STATIC_RANGE | OpCode::INVOKE_SUPER_RANGE
             | OpCode::INVOKE_VIRTUAL_RANGE
-            => format!("TODO {}", ins.opcode()),
+            => {
+                let proto = &methods.items[ins.b(ins.bytes()).unwrap() as usize];
+                let mut first_reg = ins.c(ins.bytes()).unwrap();
+                let mut args = format!("v{first_reg} ");
+                for _ in 1..ins.a(ins.bytes()).unwrap() {
+                    first_reg += 1;
+                    args.push('v');
+                    args.push_str(&first_reg.to_string());
+                    args.push(' ');
+                }
+                format!("{} {}{}", ins.opcode(), args, proto)
+            },
 
-        OpCode::INVOKE_POLYMORPHIC => format!("TODO {}", ins.opcode()),
+        OpCode::INVOKE_POLYMORPHIC => todo!("TODO {}", ins.opcode()),
 
-        OpCode::INVOKE_POLYMORPHIC_RANGE => format!("TODO {}", ins.opcode()),
-
-        OpCode::CONST_WIDE => format!("TODO {}", ins.opcode()),
+        OpCode::INVOKE_POLYMORPHIC_RANGE => todo!("TODO {}", ins.opcode()),
 
         OpCode::PACKED_SWITCH_PAYLOAD
             | OpCode::SPARSE_SWITCH_PAYLOAD
-            | OpCode::FILL_ARRAY_DATA_PAYLOAD => format!("TODO {}", ins.opcode())
+            | OpCode::FILL_ARRAY_DATA_PAYLOAD => format!("TODO {}", ins.opcode()),
+
+        OpCode::FILLED_NEW_ARRAY
+            => {
+                let array_type = &types.items[ins.b(ins.bytes()).unwrap() as usize];
+                let args = match ins.a(ins.bytes()).unwrap() {
+                    0 => String::from(""),
+                    1 => format!("v{}", ins.c(ins.bytes()).unwrap()),
+                    2 => format!("v{} v{}",
+                                 ins.c(ins.bytes()).unwrap(),
+                                 ins.d(ins.bytes()).unwrap()),
+                    3 => format!("v{} v{} v{}",
+                                 ins.c(ins.bytes()).unwrap(),
+                                 ins.d(ins.bytes()).unwrap(),
+                                 ins.e(ins.bytes()).unwrap()),
+                    4 => format!("v{} v{} v{} v{}",
+                                 ins.c(ins.bytes()).unwrap(),
+                                 ins.d(ins.bytes()).unwrap(),
+                                 ins.e(ins.bytes()).unwrap(),
+                                 ins.f(ins.bytes()).unwrap()),
+                    5 => format!("v{} v{} v{} v{} v{}",
+                                 ins.c(ins.bytes()).unwrap(),
+                                 ins.d(ins.bytes()).unwrap(),
+                                 ins.e(ins.bytes()).unwrap(),
+                                 ins.f(ins.bytes()).unwrap(),
+                                 ins.g(ins.bytes()).unwrap()),
+                    _ => {
+                        warning!("invalid args count in invoke-* instruction");
+                        warning!("computed count is: {}", ins.a(ins.bytes()).unwrap());
+                        warning!("defaulting to empty string");
+                        String::from("")
+                    }
+                };
+
+                format!("{} {} {}", ins.opcode(), args, array_type)
+            }
+
+        OpCode::FILLED_NEW_ARRAY_RANGE
+            => todo!("TODO {}", ins.opcode()),
+
+        /* Present in DEX files from version 038 onwards */
+        OpCode::INVOKE_CUSTOM
+            => todo!("TODO {}", ins.opcode()),
+
+        OpCode::INVOKE_CUSTOM_RANGE
+            => todo!("TODO {}", ins.opcode()),
+
+        /* Present in DEX files from version 039 onwards */
+        OpCode::CONST_METHOD_HANDLE
+            => todo!("TODO {}", ins.opcode()),
+
+        OpCode::CONST_METHOD_TYPE
+            => todo!("TODO {}", ins.opcode()),
+
     }
 }
