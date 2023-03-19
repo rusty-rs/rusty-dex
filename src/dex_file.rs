@@ -6,6 +6,7 @@ use crate::dex_protos::DexProtos;
 use crate::dex_fields::DexFields;
 use crate::dex_methods::DexMethods;
 use crate::dex_classes::DexClasses;
+use crate::disasm;
 
 #[derive(Debug)]
 pub struct DexFile {
@@ -64,6 +65,36 @@ impl DexFile {
             fields: field_ids_list,
             methods: method_ids_list,
             classes: class_defs_list,
+        }
+    }
+
+    pub fn disasm(&self) {
+        println!("{:#?}", self.strings);
+        println!("-------------------------");
+        for class in &self.classes.items {
+            println!("{}", self.types.items[class.class_idx as usize]);
+            if let Some(class_data) = &class.class_data {
+                for method in &class_data.direct_methods {
+                    println!("  --> {}", &method.proto);
+                    if let Some(code) = &method.code_item {
+                        let mut offset = 0;
+                        if let Some(insns) = &code.insns {
+                            for ins in insns {
+                                println!("{} {}", offset * 2,
+                                         disasm::disasm_ins(ins.as_ref(),
+                                                            &self.strings,
+                                                            &self.types,
+                                                            &self.fields,
+                                                            &self.protos,
+                                                            &self.methods,
+                                                            &self.classes));
+                                offset += ins.length();
+                            }
+                        }
+                    }
+                    println!("");
+                }
+            }
         }
     }
 }

@@ -11,15 +11,15 @@ const NO_INDEX: u32 = 0xffffffff;
 
 #[derive(Debug)]
 pub struct ClassDefItem {
-    class_idx: u32,
+    pub class_idx: u32,
     access_flags: Vec<AccessFlag>,
-    superclass_idx: u32,
+    pub superclass_idx: u32,
     interfaces_off: u32,
     source_file_idx: u32,
     annotations_off: u32,
     class_data_off: u32,
     static_value_off: u32,
-    class_data: Option<ClassDataItem>
+    pub class_data: Option<ClassDataItem>
 }
 
 #[derive(Debug)]
@@ -30,9 +30,9 @@ pub struct EncodedField {
 
 #[derive(Debug)]
 pub struct EncodedMethod {
-    proto: String,
+    pub proto: String,
     access_flags: Vec<AccessFlag>,
-    code_item: Option<CodeItem>,
+    pub code_item: Option<CodeItem>,
 }
 
 #[derive(Debug)]
@@ -41,10 +41,10 @@ pub struct ClassDataItem {
     instance_fields_size: u32,
     direct_methods_size: u32,
     virtual_methods_size: u32,
-    static_fields: Vec<EncodedField>,
-    instance_fields: Vec<EncodedField>,
-    direct_methods: Vec<EncodedMethod>,
-    virtual_methods: Vec<EncodedMethod>,
+    pub static_fields: Vec<EncodedField>,
+    pub instance_fields: Vec<EncodedField>,
+    pub direct_methods: Vec<EncodedMethod>,
+    pub virtual_methods: Vec<EncodedMethod>,
 }
 
 #[derive(Debug)]

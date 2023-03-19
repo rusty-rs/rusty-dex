@@ -40,4 +40,5 @@ fn main() {
     info!("Parsing DEX file");
     let dex_reader = DexReader::build(raw_dex);
     let dex_file = DexFile::build(dex_reader);
+    dex_file.disasm();
 }

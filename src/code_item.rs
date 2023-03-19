@@ -30,7 +30,7 @@ pub struct CodeItem {
     ins_size      : u16,
     outs_size     : u16,
     debug_info_off: u32,
-    insns         : Option<Vec<Box<dyn InstructionHandler>>>,
+    pub insns         : Option<Vec<Box<dyn InstructionHandler>>>,
     tries         : Option<Vec<TryItem>>,
     handlers      : Option<Vec<EncodedCatchHandler>>
 }
