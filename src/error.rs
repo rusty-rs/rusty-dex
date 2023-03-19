@@ -3,7 +3,7 @@ use std::fmt;
 
 #[derive(Debug)]
 pub struct DexError {
-    message: String,
+    pub message: String,
 }
 
 impl DexError {
