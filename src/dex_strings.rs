@@ -2,12 +2,14 @@
 
 use std::io::{Seek, SeekFrom};
 use std::io::BufRead;
+use std::cmp::Ordering;
 
-use mutf8;
+use crate::mutf8;
 
+use crate::error;
 use crate::dex_reader::DexReader;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct DexStringsItem {
     utf16_size: u32,
     offset: u32,
@@ -22,6 +24,19 @@ pub struct DexStrings {
 }
 
 impl DexStrings {
+    fn sort(a: &DexStringsItem, b: &DexStringsItem) -> Ordering {
+        // TODO: this seems to work (tested on app for which I have
+        // the Java source code) but this is not following the
+        // documentation. The documentation says:
+        //
+        // "This list must be sorted by string contents, using UTF-16
+        // code point values (not in a locale-sensitive manner)"
+        //
+        // However for some reason this is giving me issues later on
+        // when decoding e.g., prototypes.
+        a.offset.cmp(&b.offset)
+    }
+
     pub fn build(dex_reader: &mut DexReader, offset: u32, size: u32) -> Self {
         /* Move to start of map list */
         dex_reader.bytes.seek(SeekFrom::Start(offset.into())).unwrap();
@@ -41,8 +56,11 @@ impl DexStrings {
                 raw_string.pop();
 
                 let (decoded, is_raw) = match mutf8::decode(&raw_string) {
-                    Ok(decoded) => (decoded.into_owned(), false),
-                    Err(_) => (String::from(""), true)
+                    Ok(decoded) => (decoded, false),
+                    Err(_) => {
+                        error!("invalid MUTF-8 string");
+                        (String::from(""), true)
+                    }
                 };
 
                 strings.push(DexStringsItem {
@@ -64,13 +82,9 @@ impl DexStrings {
 
         }
 
-        strings.sort_by(|a, b| a.string
-                                .encode_utf16()
-                                .collect::<Vec<u16>>()
-                                .cmp(&b.string
-                                       .encode_utf16()
-                                       .collect::<Vec<u16>>()));
-        // TODO: remove duplicates
+        strings.sort_by(DexStrings::sort);
+        strings.dedup();
+
         DexStrings { strings }
     }
 }
