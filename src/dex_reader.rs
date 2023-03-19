@@ -139,8 +139,10 @@ impl DexReader {
     }
 
     pub fn read_uleb128p1(&mut self) -> Result<(i32, usize), DexError> {
-        let (uleb128, bytes_read) = self.read_uleb128().unwrap();
-        Ok(((uleb128 as i32) - 1, bytes_read))
+        match self.read_uleb128() {
+            Ok((uleb128, bytes_read)) => Ok(((uleb128 as i32) - 1, bytes_read)),
+            Err(err) => Err(err)
+        }
     }
 }
 
