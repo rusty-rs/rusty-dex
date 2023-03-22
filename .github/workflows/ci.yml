@@ -21,4 +21,6 @@ jobs:
     - name: Run tests
       run: RUSTFLAGS="-C instrument-coverage" cargo test --tests --verbose
     - name: Upload coverage reports to Codecov
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       uses: codecov/codecov-action@v3
