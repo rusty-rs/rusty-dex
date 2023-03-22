@@ -20,7 +20,25 @@ jobs:
       run: cargo build --verbose
     - name: Run tests
       run: RUSTFLAGS="-C instrument-coverage" cargo test --tests --verbose
+    - name: "`grcov` ~ install"
+      run: cargo install grcov
+    - name: Generate coverage data (via `grcov`)
+      id: coverage
+      shell: bash
+      run: |
+        ## Generate coverage data
+        COVERAGE_REPORT_DIR="target/debug"
+        COVERAGE_REPORT_FILE="${COVERAGE_REPORT_DIR}/lcov.info"
+        mkdir -p "${COVERAGE_REPORT_DIR}"
+        # display coverage files
+        ~/.cargo/bin/grcov . --output-type files --ignore build.rs --ignore "vendor/*" --ignore "/*" --ignore "[a-zA-Z]:/*" --excl-br-line "^\s*((debug_)?assert(_eq|_ne)?!|#\[derive\()" | sort --unique
+        # generate coverage report
+        ~/.cargo/bin/grcov . --output-type lcov --output-path "${COVERAGE_REPORT_FILE}" --branch --ignore build.rs --ignore "vendor/*" --ignore "/*" --ignore "[a-zA-Z]:/*" --excl-br-line "^\s*((debug_)?assert(_eq|_ne)?!|#\[derive\()"
+        echo "report=${COVERAGE_REPORT_FILE}" >> $GITHUB_OUTPUT
+
     - name: Upload coverage reports to Codecov
       env:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       uses: codecov/codecov-action@v3
+      with:
+        file: ${{ steps.coverage.outputs.report }}
