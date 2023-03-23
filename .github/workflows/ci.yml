@@ -20,10 +20,8 @@ jobs:
       run: cargo build --verbose
     - name: Run tests
       run: RUSTFLAGS="-C instrument-coverage" cargo test --tests --verbose
-    - name: "`rustfilt` ~ install"
-      run: cargo install rustfilt
-    - name: "`llvm-tools` ~ install"
-      run: rustup component add llvm-tools
+    - name: "`cargo-llvm-cov` ~ install"
+      run: taiki-e/install-action@cargo-llvm-cov
     - name: Generate coverage data
       id: coverage
       shell: bash
@@ -33,7 +31,7 @@ jobs:
         COVERAGE_REPORT_FILE="${COVERAGE_REPORT_DIR}/lcov.info"
         mkdir -p "${COVERAGE_REPORT_DIR}"
         # display coverage files
-        llvm-profdata merge -sparse default_*.profraw -o "${COVERAGE_REPORT_FILE}"
+        cargo llvm-cov --all-features --workspace --lcov --output-path "${COVERAGE_REPORT_FILE}"
         echo "report=${COVERAGE_REPORT_FILE}" >> $GITHUB_OUTPUT
     - name: Upload coverage reports to Codecov
       env:
