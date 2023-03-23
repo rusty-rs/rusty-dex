@@ -53,7 +53,7 @@ impl DexReader {
     }
 
     pub fn read_u8(&mut self) -> Result<u8, DexError> {
-        if self.bytes.position() == self.bytes_len {
+        if self.bytes.position() >= self.bytes_len {
             return Err(DexError::new("Error: no data left to read"));
         }
 
@@ -61,7 +61,7 @@ impl DexReader {
     }
 
     pub fn read_u16(&mut self) -> Result<u16, DexError> {
-        if self.bytes_len - self.bytes.position() < 2 {
+        if self.bytes.position() >= self.bytes_len - 2 {
             return Err(DexError::new("Error: no data left to read"));
         }
 
@@ -72,7 +72,7 @@ impl DexReader {
     }
 
     pub fn read_u32(&mut self) -> Result<u32, DexError> {
-        if self.bytes_len - self.bytes.position() < 4 {
+        if self.bytes.position() >= self.bytes_len - 4 {
             return Err(DexError::new("Error: no data left to read"));
         }
 
@@ -178,10 +178,33 @@ mod tests {
     }
 
     #[test]
+    #[should_panic]
+    fn test_check_invalid_endianess() {
+        let invalid_long_data = vec![0x00; 100];
+        let _ = DexReader::check_endianness(&invalid_long_data).unwrap_err();
+    }
+
+    #[test]
     fn test_read_u8() {
         let mut dex_reader = DexReader::build(DEX_DATA.to_vec());
         let byte = dex_reader.read_u8().unwrap();
         assert_eq!(byte, 0x64);
+
+        // Test reading at and after end of file
+        dex_reader.bytes.seek(SeekFrom::End(0)).unwrap();
+        let result = dex_reader.read_u8();
+        assert_eq!(
+            result.unwrap_err().to_string(),
+            "Error: no data left to read"
+        );
+
+        let bound = DEX_DATA.len() + 10;
+        dex_reader.bytes.seek(SeekFrom::Start(bound as u64)).unwrap();
+        let result = dex_reader.read_u8();
+        assert_eq!(
+            result.unwrap_err().to_string(),
+            "Error: no data left to read"
+        );
     }
 
     #[test]
@@ -189,6 +212,22 @@ mod tests {
         let mut dex_reader = DexReader::build(DEX_DATA.to_vec());
         let u16_val = dex_reader.read_u16().unwrap();
         assert_eq!(u16_val, 0x6564);
+
+        // Test reading at and after end of file
+        dex_reader.bytes.seek(SeekFrom::End(0)).unwrap();
+        let result = dex_reader.read_u16();
+        assert_eq!(
+            result.unwrap_err().to_string(),
+            "Error: no data left to read"
+        );
+
+        let bound = DEX_DATA.len() + 10;
+        dex_reader.bytes.seek(SeekFrom::Start(bound as u64)).unwrap();
+        let result = dex_reader.read_u16();
+        assert_eq!(
+            result.unwrap_err().to_string(),
+            "Error: no data left to read"
+        );
     }
 
     #[test]
@@ -196,6 +235,22 @@ mod tests {
         let mut dex_reader = DexReader::build(DEX_DATA.to_vec());
         let u32_val = dex_reader.read_u32().unwrap();
         assert_eq!(u32_val, 0x0a786564);
+
+        // Test reading at and after end of file
+        dex_reader.bytes.seek(SeekFrom::End(0)).unwrap();
+        let result = dex_reader.read_u32();
+        assert_eq!(
+            result.unwrap_err().to_string(),
+            "Error: no data left to read"
+        );
+
+        let bound = DEX_DATA.len() + 10;
+        dex_reader.bytes.seek(SeekFrom::Start(bound as u64)).unwrap();
+        let result = dex_reader.read_u32();
+        assert_eq!(
+            result.unwrap_err().to_string(),
+            "Error: no data left to read"
+        );
     }
 
         #[test]
