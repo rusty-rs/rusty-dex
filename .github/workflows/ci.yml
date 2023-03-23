@@ -33,7 +33,7 @@ jobs:
         COVERAGE_REPORT_FILE="${COVERAGE_REPORT_DIR}/lcov.info"
         mkdir -p "${COVERAGE_REPORT_DIR}"
         # display coverage files
-        llvm-profdata merge -sparse default_*.profraw -o "${COVERAGE_REPORT_FILE}
+        llvm-profdata merge -sparse default_*.profraw -o "${COVERAGE_REPORT_FILE}"
         echo "report=${COVERAGE_REPORT_FILE}" >> $GITHUB_OUTPUT
     - name: Upload coverage reports to Codecov
       env:
