@@ -21,7 +21,7 @@ jobs:
     - name: Run tests
       run: RUSTFLAGS="-C instrument-coverage" cargo test --tests --verbose
     - name: "`cargo-llvm-cov` ~ install"
-      run: taiki-e/install-action@cargo-llvm-cov
+      uses: taiki-e/install-action@cargo-llvm-cov
     - name: Generate coverage data
       id: coverage
       shell: bash
