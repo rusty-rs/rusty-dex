@@ -35,14 +35,6 @@ pub fn decode(raw: &Vec<u8>) -> Result<String, &'static str> {
             continue;
         }
 
-        /* TODO: deal with surrogate pairs */
-        if raw[idx] as u16 >= 0xd800 && raw[idx] as u16 <= 0xdbff {
-            println!("-------------------");
-            println!("{:08X} {:010b}", raw[idx], raw[idx]);
-            println!("{:08X} {:010b}", raw[idx + 1], raw[idx + 1]);
-            panic!();
-        }
-
         /* char values in the range '\u0800' to '\uFFFF'
          * are represented by three bytes */
         if (raw[idx] >> 4) == 0b1110 {
@@ -60,13 +52,41 @@ pub fn decode(raw: &Vec<u8>) -> Result<String, &'static str> {
             let code_point = ((x & 0b0000_1111) << 12)
                            + ((y & 0b0011_1111) << 6)
                            + (z & 0b0011_1111);
-            decoded.push(code_point as u32);
 
-            idx += 3;
-            continue;
+            /* dealing with surrogate pairs */
+            if code_point >= 0xd800 && code_point <= 0xdbff {
+                if idx + 3 >= raw_len {
+                    error!("[MUTF-8] error: truncated surrogate pair");
+                    return Err("[MUTF-8] truncated surrogate pair");
+                }
+
+                /* checking second part of the surrogate pair */
+                let next_x = raw[idx + 3] as u32;
+                let next_y = raw[idx + 4] as u32;
+                let next_z = raw[idx + 5] as u32;
+
+                let next_code_point = ((next_x & 0b0000_1111) << 12)
+                                    + ((next_y & 0b0011_1111) << 6)
+                                    + (next_z & 0b0011_1111);
+
+                if next_code_point >= 0xdc00 && next_code_point <= 0xdfff {
+                    let final_code_point = ((code_point - 0xd800) << 10
+                                         | (next_code_point - 0xdc00)) + 0x10000;
+                    decoded.push(final_code_point);
+
+                    idx += 6;
+                    continue
+                } else {
+                    error!("[MUTF-8] error: invalid surrogate pair");
+                    return Err("[MUTF-8] invalid surrogate pair");
+                }
+            } else {
+                /* regular three-bytes code point */
+                decoded.push(code_point as u32);
+                idx += 3;
+                continue;
+            }
         }
-
-        panic!("WTF: {:?}", raw[idx]);
     }
 
     /* Converting the decoding code points (which are u32)
