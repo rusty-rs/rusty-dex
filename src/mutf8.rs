@@ -101,3 +101,69 @@ pub fn decode(raw: &Vec<u8>) -> Result<String, &'static str> {
 
     Ok(decoded_str)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_decode_single_byte() {
+        let input = vec![0x41]; // 'A'
+        let expected = "A";
+        assert_eq!(decode(&input).unwrap(), expected);
+    }
+
+    #[test]
+    fn test_decode_two_bytes() {
+        let input = vec![0xc3, 0xa9]; // 'é'
+        let expected = "é";
+        assert_eq!(decode(&input).unwrap(), expected);
+    }
+
+    #[test]
+    fn test_decode_three_bytes() {
+        let input = vec![0xe6, 0xb0, 0xb4]; // '水'
+        let expected = "水";
+        assert_eq!(decode(&input).unwrap(), expected);
+    }
+
+    #[test]
+    fn test_decode_error_two_bytes() {
+        let input = vec![0xc3]; // Incomplete two-byte sequence
+        let result = decode(&input);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_decode_error_three_bytes() {
+        let input = vec![0xe6, 0xb0]; // Incomplete three-byte sequence
+        let result = decode(&input);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_decode_surrogate_pairs() {
+        let raw = vec![0xED, 0xA0, 0x80, 0xED, 0xB0, 0x80];
+        let expected_result = "\u{10000}";
+
+        assert_eq!(decode(&raw), Ok(expected_result.to_string()));
+    }
+
+    #[test]
+    fn test_decode_invalid_surrogate_pair() {
+        let raw = vec![0xED, 0xA0, 0x80, 0xED, 0xA0, 0x00]; // Invalid surrogate pair
+        let result = decode(&raw);
+
+        assert_eq!(result.unwrap_err().to_string(),
+                   "[MUTF-8] invalid surrogate pair");
+    }
+
+    #[test]
+    fn test_decode_truncated_surrogate_pair() {
+        let raw = vec![0xED, 0xA0, 0x80]; // Truncated surrogate pair
+        let result = decode(&raw);
+
+        assert_eq!(result.unwrap_err().to_string(),
+                   "[MUTF-8] truncated surrogate pair");
+    }
+}
