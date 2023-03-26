@@ -275,7 +275,6 @@ mod tests {
     fn test_read_sleb128() {
         let mut reader = DexReader::build(DEX_DATA.to_vec());
         reader.bytes.seek(SeekFrom::Start(20)).unwrap();
-        let pos = reader.bytes.position();
 
         let result = reader.read_sleb128().unwrap();
         assert_eq!(result, (-1, 1));
