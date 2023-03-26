@@ -11,9 +11,9 @@ use crate::dex_reader::DexReader;
 
 #[derive(Debug, PartialEq)]
 pub struct DexStringsItem {
-    utf16_size: u32,
-    offset: u32,
-    is_raw: bool,  // sometimes decoding fails but we still need an entry
+    pub utf16_size: u32,
+    pub offset: u32,
+    pub is_raw: bool,  // sometimes decoding fails but we still need an entry
                    // in the list so we keep the raw bytes
     pub string: String
 }
