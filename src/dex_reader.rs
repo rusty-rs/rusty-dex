@@ -61,7 +61,7 @@ impl DexReader {
     }
 
     pub fn read_u16(&mut self) -> Result<u16, DexError> {
-        if self.bytes.position() >= self.bytes_len - 2 {
+        if self.bytes.position() > self.bytes_len - 2 {
             return Err(DexError::new("Error: no data left to read"));
         }
 
@@ -72,7 +72,7 @@ impl DexReader {
     }
 
     pub fn read_u32(&mut self) -> Result<u32, DexError> {
-        if self.bytes.position() >= self.bytes_len - 4 {
+        if self.bytes.position() > self.bytes_len - 4 {
             return Err(DexError::new("Error: no data left to read"));
         }
 
