@@ -1228,7 +1228,7 @@ impl PackedSwitchPayload {
         let size = bytes[offset + 1];
         let first_key = read_i32(bytes, offset + 2, endianness);
         let mut targets = Vec::new();
-        let mut ioffset = 2;
+        let mut ioffset = 4;
         for _ in 0..size {
             targets.push(read_i32(bytes, offset + ioffset, endianness));
             ioffset += 2;
