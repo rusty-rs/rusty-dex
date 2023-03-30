@@ -1428,6 +1428,13 @@ mod tests {
     use super::*;
 
     #[test]
+    fn test_read_i32() {
+        let bytes = [0x1234, 0x5678];
+        assert_eq!(read_i32(&bytes, 0, &DexEndianness::BigEndian), 0x1234_5678);
+        assert_eq!(read_i32(&bytes, 0, &DexEndianness::LittleEndian), 0x5678_1234);
+    }
+
+    #[test]
     fn test_instruction10x() {
         let inst = Instruction10x {
             opcode: OpCode::NOP,
