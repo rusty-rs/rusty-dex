@@ -1391,6 +1391,18 @@ impl FillArrayDataPayload {
             data
         }
     }
+
+    fn get_element_width(&self) -> u16 {
+        self.element_width
+    }
+
+    fn get_size(&self) -> u32 {
+        self.size
+    }
+
+    fn get_data(&self) -> &[u8] {
+        &self.data
+    }
 }
 
 impl InstructionHandler for FillArrayDataPayload {
@@ -3126,8 +3138,28 @@ mod tests {
 
     #[test]
     fn test_parse_fill_array_data_payload() {
-        let bytes = [0x0300, 0x01, 0x00, 0x00, 0x00];
+        let bytes = [
+            0x0300,     // opcode
+            0x0001,     // element width
+            0x0004,     // size
+            0x0000,     // ...
+            0x0100,     // data
+            0x0302,     // ...
+        ];
         let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
         assert_eq!(inst.inst_format(), "FillArrayDataPayload");
+
+        let any_inst = match inst.as_ref()
+                                 .as_any()
+                                 .downcast_ref::<FillArrayDataPayload>() {
+            Some(ins) => ins,
+            None      => {
+                error!("cannot access FillArrayDataPayload from Box");
+                panic!("error: cannot access FillArrayDataPayload from Box");
+            }
+        };
+        assert_eq!(any_inst.get_element_width(), 1);
+        assert_eq!(any_inst.get_size(), 4);
+        assert_eq!(any_inst.get_data(), &vec![0, 1, 2, 3]);
     }
 }
