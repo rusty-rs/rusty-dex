@@ -1299,7 +1299,7 @@ impl SparseSwitchPayload {
         }
 
         let mut targets = Vec::new();
-        let mut ioffset = 2;
+        let mut ioffset = 2 + (size as usize) * 2;
         for _ in 0..size {
             targets.push(read_i32(bytes, offset + ioffset, endianness));
             ioffset += 2;
