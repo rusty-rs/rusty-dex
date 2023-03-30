@@ -1428,10 +1428,31 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_read_i32() {
+    fn test_read_i32_big_endian_no_overflow() {
         let bytes = [0x1234, 0x5678];
-        assert_eq!(read_i32(&bytes, 0, &DexEndianness::BigEndian), 0x1234_5678);
-        assert_eq!(read_i32(&bytes, 0, &DexEndianness::LittleEndian), 0x5678_1234);
+        let result = read_i32(&bytes, 0, &DexEndianness::BigEndian);
+        assert_eq!(result, 0x1234_5678);
+    }
+
+    #[test]
+    fn test_read_i32_little_endian_no_overflow() {
+        let bytes = [0x1234, 0x5678];
+        let result = read_i32(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(result, 0x5678_1234);
+    }
+
+    #[test]
+    fn test_read_i32_big_endian_overflow() {
+        let bytes = [0xFFFF, 0xFFFF];
+        let result = read_i32(&bytes, 0, &DexEndianness::BigEndian);
+        assert_eq!(result, -1);
+    }
+
+    #[test]
+    fn test_read_i32_little_endian_overflow() {
+        let bytes = [0xFFFF, 0xFFFF];
+        let result = read_i32(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(result, -1);
     }
 
     #[test]
