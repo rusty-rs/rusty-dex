@@ -2077,6 +2077,75 @@ mod tests {
     }
 
     #[test]
+    fn test_packed_switch_payload() {
+        let inst = PackedSwitchPayload {
+            size: 4,
+            first_key: 0,
+            targets: vec![1, 2, 3, 4]
+        };
+
+        assert_eq!(inst.length(), 12);
+        assert_eq!(inst.opcode(), OpCode::PACKED_SWITCH_PAYLOAD);
+        assert_eq!(inst.bytes(), vec![]);
+        assert_eq!(inst.inst_format(), "PackedSwitchPayload");
+
+        assert_eq!(inst.a(inst.bytes()), None);
+        assert_eq!(inst.b(inst.bytes()), None);
+        assert_eq!(inst.c(inst.bytes()), None);
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_sparse_switch_payload() {
+        let inst = SparseSwitchPayload {
+            size: 4,
+            keys: vec![1, 2, 3, 4],
+            targets: vec![1, 2, 3, 4]
+        };
+
+        assert_eq!(inst.length(), 18);
+        assert_eq!(inst.opcode(), OpCode::SPARSE_SWITCH_PAYLOAD);
+        assert_eq!(inst.bytes(), vec![]);
+        assert_eq!(inst.inst_format(), "SparseSwitchPayload");
+
+        assert_eq!(inst.a(inst.bytes()), None);
+        assert_eq!(inst.b(inst.bytes()), None);
+        assert_eq!(inst.c(inst.bytes()), None);
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_fill_array_data_payload() {
+        let inst = FillArrayDataPayload {
+            element_width: 4,
+            size: 4,
+            data: vec![1, 2, 3, 4]
+        };
+
+        assert_eq!(inst.length(), 12);
+        assert_eq!(inst.opcode(), OpCode::FILL_ARRAY_DATA_PAYLOAD);
+        assert_eq!(inst.bytes(), vec![]);
+        assert_eq!(inst.inst_format(), "FillArrayDataPayload");
+
+        assert_eq!(inst.a(inst.bytes()), None);
+        assert_eq!(inst.b(inst.bytes()), None);
+        assert_eq!(inst.c(inst.bytes()), None);
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
     fn test_parse_instruction() {
         let bytes = [0x00, 0x00, 0x00, 0x00, 0x00];
         let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
