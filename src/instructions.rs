@@ -1311,6 +1311,18 @@ impl SparseSwitchPayload {
             targets
         }
     }
+
+    fn get_size(&self) -> usize {
+        self.size as usize
+    }
+
+    fn get_keys(&self) -> &[i32] {
+        &self.keys
+    }
+
+    fn get_targets(&self) -> &[i32] {
+        &self.targets
+    }
 }
 
 impl InstructionHandler for SparseSwitchPayload {
@@ -3083,9 +3095,33 @@ mod tests {
 
     #[test]
     fn test_parse_sparse_switch_payload() {
-        let bytes = [0x0200, 0x00, 0x00, 0x00, 0x00];
+        let bytes = [
+            0x0200,     // opcode
+            0x0002,     // size
+            0x0000,     // keys
+            0x0000,     // ...
+            0x0000,     // ...
+            0x0001,     // ...
+            0x0000,     // targets
+            0x0002,     // ...
+            0x0000,     // ...
+            0x0003,     // ...
+        ];
         let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
         assert_eq!(inst.inst_format(), "SparseSwitchPayload");
+
+        let any_inst = match inst.as_ref()
+                                 .as_any()
+                                 .downcast_ref::<SparseSwitchPayload>() {
+            Some(ins) => ins,
+            None      => {
+                error!("cannot access SparseSwitchPayload from Box");
+                panic!("error: cannot access SparseSwitchPayload from Box");
+            }
+        };
+        assert_eq!(any_inst.get_size(), 2);
+        assert_eq!(any_inst.get_keys(), &vec![0x00, 0x0001_0000]);
+        assert_eq!(any_inst.get_targets(), &vec![0x0002_0000, 0x0003_0000]);
     }
 
     #[test]
