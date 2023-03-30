@@ -31,3 +31,31 @@ pub fn verify_from_bytes(bytes: &[u8], checksum: u32) -> Result<bool, DexError> 
         Err(DexError::new("[adler32] error: computed checksum does not match one in header"))
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_verify_valid_from_bytes() {
+        // Test data with valid checksum
+        let bytes: [u8; 16] = [0x44, 0x45, 0x58, 0x0a,
+                               0x30, 0x33, 0x35, 0x00,
+                               0x00, 0x00, 0x00, 0x00,
+                               0x00, 0x00, 0x00, 0x00];
+        let checksum: u32 = 0x14300184;
+        assert!(verify_from_bytes(&bytes, checksum).unwrap());
+    }
+
+    #[test]
+    fn test_verify_invalid_from_bytes() {
+        // Test data with invalid checksum
+        let bytes: [u8; 16] = [0x44, 0x45, 0x58, 0x0a,
+                               0x30, 0x33, 0x35, 0x00,
+                               0x00, 0x00, 0x00, 0x00,
+                               0x00, 0x00, 0x00, 0x00];
+        let checksum: u32 = 0xcafebabe;
+        assert_eq!(verify_from_bytes(&bytes, checksum).unwrap_err().to_string(),
+                   "[adler32] error: computed checksum does not match one in header");
+    }
+}

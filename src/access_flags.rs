@@ -22,7 +22,7 @@ impl fmt::Display for AccessFlagType {
 
 /* Bitfields of these flags are used to indicate the accessibility
  * and overall properties of classes and class members. */
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum AccessFlag {
     ACC_PUBLIC,
     ACC_PRIVATE,
@@ -175,5 +175,75 @@ impl AccessFlag {
         }
 
         flags
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_access_flag_type_display() {
+        let class_flag = AccessFlagType::Class;
+        let field_flag = AccessFlagType::Field;
+        let method_flag = AccessFlagType::Method;
+
+        assert_eq!(class_flag.to_string(), "class");
+        assert_eq!(field_flag.to_string(), "field");
+        assert_eq!(method_flag.to_string(), "method");
+    }
+
+    #[test]
+    fn test_access_flag_class_parse() {
+        // Test with valid flags
+        // Testing all at once because there is no semantics at play here
+        let flags = AccessFlag::parse(0x3ffff, AccessFlagType::Class);
+        assert_eq!(flags, vec![AccessFlag::ACC_PUBLIC,
+                               AccessFlag::ACC_PRIVATE,
+                               AccessFlag::ACC_PROTECTED,
+                               AccessFlag::ACC_STATIC,
+                               AccessFlag::ACC_FINAL,
+                               AccessFlag::ACC_INTERFACE,
+                               AccessFlag::ACC_ABSTRACT,
+                               AccessFlag::ACC_SYNTHETIC,
+                               AccessFlag::ACC_ANNOTATION,
+                               AccessFlag::ACC_ENUM]);
+    }
+
+    #[test]
+    fn test_access_flag_field_parse() {
+        // Test with valid flags
+        // Testing all at once because there is no semantics at play here
+        let flags = AccessFlag::parse(0x3ffff, AccessFlagType::Field);
+        assert_eq!(flags, vec![AccessFlag::ACC_PUBLIC,
+                               AccessFlag::ACC_PRIVATE,
+                               AccessFlag::ACC_PROTECTED,
+                               AccessFlag::ACC_STATIC,
+                               AccessFlag::ACC_FINAL,
+                               AccessFlag::ACC_VOLATILE,
+                               AccessFlag::ACC_TRANSIENT,
+                               AccessFlag::ACC_SYNTHETIC,
+                               AccessFlag::ACC_ENUM]);
+    }
+
+    #[test]
+    fn test_access_flag_method_parse() {
+        // Test with valid flags
+        // Testing all at once because there is no semantics at play here
+        let flags = AccessFlag::parse(0x3ffff, AccessFlagType::Method);
+        assert_eq!(flags, vec![AccessFlag::ACC_PUBLIC,
+                               AccessFlag::ACC_PRIVATE,
+                               AccessFlag::ACC_PROTECTED,
+                               AccessFlag::ACC_STATIC,
+                               AccessFlag::ACC_FINAL,
+                               AccessFlag::ACC_SYNCHRONIZED,
+                               AccessFlag::ACC_BRIDGE,
+                               AccessFlag::ACC_VARARGS,
+                               AccessFlag::ACC_NATIVE,
+                               AccessFlag::ACC_ABSTRACT,
+                               AccessFlag::ACC_STRICT,
+                               AccessFlag::ACC_SYNTHETIC,
+                               AccessFlag::ACC_CONSTRUCTOR,
+                               AccessFlag::ACC_DECLARED_SYNCHRONIZED]);
     }
 }

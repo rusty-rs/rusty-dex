@@ -3,7 +3,7 @@ use std::fmt;
 
 #[derive(Debug)]
 pub struct DexError {
-    message: String,
+    pub message: String,
 }
 
 impl DexError {
@@ -24,3 +24,25 @@ impl Error for DexError {
     }
 }
 
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_new() {
+        let error = DexError::new("test message");
+        assert_eq!(error.message, "test message");
+    }
+
+    #[test]
+    fn test_display() {
+        let error = DexError::new("test message");
+        assert_eq!(error.to_string(), "test message");
+    }
+
+    #[test]
+    fn test_description() {
+        let error = DexError::new("test message");
+        assert_eq!(error.description(), "test message");
+    }
+}

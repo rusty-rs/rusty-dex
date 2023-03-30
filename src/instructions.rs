@@ -1,4 +1,5 @@
 use core::fmt::Debug;
+use std::any::Any;
 
 use crate::error;
 use crate::opcodes::OpCode;
@@ -359,8 +360,18 @@ struct Instruction4rcc { opcode: OpCode, length: usize, bytes: Vec<u16> }
 #[derive(Debug)]
 struct Instruction51l  { opcode: OpCode, length: usize, bytes: Vec<u16> }
 
+pub trait AToAny: 'static {
+    fn as_any(&self) -> &dyn Any;
+}
+
+impl<T: 'static> AToAny for T {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+}
+
 #[allow(unused_variables)]
-pub trait InstructionHandler: Debug {
+pub trait InstructionHandler: Debug + Any + AToAny {
     /* Getters for the instructions metadata */
     fn length(&self) -> usize;
     fn opcode(&self) -> OpCode;
@@ -1217,7 +1228,7 @@ impl PackedSwitchPayload {
         let size = bytes[offset + 1];
         let first_key = read_i32(bytes, offset + 2, endianness);
         let mut targets = Vec::new();
-        let mut ioffset = 2;
+        let mut ioffset = 4;
         for _ in 0..size {
             targets.push(read_i32(bytes, offset + ioffset, endianness));
             ioffset += 2;
@@ -1228,6 +1239,18 @@ impl PackedSwitchPayload {
             first_key,
             targets
         }
+    }
+
+    fn get_size(&self) -> usize {
+        self.size as usize
+    }
+
+    fn get_first_key(&self) -> i32 {
+        self.first_key
+    }
+
+    fn get_targets(&self) -> &[i32] {
+        &self.targets
     }
 }
 
@@ -1276,7 +1299,7 @@ impl SparseSwitchPayload {
         }
 
         let mut targets = Vec::new();
-        let mut ioffset = 2;
+        let mut ioffset = 2 + (size as usize) * 2;
         for _ in 0..size {
             targets.push(read_i32(bytes, offset + ioffset, endianness));
             ioffset += 2;
@@ -1287,6 +1310,18 @@ impl SparseSwitchPayload {
             keys,
             targets
         }
+    }
+
+    fn get_size(&self) -> usize {
+        self.size as usize
+    }
+
+    fn get_keys(&self) -> &[i32] {
+        &self.keys
+    }
+
+    fn get_targets(&self) -> &[i32] {
+        &self.targets
     }
 }
 
@@ -1335,14 +1370,14 @@ impl FillArrayDataPayload {
         let mut ioffset = 4;
         match endianness {
             DexEndianness::LittleEndian =>
-                for _ in 0..(size / element_width as u32) / 2 {
+                for _ in 0..((size / element_width as u32) / 2) {
                     let _b = bytes[offset + ioffset].to_le_bytes();
                     data.push(_b[0]);
                     data.push(_b[1]);
                     ioffset += 1;
                 },
             DexEndianness::BigEndian =>
-                for _ in 0..(size / element_width as u32) / 2 {
+                for _ in 0..((size / element_width as u32) / 2) {
                     let _b = bytes[offset + ioffset].to_be_bytes();
                     data.push(_b[0]);
                     data.push(_b[1]);
@@ -1355,6 +1390,18 @@ impl FillArrayDataPayload {
             size,
             data
         }
+    }
+
+    fn get_element_width(&self) -> u16 {
+        self.element_width
+    }
+
+    fn get_size(&self) -> u32 {
+        self.size
+    }
+
+    fn get_data(&self) -> &[u8] {
+        &self.data
     }
 }
 
@@ -1420,5 +1467,1699 @@ impl<'a> InstructionsReader<'a> {
             0 => None,
             _ => Some(instructions)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_read_i32_big_endian_no_overflow() {
+        let bytes = [0x1234, 0x5678];
+        let result = read_i32(&bytes, 0, &DexEndianness::BigEndian);
+        assert_eq!(result, 0x1234_5678);
+    }
+
+    #[test]
+    fn test_read_i32_little_endian_no_overflow() {
+        let bytes = [0x1234, 0x5678];
+        let result = read_i32(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(result, 0x5678_1234);
+    }
+
+    #[test]
+    fn test_read_i32_big_endian_overflow() {
+        let bytes = [0xFFFF, 0xFFFF];
+        let result = read_i32(&bytes, 0, &DexEndianness::BigEndian);
+        assert_eq!(result, -1);
+    }
+
+    #[test]
+    fn test_read_i32_little_endian_overflow() {
+        let bytes = [0xFFFF, 0xFFFF];
+        let result = read_i32(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(result, -1);
+    }
+
+    #[test]
+    fn test_instruction10x() {
+        let inst = Instruction10x {
+            opcode: OpCode::NOP,
+            length: 1,
+            bytes: vec![0x00]
+        };
+
+        assert_eq!(inst.length(), 1);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x00]);
+        assert_eq!(inst.inst_format(), "Instruction10x");
+
+        assert_eq!(inst.a(inst.bytes()), None);
+        assert_eq!(inst.b(inst.bytes()), None);
+        assert_eq!(inst.c(inst.bytes()), None);
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction11n() {
+        let inst = Instruction11n {
+            opcode: OpCode::NOP,
+            length: 1,
+            bytes: vec![0x2100]
+        };
+
+        assert_eq!(inst.length(), 1);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x2100]);
+        assert_eq!(inst.inst_format(), "Instruction11n");
+
+        assert_eq!(inst.a(inst.bytes()), Some(1));
+        assert_eq!(inst.b(inst.bytes()), Some(2));
+        assert_eq!(inst.c(inst.bytes()), None);
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction12x() {
+        let inst = Instruction12x {
+            opcode: OpCode::NOP,
+            length: 1,
+            bytes: vec![0x2100]
+        };
+
+        assert_eq!(inst.length(), 1);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x2100]);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        assert_eq!(inst.a(inst.bytes()), Some(1));
+        assert_eq!(inst.b(inst.bytes()), Some(2));
+        assert_eq!(inst.c(inst.bytes()), None);
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction11x() {
+        let inst = Instruction11x {
+            opcode: OpCode::NOP,
+            length: 1,
+            bytes: vec![0x1000]
+        };
+
+        assert_eq!(inst.length(), 1);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x1000]);
+        assert_eq!(inst.inst_format(), "Instruction11x");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x10));
+        assert_eq!(inst.b(inst.bytes()), None);
+        assert_eq!(inst.c(inst.bytes()), None);
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction10t() {
+        let inst = Instruction10t {
+            opcode: OpCode::NOP,
+            length: 1,
+            bytes: vec![0x1000]
+        };
+
+        assert_eq!(inst.length(), 1);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x1000]);
+        assert_eq!(inst.inst_format(), "Instruction10t");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x10));
+        assert_eq!(inst.b(inst.bytes()), None);
+        assert_eq!(inst.c(inst.bytes()), None);
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction20t() {
+        let inst = Instruction20t {
+            opcode: OpCode::NOP,
+            length: 2,
+            bytes: vec![0x0000, 0x1234]
+        };
+
+        assert_eq!(inst.length(), 2);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x0000, 0x1234]);
+        assert_eq!(inst.inst_format(), "Instruction20t");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x1234));
+        assert_eq!(inst.b(inst.bytes()), None);
+        assert_eq!(inst.c(inst.bytes()), None);
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction21c() {
+        let inst = Instruction21c {
+            opcode: OpCode::NOP,
+            length: 2,
+            bytes: vec![0x1200, 0x3456]
+        };
+
+        assert_eq!(inst.length(), 2);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x1200, 0x3456]);
+        assert_eq!(inst.inst_format(), "Instruction21c");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x12));
+        assert_eq!(inst.b(inst.bytes()), Some(0x3456));
+        assert_eq!(inst.c(inst.bytes()), None);
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction21h() {
+        let inst = Instruction21h {
+            opcode: OpCode::NOP,
+            length: 2,
+            bytes: vec![0x1200, 0x3456]
+        };
+
+        assert_eq!(inst.length(), 2);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x1200, 0x3456]);
+        assert_eq!(inst.inst_format(), "Instruction21h");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x12));
+        assert_eq!(inst.b(inst.bytes()), Some(0x3456));
+        assert_eq!(inst.c(inst.bytes()), None);
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction21s() {
+        let inst = Instruction21s {
+            opcode: OpCode::NOP,
+            length: 2,
+            bytes: vec![0x1200, 0x3456]
+        };
+
+        assert_eq!(inst.length(), 2);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x1200, 0x3456]);
+        assert_eq!(inst.inst_format(), "Instruction21s");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x12));
+        assert_eq!(inst.b(inst.bytes()), Some(0x3456));
+        assert_eq!(inst.c(inst.bytes()), None);
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction21t() {
+        let inst = Instruction21t {
+            opcode: OpCode::NOP,
+            length: 2,
+            bytes: vec![0x1200, 0x3456]
+        };
+
+        assert_eq!(inst.length(), 2);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x1200, 0x3456]);
+        assert_eq!(inst.inst_format(), "Instruction21t");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x12));
+        assert_eq!(inst.b(inst.bytes()), Some(0x3456));
+        assert_eq!(inst.c(inst.bytes()), None);
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction22x() {
+        let inst = Instruction22x {
+            opcode: OpCode::NOP,
+            length: 2,
+            bytes: vec![0x1200, 0x3456]
+        };
+
+        assert_eq!(inst.length(), 2);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x1200, 0x3456]);
+        assert_eq!(inst.inst_format(), "Instruction22x");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x12));
+        assert_eq!(inst.b(inst.bytes()), Some(0x3456));
+        assert_eq!(inst.c(inst.bytes()), None);
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction23x() {
+        let inst = Instruction23x {
+            opcode: OpCode::NOP,
+            length: 2,
+            bytes: vec![0x1200, 0x3456]
+        };
+
+        assert_eq!(inst.length(), 2);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x1200, 0x3456]);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x12));
+        assert_eq!(inst.b(inst.bytes()), Some(0x34));
+        assert_eq!(inst.c(inst.bytes()), Some(0x56));
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction22b() {
+        let inst = Instruction22b {
+            opcode: OpCode::NOP,
+            length: 2,
+            bytes: vec![0x1200, 0x3456]
+        };
+
+        assert_eq!(inst.length(), 2);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x1200, 0x3456]);
+        assert_eq!(inst.inst_format(), "Instruction22b");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x12));
+        assert_eq!(inst.b(inst.bytes()), Some(0x34));
+        assert_eq!(inst.c(inst.bytes()), Some(0x56));
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction22c() {
+        let inst = Instruction22c {
+            opcode: OpCode::NOP,
+            length: 2,
+            bytes: vec![0x1200, 0x3456]
+        };
+
+        assert_eq!(inst.length(), 2);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x1200, 0x3456]);
+        assert_eq!(inst.inst_format(), "Instruction22c");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x2));
+        assert_eq!(inst.b(inst.bytes()), Some(0x1));
+        assert_eq!(inst.c(inst.bytes()), Some(0x3456));
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction22s() {
+        let inst = Instruction22s {
+            opcode: OpCode::NOP,
+            length: 2,
+            bytes: vec![0x1200, 0x3456]
+        };
+
+        assert_eq!(inst.length(), 2);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x1200, 0x3456]);
+        assert_eq!(inst.inst_format(), "Instruction22s");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x2));
+        assert_eq!(inst.b(inst.bytes()), Some(0x1));
+        assert_eq!(inst.c(inst.bytes()), Some(0x3456));
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction22t() {
+        let inst = Instruction22t {
+            opcode: OpCode::NOP,
+            length: 2,
+            bytes: vec![0x1200, 0x3456]
+        };
+
+        assert_eq!(inst.length(), 2);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x1200, 0x3456]);
+        assert_eq!(inst.inst_format(), "Instruction22t");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x2));
+        assert_eq!(inst.b(inst.bytes()), Some(0x1));
+        assert_eq!(inst.c(inst.bytes()), Some(0x3456));
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction30t() {
+        let inst = Instruction30t {
+            opcode: OpCode::NOP,
+            length: 3,
+            bytes: vec![0x00, 0x5678, 0x1234]
+        };
+
+        assert_eq!(inst.length(), 3);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x00, 0x5678, 0x1234]);
+        assert_eq!(inst.inst_format(), "Instruction30t");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x12345678));
+        assert_eq!(inst.b(inst.bytes()), None);
+        assert_eq!(inst.c(inst.bytes()), None);
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction31c() {
+        let inst = Instruction31c {
+            opcode: OpCode::NOP,
+            length: 3,
+            bytes: vec![0x1200, 0x5678, 0x1234]
+        };
+
+        assert_eq!(inst.length(), 3);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x1200, 0x5678, 0x1234]);
+        assert_eq!(inst.inst_format(), "Instruction31c");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x12));
+        assert_eq!(inst.b(inst.bytes()), Some(0x12345678));
+        assert_eq!(inst.c(inst.bytes()), None);
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction31i() {
+        let inst = Instruction31i {
+            opcode: OpCode::NOP,
+            length: 3,
+            bytes: vec![0x1200, 0x5678, 0x1234]
+        };
+
+        assert_eq!(inst.length(), 3);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x1200, 0x5678, 0x1234]);
+        assert_eq!(inst.inst_format(), "Instruction31i");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x12));
+        assert_eq!(inst.b(inst.bytes()), Some(0x12345678));
+        assert_eq!(inst.c(inst.bytes()), None);
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction31t() {
+        let inst = Instruction31t {
+            opcode: OpCode::NOP,
+            length: 3,
+            bytes: vec![0x1200, 0x5678, 0x1234]
+        };
+
+        assert_eq!(inst.length(), 3);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x1200, 0x5678, 0x1234]);
+        assert_eq!(inst.inst_format(), "Instruction31t");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x12));
+        assert_eq!(inst.b(inst.bytes()), Some(0x12345678));
+        assert_eq!(inst.c(inst.bytes()), None);
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction32x() {
+        let inst = Instruction32x {
+            opcode: OpCode::NOP,
+            length: 3,
+            bytes: vec![0x00, 0x1234, 0x5678]
+        };
+
+        assert_eq!(inst.length(), 3);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x00, 0x1234, 0x5678]);
+        assert_eq!(inst.inst_format(), "Instruction32x");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x1234));
+        assert_eq!(inst.b(inst.bytes()), Some(0x5678));
+        assert_eq!(inst.c(inst.bytes()), None);
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction35c() {
+        let inst = Instruction35c {
+            opcode: OpCode::NOP,
+            length: 3,
+            bytes: vec![0x1200, 0x3456, 0x7890]
+        };
+
+        assert_eq!(inst.length(), 3);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x1200, 0x3456, 0x7890]);
+        assert_eq!(inst.inst_format(), "Instruction35c");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x01));
+        assert_eq!(inst.b(inst.bytes()), Some(0x3456));
+        assert_eq!(inst.c(inst.bytes()), Some(0x00));
+        assert_eq!(inst.d(inst.bytes()), Some(0x09));
+        assert_eq!(inst.e(inst.bytes()), Some(0x08));
+        assert_eq!(inst.f(inst.bytes()), Some(0x07));
+        assert_eq!(inst.g(inst.bytes()), Some(0x02));
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction3rc() {
+        let inst = Instruction3rc {
+            opcode: OpCode::NOP,
+            length: 3,
+            bytes: vec![0x1200, 0x3456, 0x7890]
+        };
+
+        assert_eq!(inst.length(), 3);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x1200, 0x3456, 0x7890]);
+        assert_eq!(inst.inst_format(), "Instruction3rc");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x12));
+        assert_eq!(inst.b(inst.bytes()), Some(0x3456));
+        assert_eq!(inst.c(inst.bytes()), Some(0x7890));
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction45cc() {
+        let inst = Instruction45cc {
+            opcode: OpCode::NOP,
+            length: 4,
+            bytes: vec![0x1200, 0x3456, 0x7890, 0x1234]
+        };
+
+        assert_eq!(inst.length(), 4);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x1200, 0x3456, 0x7890, 0x1234]);
+        assert_eq!(inst.inst_format(), "Instruction45cc");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x01));
+        assert_eq!(inst.b(inst.bytes()), Some(0x03456));
+        assert_eq!(inst.c(inst.bytes()), Some(0x00));
+        assert_eq!(inst.d(inst.bytes()), Some(0x09));
+        assert_eq!(inst.e(inst.bytes()), Some(0x08));
+        assert_eq!(inst.f(inst.bytes()), Some(0x07));
+        assert_eq!(inst.g(inst.bytes()), Some(0x02));
+        assert_eq!(inst.h(inst.bytes()), Some(0x1234));
+    }
+
+    #[test]
+    fn test_instruction4rcc() {
+        let inst = Instruction4rcc {
+            opcode: OpCode::NOP,
+            length: 4,
+            bytes: vec![0x1200, 0x3456, 0x7890, 0x1234]
+        };
+
+        assert_eq!(inst.length(), 4);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x1200, 0x3456, 0x7890, 0x1234]);
+        assert_eq!(inst.inst_format(), "Instruction4rcc");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x12));
+        assert_eq!(inst.b(inst.bytes()), Some(0x3456));
+        assert_eq!(inst.c(inst.bytes()), Some(0x7890));
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), Some(0x1234));
+    }
+
+    #[test]
+    fn test_instruction51l() {
+        let inst = Instruction51l {
+            opcode: OpCode::NOP,
+            length: 5,
+            bytes: vec![0x1200, 0x3456, 0x9012, 0x5678, 0x1234]
+        };
+
+        assert_eq!(inst.length(), 5);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x1200, 0x3456, 0x9012, 0x5678, 0x1234]);
+        assert_eq!(inst.inst_format(), "Instruction51l");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x12));
+        assert_eq!(inst.b(inst.bytes()), Some(0x1234_5678_9012_3456));
+        assert_eq!(inst.c(inst.bytes()), None);
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_packed_switch_payload() {
+        let inst = PackedSwitchPayload {
+            size: 4,
+            first_key: 0,
+            targets: vec![1, 2, 3, 4]
+        };
+
+        assert_eq!(inst.length(), 12);
+        assert_eq!(inst.opcode(), OpCode::PACKED_SWITCH_PAYLOAD);
+        assert_eq!(inst.bytes(), vec![]);
+        assert_eq!(inst.inst_format(), "PackedSwitchPayload");
+
+        assert_eq!(inst.a(inst.bytes()), None);
+        assert_eq!(inst.b(inst.bytes()), None);
+        assert_eq!(inst.c(inst.bytes()), None);
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_sparse_switch_payload() {
+        let inst = SparseSwitchPayload {
+            size: 4,
+            keys: vec![1, 2, 3, 4],
+            targets: vec![1, 2, 3, 4]
+        };
+
+        assert_eq!(inst.length(), 18);
+        assert_eq!(inst.opcode(), OpCode::SPARSE_SWITCH_PAYLOAD);
+        assert_eq!(inst.bytes(), vec![]);
+        assert_eq!(inst.inst_format(), "SparseSwitchPayload");
+
+        assert_eq!(inst.a(inst.bytes()), None);
+        assert_eq!(inst.b(inst.bytes()), None);
+        assert_eq!(inst.c(inst.bytes()), None);
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_fill_array_data_payload() {
+        let inst = FillArrayDataPayload {
+            element_width: 4,
+            size: 4,
+            data: vec![1, 2, 3, 4]
+        };
+
+        assert_eq!(inst.length(), 12);
+        assert_eq!(inst.opcode(), OpCode::FILL_ARRAY_DATA_PAYLOAD);
+        assert_eq!(inst.bytes(), vec![]);
+        assert_eq!(inst.inst_format(), "FillArrayDataPayload");
+
+        assert_eq!(inst.a(inst.bytes()), None);
+        assert_eq!(inst.b(inst.bytes()), None);
+        assert_eq!(inst.c(inst.bytes()), None);
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_parse_instruction() {
+        let bytes = [0x00, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction10x");
+
+        let bytes = [0x01, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0x02, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22x");
+
+        let bytes = [0x03, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction32x");
+
+        let bytes = [0x04, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0x05, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22x");
+
+        let bytes = [0x06, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction32x");
+
+        let bytes = [0x07, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0x08, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22x");
+
+        let bytes = [0x09, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction32x");
+
+        let bytes = [0x0a, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction11x");
+
+        let bytes = [0x0b, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction11x");
+
+        let bytes = [0x0c, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction11x");
+
+        let bytes = [0x0d, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction11x");
+
+        let bytes = [0x0e, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction10x");
+
+        let bytes = [0x0f, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction11x");
+
+        let bytes = [0x10, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction11x");
+
+        let bytes = [0x11, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction11x");
+
+        let bytes = [0x12, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction11n");
+
+        let bytes = [0x13, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction21s");
+
+        let bytes = [0x14, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction31i");
+
+        let bytes = [0x15, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction21h");
+
+        let bytes = [0x16, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction21s");
+
+        let bytes = [0x17, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction31i");
+
+        let bytes = [0x18, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction51l");
+
+        let bytes = [0x19, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction21h");
+
+        let bytes = [0x1a, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction21c");
+
+        let bytes = [0x1b, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction31c");
+
+        let bytes = [0x1c, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction21c");
+
+        let bytes = [0x1d, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction11x");
+
+        let bytes = [0x1e, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction11x");
+
+        let bytes = [0x1f, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction21c");
+
+        let bytes = [0x20, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22c");
+
+        let bytes = [0x21, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0x22, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction21c");
+
+        let bytes = [0x23, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22c");
+
+        let bytes = [0x24, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction35c");
+
+        let bytes = [0x25, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction3rc");
+
+        let bytes = [0x26, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction31t");
+
+        let bytes = [0x27, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction11x");
+
+        let bytes = [0x28, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction10t");
+
+        let bytes = [0x29, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction20t");
+
+        let bytes = [0x2a, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction30t");
+
+        let bytes = [0x2b, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction31t");
+
+        let bytes = [0x2c, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction31t");
+
+        let bytes = [0x2d, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0x2e, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0x2f, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0x30, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0x31, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0x32, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22t");
+
+        let bytes = [0x33, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22t");
+
+        let bytes = [0x34, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22t");
+
+        let bytes = [0x35, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22t");
+
+        let bytes = [0x36, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22t");
+
+        let bytes = [0x37, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22t");
+
+        let bytes = [0x38, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction21t");
+
+        let bytes = [0x39, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction21t");
+
+        let bytes = [0x3a, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction21t");
+
+        let bytes = [0x3b, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction21t");
+
+        let bytes = [0x3c, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction21t");
+
+        let bytes = [0x3d, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction21t");
+
+        /* 0x3e..=0x43 : unused */
+
+        let bytes = [0x44, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0x45, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0x46, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0x47, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0x48, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0x49, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0x4a, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0x4b, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0x4c, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0x4d, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0x4e, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0x4f, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0x50, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0x51, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0x52, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22c");
+
+        let bytes = [0x53, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22c");
+
+        let bytes = [0x54, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22c");
+
+        let bytes = [0x55, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22c");
+
+        let bytes = [0x56, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22c");
+
+        let bytes = [0x57, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22c");
+
+        let bytes = [0x58, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22c");
+
+        let bytes = [0x59, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22c");
+
+        let bytes = [0x5a, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22c");
+
+        let bytes = [0x5b, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22c");
+
+        let bytes = [0x5c, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22c");
+
+        let bytes = [0x5d, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22c");
+
+        let bytes = [0x5e, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22c");
+
+        let bytes = [0x5f, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22c");
+
+        let bytes = [0x60, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction21c");
+
+        let bytes = [0x61, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction21c");
+
+        let bytes = [0x62, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction21c");
+
+        let bytes = [0x63, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction21c");
+
+        let bytes = [0x64, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction21c");
+
+        let bytes = [0x65, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction21c");
+
+        let bytes = [0x66, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction21c");
+
+        let bytes = [0x67, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction21c");
+
+        let bytes = [0x68, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction21c");
+
+        let bytes = [0x69, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction21c");
+
+        let bytes = [0x6a, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction21c");
+
+        let bytes = [0x6b, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction21c");
+
+        let bytes = [0x6c, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction21c");
+
+        let bytes = [0x6d, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction21c");
+
+        let bytes = [0x6e, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction35c");
+
+        let bytes = [0x6f, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction35c");
+
+        let bytes = [0x70, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction35c");
+
+        let bytes = [0x71, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction35c");
+
+        let bytes = [0x72, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction35c");
+        
+        /* 0x73 : unused */
+
+        let bytes = [0x74, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction3rc");
+
+        let bytes = [0x75, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction3rc");
+
+        let bytes = [0x76, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction3rc");
+
+        let bytes = [0x77, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction3rc");
+
+        let bytes = [0x78, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction3rc");
+
+        /* 0x79 | 0x7a : unused */
+
+        let bytes = [0x7b, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0x7c, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0x7d, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0x7e, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0x7f, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0x80, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0x81, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0x82, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0x83, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0x84, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0x85, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0x86, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0x87, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0x88, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0x89, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0x8a, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0x8b, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0x8c, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0x8d, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0x8e, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0x8f, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0x90, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0x91, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0x92, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0x93, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0x94, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0x95, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0x96, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0x97, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0x98, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0x99, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0x9a, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0x9b, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0x9c, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0x9d, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0x9e, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0x9f, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0xa0, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0xa1, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0xa2, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0xa3, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0xa4, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0xa5, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0xa6, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0xa7, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0xa8, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0xa9, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0xaa, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0xab, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0xac, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0xad, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0xae, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0xaf, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        let bytes = [0xb0, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0xb1, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0xb2, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0xb3, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0xb4, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0xb5, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0xb6, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0xb7, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0xb8, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0xb9, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0xba, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0xbb, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0xbc, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0xbd, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0xbe, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0xbf, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0xc0, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0xc1, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0xc2, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0xc3, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0xc4, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0xc5, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0xc6, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0xc7, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0xc8, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0xc9, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0xca, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0xcb, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0xcc, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0xcd, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0xce, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0xcf, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        let bytes = [0xd0, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22s");
+
+        let bytes = [0xd1, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22s");
+
+        let bytes = [0xd2, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22s");
+
+        let bytes = [0xd3, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22s");
+
+        let bytes = [0xd4, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22s");
+
+        let bytes = [0xd5, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22s");
+
+        let bytes = [0xd6, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22s");
+
+        let bytes = [0xd7, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22s");
+
+        let bytes = [0xd8, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22b");
+
+        let bytes = [0xd9, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22b");
+
+        let bytes = [0xda, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22b");
+
+        let bytes = [0xdb, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22b");
+
+        let bytes = [0xdc, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22b");
+
+        let bytes = [0xdd, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22b");
+
+        let bytes = [0xde, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22b");
+
+        let bytes = [0xdf, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22b");
+
+        let bytes = [0xe0, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22b");
+
+        let bytes = [0xe1, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22b");
+
+        let bytes = [0xe2, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction22b");
+
+        /* 0xe3..=0xf9 : unused */
+
+        let bytes = [0xfa, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction45cc");
+
+        let bytes = [0xfb, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction4rcc");
+
+        let bytes = [0xfc, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction35c");
+
+        let bytes = [0xfd, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction3rc");
+
+        let bytes = [0xfe, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction21c");
+
+        let bytes = [0xff, 0x00, 0x00, 0x00, 0x00];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "Instruction21c");
+    }
+
+    #[test]
+    fn test_parse_packed_switch_payload() {
+        let bytes = [
+            0x0100,     // opcode
+            0x0002,     // size
+            0x0000,     // first_key
+            0x0000,     // ...
+            0x0000,      // targets
+            0x0000,     // ...
+            0x0000,     // ...
+            0x0001,     // ...
+        ];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "PackedSwitchPayload");
+
+        let any_inst = match inst.as_ref()
+                                 .as_any()
+                                 .downcast_ref::<PackedSwitchPayload>() {
+            Some(ins) => ins,
+            None      => {
+                error!("cannot access PackedSwitchPayload from Box");
+                panic!("error: cannot access PackedSwitchPayload from Box");
+            }
+        };
+        assert_eq!(any_inst.get_size(), 2);
+        assert_eq!(any_inst.get_first_key(), 0);
+        assert_eq!(any_inst.get_targets(), &vec![0x00, 0x0001_0000]);
+    }
+
+    #[test]
+    fn test_parse_sparse_switch_payload() {
+        let bytes = [
+            0x0200,     // opcode
+            0x0002,     // size
+            0x0000,     // keys
+            0x0000,     // ...
+            0x0000,     // ...
+            0x0001,     // ...
+            0x0000,     // targets
+            0x0002,     // ...
+            0x0000,     // ...
+            0x0003,     // ...
+        ];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "SparseSwitchPayload");
+
+        let any_inst = match inst.as_ref()
+                                 .as_any()
+                                 .downcast_ref::<SparseSwitchPayload>() {
+            Some(ins) => ins,
+            None      => {
+                error!("cannot access SparseSwitchPayload from Box");
+                panic!("error: cannot access SparseSwitchPayload from Box");
+            }
+        };
+        assert_eq!(any_inst.get_size(), 2);
+        assert_eq!(any_inst.get_keys(), &vec![0x00, 0x0001_0000]);
+        assert_eq!(any_inst.get_targets(), &vec![0x0002_0000, 0x0003_0000]);
+    }
+
+    #[test]
+    fn test_parse_fill_array_data_payload() {
+        let bytes = [
+            0x0300,     // opcode
+            0x0001,     // element width
+            0x0004,     // size
+            0x0000,     // ...
+            0x0100,     // data
+            0x0302,     // ...
+        ];
+        let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
+        assert_eq!(inst.inst_format(), "FillArrayDataPayload");
+
+        let any_inst = match inst.as_ref()
+                                 .as_any()
+                                 .downcast_ref::<FillArrayDataPayload>() {
+            Some(ins) => ins,
+            None      => {
+                error!("cannot access FillArrayDataPayload from Box");
+                panic!("error: cannot access FillArrayDataPayload from Box");
+            }
+        };
+        assert_eq!(any_inst.get_element_width(), 1);
+        assert_eq!(any_inst.get_size(), 4);
+        assert_eq!(any_inst.get_data(), &vec![0, 1, 2, 3]);
     }
 }
