@@ -1,4 +1,5 @@
 use core::fmt::Debug;
+use std::any::Any;
 
 use crate::error;
 use crate::opcodes::OpCode;
@@ -359,8 +360,18 @@ struct Instruction4rcc { opcode: OpCode, length: usize, bytes: Vec<u16> }
 #[derive(Debug)]
 struct Instruction51l  { opcode: OpCode, length: usize, bytes: Vec<u16> }
 
+pub trait AToAny: 'static {
+    fn as_any(&self) -> &dyn Any;
+}
+
+impl<T: 'static> AToAny for T {
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+}
+
 #[allow(unused_variables)]
-pub trait InstructionHandler: Debug {
+pub trait InstructionHandler: Debug + Any + AToAny {
     /* Getters for the instructions metadata */
     fn length(&self) -> usize;
     fn opcode(&self) -> OpCode;
