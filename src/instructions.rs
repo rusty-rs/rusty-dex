@@ -1422,3 +1422,606 @@ impl<'a> InstructionsReader<'a> {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_instruction10x() {
+        let inst = Instruction10x {
+            opcode: OpCode::NOP,
+            length: 1,
+            bytes: vec![0x00]
+        };
+
+        assert_eq!(inst.length(), 1);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x00]);
+        assert_eq!(inst.inst_format(), "Instruction10x");
+
+        assert_eq!(inst.a(inst.bytes()), None);
+        assert_eq!(inst.b(inst.bytes()), None);
+        assert_eq!(inst.c(inst.bytes()), None);
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction11n() {
+        let inst = Instruction11n {
+            opcode: OpCode::NOP,
+            length: 1,
+            bytes: vec![0x2100]
+        };
+
+        assert_eq!(inst.length(), 1);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x2100]);
+        assert_eq!(inst.inst_format(), "Instruction11n");
+
+        assert_eq!(inst.a(inst.bytes()), Some(1));
+        assert_eq!(inst.b(inst.bytes()), Some(2));
+        assert_eq!(inst.c(inst.bytes()), None);
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction12x() {
+        let inst = Instruction12x {
+            opcode: OpCode::NOP,
+            length: 1,
+            bytes: vec![0x2100]
+        };
+
+        assert_eq!(inst.length(), 1);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x2100]);
+        assert_eq!(inst.inst_format(), "Instruction12x");
+
+        assert_eq!(inst.a(inst.bytes()), Some(1));
+        assert_eq!(inst.b(inst.bytes()), Some(2));
+        assert_eq!(inst.c(inst.bytes()), None);
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction11x() {
+        let inst = Instruction11x {
+            opcode: OpCode::NOP,
+            length: 1,
+            bytes: vec![0x1000]
+        };
+
+        assert_eq!(inst.length(), 1);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x1000]);
+        assert_eq!(inst.inst_format(), "Instruction11x");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x10));
+        assert_eq!(inst.b(inst.bytes()), None);
+        assert_eq!(inst.c(inst.bytes()), None);
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction10t() {
+        let inst = Instruction10t {
+            opcode: OpCode::NOP,
+            length: 1,
+            bytes: vec![0x1000]
+        };
+
+        assert_eq!(inst.length(), 1);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x1000]);
+        assert_eq!(inst.inst_format(), "Instruction10t");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x10));
+        assert_eq!(inst.b(inst.bytes()), None);
+        assert_eq!(inst.c(inst.bytes()), None);
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction20t() {
+        let inst = Instruction20t {
+            opcode: OpCode::NOP,
+            length: 2,
+            bytes: vec![0x0000, 0x1234]
+        };
+
+        assert_eq!(inst.length(), 2);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x0000, 0x1234]);
+        assert_eq!(inst.inst_format(), "Instruction20t");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x1234));
+        assert_eq!(inst.b(inst.bytes()), None);
+        assert_eq!(inst.c(inst.bytes()), None);
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction21c() {
+        let inst = Instruction21c {
+            opcode: OpCode::NOP,
+            length: 2,
+            bytes: vec![0x1200, 0x3456]
+        };
+
+        assert_eq!(inst.length(), 2);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x1200, 0x3456]);
+        assert_eq!(inst.inst_format(), "Instruction21c");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x12));
+        assert_eq!(inst.b(inst.bytes()), Some(0x3456));
+        assert_eq!(inst.c(inst.bytes()), None);
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction21h() {
+        let inst = Instruction21h {
+            opcode: OpCode::NOP,
+            length: 2,
+            bytes: vec![0x1200, 0x3456]
+        };
+
+        assert_eq!(inst.length(), 2);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x1200, 0x3456]);
+        assert_eq!(inst.inst_format(), "Instruction21h");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x12));
+        assert_eq!(inst.b(inst.bytes()), Some(0x3456));
+        assert_eq!(inst.c(inst.bytes()), None);
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction21s() {
+        let inst = Instruction21s {
+            opcode: OpCode::NOP,
+            length: 2,
+            bytes: vec![0x1200, 0x3456]
+        };
+
+        assert_eq!(inst.length(), 2);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x1200, 0x3456]);
+        assert_eq!(inst.inst_format(), "Instruction21s");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x12));
+        assert_eq!(inst.b(inst.bytes()), Some(0x3456));
+        assert_eq!(inst.c(inst.bytes()), None);
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction21t() {
+        let inst = Instruction21t {
+            opcode: OpCode::NOP,
+            length: 2,
+            bytes: vec![0x1200, 0x3456]
+        };
+
+        assert_eq!(inst.length(), 2);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x1200, 0x3456]);
+        assert_eq!(inst.inst_format(), "Instruction21t");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x12));
+        assert_eq!(inst.b(inst.bytes()), Some(0x3456));
+        assert_eq!(inst.c(inst.bytes()), None);
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction22x() {
+        let inst = Instruction22x {
+            opcode: OpCode::NOP,
+            length: 2,
+            bytes: vec![0x1200, 0x3456]
+        };
+
+        assert_eq!(inst.length(), 2);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x1200, 0x3456]);
+        assert_eq!(inst.inst_format(), "Instruction22x");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x12));
+        assert_eq!(inst.b(inst.bytes()), Some(0x3456));
+        assert_eq!(inst.c(inst.bytes()), None);
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction23x() {
+        let inst = Instruction23x {
+            opcode: OpCode::NOP,
+            length: 2,
+            bytes: vec![0x1200, 0x3456]
+        };
+
+        assert_eq!(inst.length(), 2);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x1200, 0x3456]);
+        assert_eq!(inst.inst_format(), "Instruction23x");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x12));
+        assert_eq!(inst.b(inst.bytes()), Some(0x34));
+        assert_eq!(inst.c(inst.bytes()), Some(0x56));
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction22b() {
+        let inst = Instruction22b {
+            opcode: OpCode::NOP,
+            length: 2,
+            bytes: vec![0x1200, 0x3456]
+        };
+
+        assert_eq!(inst.length(), 2);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x1200, 0x3456]);
+        assert_eq!(inst.inst_format(), "Instruction22b");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x12));
+        assert_eq!(inst.b(inst.bytes()), Some(0x34));
+        assert_eq!(inst.c(inst.bytes()), Some(0x56));
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction22c() {
+        let inst = Instruction22c {
+            opcode: OpCode::NOP,
+            length: 2,
+            bytes: vec![0x1200, 0x3456]
+        };
+
+        assert_eq!(inst.length(), 2);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x1200, 0x3456]);
+        assert_eq!(inst.inst_format(), "Instruction22c");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x2));
+        assert_eq!(inst.b(inst.bytes()), Some(0x1));
+        assert_eq!(inst.c(inst.bytes()), Some(0x3456));
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction22s() {
+        let inst = Instruction22s {
+            opcode: OpCode::NOP,
+            length: 2,
+            bytes: vec![0x1200, 0x3456]
+        };
+
+        assert_eq!(inst.length(), 2);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x1200, 0x3456]);
+        assert_eq!(inst.inst_format(), "Instruction22s");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x2));
+        assert_eq!(inst.b(inst.bytes()), Some(0x1));
+        assert_eq!(inst.c(inst.bytes()), Some(0x3456));
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction22t() {
+        let inst = Instruction22t {
+            opcode: OpCode::NOP,
+            length: 2,
+            bytes: vec![0x1200, 0x3456]
+        };
+
+        assert_eq!(inst.length(), 2);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x1200, 0x3456]);
+        assert_eq!(inst.inst_format(), "Instruction22t");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x2));
+        assert_eq!(inst.b(inst.bytes()), Some(0x1));
+        assert_eq!(inst.c(inst.bytes()), Some(0x3456));
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction30t() {
+        let inst = Instruction30t {
+            opcode: OpCode::NOP,
+            length: 3,
+            bytes: vec![0x00, 0x5678, 0x1234]
+        };
+
+        assert_eq!(inst.length(), 3);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x00, 0x5678, 0x1234]);
+        assert_eq!(inst.inst_format(), "Instruction30t");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x12345678));
+        assert_eq!(inst.b(inst.bytes()), None);
+        assert_eq!(inst.c(inst.bytes()), None);
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction31c() {
+        let inst = Instruction31c {
+            opcode: OpCode::NOP,
+            length: 3,
+            bytes: vec![0x1200, 0x5678, 0x1234]
+        };
+
+        assert_eq!(inst.length(), 3);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x1200, 0x5678, 0x1234]);
+        assert_eq!(inst.inst_format(), "Instruction31c");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x12));
+        assert_eq!(inst.b(inst.bytes()), Some(0x12345678));
+        assert_eq!(inst.c(inst.bytes()), None);
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction31i() {
+        let inst = Instruction31i {
+            opcode: OpCode::NOP,
+            length: 3,
+            bytes: vec![0x1200, 0x5678, 0x1234]
+        };
+
+        assert_eq!(inst.length(), 3);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x1200, 0x5678, 0x1234]);
+        assert_eq!(inst.inst_format(), "Instruction31i");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x12));
+        assert_eq!(inst.b(inst.bytes()), Some(0x12345678));
+        assert_eq!(inst.c(inst.bytes()), None);
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction31t() {
+        let inst = Instruction31t {
+            opcode: OpCode::NOP,
+            length: 3,
+            bytes: vec![0x1200, 0x5678, 0x1234]
+        };
+
+        assert_eq!(inst.length(), 3);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x1200, 0x5678, 0x1234]);
+        assert_eq!(inst.inst_format(), "Instruction31t");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x12));
+        assert_eq!(inst.b(inst.bytes()), Some(0x12345678));
+        assert_eq!(inst.c(inst.bytes()), None);
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction32x() {
+        let inst = Instruction32x {
+            opcode: OpCode::NOP,
+            length: 3,
+            bytes: vec![0x00, 0x1234, 0x5678]
+        };
+
+        assert_eq!(inst.length(), 3);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x00, 0x1234, 0x5678]);
+        assert_eq!(inst.inst_format(), "Instruction32x");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x1234));
+        assert_eq!(inst.b(inst.bytes()), Some(0x5678));
+        assert_eq!(inst.c(inst.bytes()), None);
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction35c() {
+        let inst = Instruction35c {
+            opcode: OpCode::NOP,
+            length: 3,
+            bytes: vec![0x1200, 0x3456, 0x7890]
+        };
+
+        assert_eq!(inst.length(), 3);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x1200, 0x3456, 0x7890]);
+        assert_eq!(inst.inst_format(), "Instruction35c");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x01));
+        assert_eq!(inst.b(inst.bytes()), Some(0x3456));
+        assert_eq!(inst.c(inst.bytes()), Some(0x00));
+        assert_eq!(inst.d(inst.bytes()), Some(0x09));
+        assert_eq!(inst.e(inst.bytes()), Some(0x08));
+        assert_eq!(inst.f(inst.bytes()), Some(0x07));
+        assert_eq!(inst.g(inst.bytes()), Some(0x02));
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction3rc() {
+        let inst = Instruction3rc {
+            opcode: OpCode::NOP,
+            length: 3,
+            bytes: vec![0x1200, 0x3456, 0x7890]
+        };
+
+        assert_eq!(inst.length(), 3);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x1200, 0x3456, 0x7890]);
+        assert_eq!(inst.inst_format(), "Instruction3rc");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x12));
+        assert_eq!(inst.b(inst.bytes()), Some(0x3456));
+        assert_eq!(inst.c(inst.bytes()), Some(0x7890));
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+
+    #[test]
+    fn test_instruction45cc() {
+        let inst = Instruction45cc {
+            opcode: OpCode::NOP,
+            length: 4,
+            bytes: vec![0x1200, 0x3456, 0x7890, 0x1234]
+        };
+
+        assert_eq!(inst.length(), 4);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x1200, 0x3456, 0x7890, 0x1234]);
+        assert_eq!(inst.inst_format(), "Instruction45cc");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x01));
+        assert_eq!(inst.b(inst.bytes()), Some(0x03456));
+        assert_eq!(inst.c(inst.bytes()), Some(0x00));
+        assert_eq!(inst.d(inst.bytes()), Some(0x09));
+        assert_eq!(inst.e(inst.bytes()), Some(0x08));
+        assert_eq!(inst.f(inst.bytes()), Some(0x07));
+        assert_eq!(inst.g(inst.bytes()), Some(0x02));
+        assert_eq!(inst.h(inst.bytes()), Some(0x1234));
+    }
+
+    #[test]
+    fn test_instruction4rcc() {
+        let inst = Instruction4rcc {
+            opcode: OpCode::NOP,
+            length: 4,
+            bytes: vec![0x1200, 0x3456, 0x7890, 0x1234]
+        };
+
+        assert_eq!(inst.length(), 4);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x1200, 0x3456, 0x7890, 0x1234]);
+        assert_eq!(inst.inst_format(), "Instruction4rcc");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x12));
+        assert_eq!(inst.b(inst.bytes()), Some(0x3456));
+        assert_eq!(inst.c(inst.bytes()), Some(0x7890));
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), Some(0x1234));
+    }
+
+    #[test]
+    fn test_instruction51l() {
+        let inst = Instruction51l {
+            opcode: OpCode::NOP,
+            length: 5,
+            bytes: vec![0x1200, 0x3456, 0x9012, 0x5678, 0x1234]
+        };
+
+        assert_eq!(inst.length(), 5);
+        assert_eq!(inst.opcode(), OpCode::NOP);
+        assert_eq!(inst.bytes(), vec![0x1200, 0x3456, 0x9012, 0x5678, 0x1234]);
+        assert_eq!(inst.inst_format(), "Instruction51l");
+
+        assert_eq!(inst.a(inst.bytes()), Some(0x12));
+        assert_eq!(inst.b(inst.bytes()), Some(0x1234_5678_9012_3456));
+        assert_eq!(inst.c(inst.bytes()), None);
+        assert_eq!(inst.d(inst.bytes()), None);
+        assert_eq!(inst.e(inst.bytes()), None);
+        assert_eq!(inst.f(inst.bytes()), None);
+        assert_eq!(inst.g(inst.bytes()), None);
+        assert_eq!(inst.h(inst.bytes()), None);
+    }
+}
