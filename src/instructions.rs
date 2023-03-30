@@ -1240,6 +1240,18 @@ impl PackedSwitchPayload {
             targets
         }
     }
+
+    fn get_size(&self) -> usize {
+        self.size as usize
+    }
+
+    fn get_first_key(&self) -> i32 {
+        self.first_key
+    }
+
+    fn get_targets(&self) -> &[i32] {
+        &self.targets
+    }
 }
 
 impl InstructionHandler for PackedSwitchPayload {
@@ -2969,15 +2981,46 @@ mod tests {
         let bytes = [0xff, 0x00, 0x00, 0x00, 0x00];
         let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
         assert_eq!(inst.inst_format(), "Instruction21c");
+    }
 
-        let bytes = [0x0100, 0x00, 0x00, 0x00, 0x00];
+    #[test]
+    fn test_parse_packed_switch_payload() {
+        let bytes = [
+            0x0100,     // opcode
+            0x0002,     // size
+            0x0000,     // first_key
+            0x0000,     // ...
+            0x0000,      // targets
+            0x0000,     // ...
+            0x0000,     // ...
+            0x0001,     // ...
+        ];
         let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
         assert_eq!(inst.inst_format(), "PackedSwitchPayload");
 
+        let any_inst = match inst.as_ref()
+                                 .as_any()
+                                 .downcast_ref::<PackedSwitchPayload>() {
+            Some(ins) => ins,
+            None      => {
+                error!("cannot access PackedSwitchPayload from Box");
+                panic!("error: cannot access PackedSwitchPayload from Box");
+            }
+        };
+        assert_eq!(any_inst.get_size(), 2);
+        assert_eq!(any_inst.get_first_key(), 0);
+        assert_eq!(any_inst.get_targets(), &vec![0x00, 0x0001_0000]);
+    }
+
+    #[test]
+    fn test_parse_sparse_switch_payload() {
         let bytes = [0x0200, 0x00, 0x00, 0x00, 0x00];
         let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
         assert_eq!(inst.inst_format(), "SparseSwitchPayload");
+    }
 
+    #[test]
+    fn test_parse_fill_array_data_payload() {
         let bytes = [0x0300, 0x01, 0x00, 0x00, 0x00];
         let inst = parse(&bytes, 0, &DexEndianness::LittleEndian);
         assert_eq!(inst.inst_format(), "FillArrayDataPayload");
