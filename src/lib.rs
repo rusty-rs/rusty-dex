@@ -2,6 +2,9 @@
 
 use clap::Parser;
 
+use crate::dex_reader::DexReader;
+use crate::dex_file::DexFile;
+
 pub mod logging;
 pub mod dex_header;
 pub mod dex_file;
@@ -48,4 +51,9 @@ pub struct CliArgs {
     /// Loglevel
     #[arg(short, long, default_value_t = 0)]
     pub log_level: u8,
+}
+
+pub fn parse(filepath: &str) -> DexFile {
+    let dex_reader = DexReader::build(filepath);
+    DexFile::build(dex_reader)
 }
