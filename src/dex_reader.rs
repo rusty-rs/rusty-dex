@@ -43,14 +43,17 @@ impl DexReader {
 
         let mut raw_dex = Vec::new();
         dex_entry.read_to_end(&mut raw_dex)
-                .unwrap_or_else(|err| die!("Could not read input file: {err}"));
+                 .unwrap_or_else(|err| die!("Could not read input file: {err}"));
 
         raw_dex
     }
 
-    pub fn build(filepath: &str) -> Self {
+    pub fn build_from_file(filepath: &str) -> Self {
         let mut raw_dex = Self::open_from_file(filepath);
+        Self::build(raw_dex)
+    }
 
+    pub fn build(raw_dex: Vec<u8>) -> Self {
         let endianness = DexReader::check_endianness(&raw_dex).unwrap();
 
         let mut bytes = Cursor::new(raw_dex);
