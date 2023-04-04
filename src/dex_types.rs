@@ -4,9 +4,9 @@ use crate::dex_reader::DexReader;
 use crate::dex_strings::DexStrings;
 
 #[derive(Debug)]
-pub struct DexTypeItem {
+struct DexTypeItem {
     offset: u32,
-    pub str_type: String,
+    str_type: String,
 }
 
 #[derive(Debug)]
