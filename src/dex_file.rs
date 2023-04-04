@@ -55,6 +55,7 @@ impl DexFile {
                                                 dex_header.class_defs_size,
                                                 &field_ids_list,
                                                 &type_ids_list,
+                                                &strings_list,
                                                 &method_ids_list);
 
         DexFile {

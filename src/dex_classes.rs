@@ -3,6 +3,7 @@ use std::io::{Seek, SeekFrom};
 use crate::dex_reader::DexReader;
 use crate::dex_fields::DexFields;
 use crate::dex_types::DexTypes;
+use crate::dex_strings::DexStrings;
 use crate::dex_methods::DexMethods;
 use crate::access_flags::{ AccessFlag, AccessFlagType };
 use crate::code_item::CodeItem;
@@ -11,11 +12,11 @@ const NO_INDEX: u32 = 0xffffffff;
 
 #[derive(Debug)]
 pub struct ClassDefItem {
-    pub class_idx: u32,
+    class_str: String,
     access_flags: Vec<AccessFlag>,
-    pub superclass_idx: u32,
+    superclass_str: Option<String>,
     interfaces_off: u32,
-    source_file_idx: u32,
+    source_file_str: Option<String>,
     annotations_off: u32,
     class_data_off: u32,
     static_value_off: u32,
@@ -58,6 +59,7 @@ impl DexClasses {
                  size: u32,
                  fields_list: &DexFields,
                  types_list: &DexTypes,
+                 strings_list: &DexStrings,
                  methods_list: &DexMethods) -> Self {
         dex_reader.bytes.seek(SeekFrom::Start(offset.into())).unwrap();
 
@@ -75,6 +77,24 @@ impl DexClasses {
             let annotations_off  = dex_reader.read_u32().unwrap();
             let class_data_off   = dex_reader.read_u32().unwrap();
             let static_value_off = dex_reader.read_u32().unwrap();
+
+            // Convert indexs into human-readable strings
+            let class_str = types_list.items
+                                      .get(class_idx as usize).unwrap();
+
+            let mut superclass_str = None;
+            if superclass_idx != NO_INDEX {
+                superclass_str = Some(types_list.items
+                                                .get(superclass_idx as usize)
+                                                .unwrap());
+            }
+
+            let mut source_file_str = None;
+            if source_file_idx != NO_INDEX {
+                source_file_str = Some(strings_list.strings
+                                                   .get(source_file_idx as usize)
+                                                   .unwrap());
+            }
 
             // If class_data_off == 0 then we have no class data
             let mut class_data = None;
@@ -225,11 +245,11 @@ impl DexClasses {
             }
 
             methods.push(ClassDefItem {
-                class_idx,
+                class_str: class_str.to_string(),
                 access_flags: access_flags_decoded,
-                superclass_idx,
+                superclass_str: superclass_str.cloned(),
                 interfaces_off,
-                source_file_idx,
+                source_file_str: source_file_str.cloned(),
                 annotations_off,
                 class_data_off,
                 static_value_off,
