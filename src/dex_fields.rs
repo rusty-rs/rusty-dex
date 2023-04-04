@@ -68,8 +68,8 @@ impl DexFields {
         fields.sort_by(DexFields::sort);
 
         let mut items = Vec::new();
-        for dex_field in fields.iter() {
-            items.push(dex_field.decoded.clone());
+        for dex_field in fields.into_iter() {
+            items.push(dex_field.decoded);
         }
         items.dedup();
 

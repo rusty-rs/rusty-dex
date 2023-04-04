@@ -69,8 +69,8 @@ impl DexMethods {
         methods.sort_by(DexMethods::sort);
 
         let mut items = Vec::new();
-        for dex_method in methods.iter() {
-            items.push(dex_method.decoded.clone());
+        for dex_method in methods.into_iter() {
+            items.push(dex_method.decoded);
         }
         items.dedup();
 
