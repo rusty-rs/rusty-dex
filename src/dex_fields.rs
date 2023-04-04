@@ -6,7 +6,7 @@ use crate::dex_types::DexTypes;
 use crate::dex_strings::DexStrings;
 
 #[derive(Debug)]
-pub struct FieldIdItem {
+struct FieldIdItem {
     class_idx: u16,
     type_idx: u16,
     name_idx: u32,
