@@ -53,7 +53,7 @@ impl DexFields {
             let mut decoded = String::new();
             decoded.push_str(types_list.items.get(class_idx as usize).unwrap());
             decoded.push_str("->");
-            decoded.push_str(&strings_list.strings.get(name_idx as usize).unwrap().string);
+            decoded.push_str(&strings_list.strings.get(name_idx as usize).unwrap());
             decoded.push(':');
             decoded.push_str(types_list.items.get(type_idx as usize).unwrap());
 

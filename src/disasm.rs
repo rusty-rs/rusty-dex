@@ -198,7 +198,7 @@ pub fn disasm_ins(ins: &(impl InstructionHandler + ?Sized),
 
         OpCode::CONST_STRING | OpCode::CONST_STRING_JUMBO
             => {
-                let string = &strings.strings[ins.b(ins.bytes()).unwrap() as usize].string;
+                let string = &strings.strings[ins.b(ins.bytes()).unwrap() as usize];
                 format!("{} v{} \"{}\"",
                         ins.opcode(),
                         ins.a(ins.bytes()).unwrap(),
