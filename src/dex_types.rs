@@ -33,8 +33,8 @@ impl DexTypes {
         types.sort_by(|a, b| a.offset.cmp(&b.offset));
 
         let mut items = Vec::new();
-        for dex_type in types.iter() {
-            items.push(dex_type.str_type.clone());
+        for dex_type in types.into_iter() {
+            items.push(dex_type.str_type);
         }
         items.dedup();
 
