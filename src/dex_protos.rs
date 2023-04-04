@@ -88,8 +88,8 @@ impl DexProtos {
         protos.sort_by(DexProtos::sort);
 
         let mut items = Vec::new();
-        for dex_proto in protos.iter() {
-            items.push(dex_proto.proto.clone());
+        for dex_proto in protos.into_iter() {
+            items.push(dex_proto.proto);
         }
         items.dedup();
 
