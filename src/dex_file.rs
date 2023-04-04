@@ -70,7 +70,7 @@ impl DexFile {
     }
 
     pub fn disasm(&self) {
-        println!("{:#?}", self.strings);
+        /* println!("{:#?}", self.strings);
         println!("-------------------------");
         for class in &self.classes.items {
             println!("{}", self.types.items[class.class_idx as usize]);
@@ -96,6 +96,6 @@ impl DexFile {
                     println!("");
                 }
             }
-        }
+        } */
     }
 }
