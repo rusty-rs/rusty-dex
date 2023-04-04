@@ -5,12 +5,12 @@ use crate::dex_reader::DexReader;
 use crate::dex_types::DexTypes;
 
 #[derive(Debug)]
-pub struct ProtoIdItem {
+struct ProtoIdItem {
     shorty_idx: u32,
     return_type_idx: u32,
     parameters_off: u32,
     parameters_off_list: Vec<u16>,  // used to sort items
-    pub proto: String,
+    proto: String,
 }
 
 #[derive(Debug)]
