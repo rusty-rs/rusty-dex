@@ -1,12 +1,14 @@
 use std::io::{Seek, SeekFrom};
 
 use crate::dex_reader::DexReader;
-use crate::dex_fields::DexFields;
-use crate::dex_types::DexTypes;
-use crate::dex_strings::DexStrings;
-use crate::dex_methods::DexMethods;
 use crate::access_flags::{ AccessFlag, AccessFlagType };
 use crate::code_item::CodeItem;
+
+use crate::dex_strings::DexStrings;
+use crate::dex_types::DexTypes;
+use crate::dex_protos::DexProtos;
+use crate::dex_fields::DexFields;
+use crate::dex_methods::DexMethods;
 
 const NO_INDEX: u32 = 0xffffffff;
 
@@ -250,5 +252,47 @@ impl DexClasses {
         }
 
         DexClasses { items: methods }
+    }
+}
+
+impl ClassDefItem {
+    pub fn disasm(&self,
+                  dex_strings: &DexStrings,
+                  dex_types: &DexTypes,
+                  dex_fields: &DexFields,
+                  dex_protos: &DexProtos,
+                  dex_methods: &DexMethods,
+                  dex_classes: &DexClasses) {
+
+        if let Some(class_data) = &self.class_data {
+            for method in class_data.direct_methods.iter() {
+                method.disasm(dex_strings,
+                                dex_types,
+                                dex_fields,
+                                dex_protos,
+                                dex_methods,
+                                dex_classes);
+            }
+            println!();
+        }
+    }
+}
+
+impl EncodedMethod {
+    pub fn disasm(&self,
+                  dex_strings: &DexStrings,
+                  dex_types: &DexTypes,
+                  dex_fields: &DexFields,
+                  dex_protos: &DexProtos,
+                  dex_methods: &DexMethods,
+                  dex_classes: &DexClasses) {
+        if let Some(code) = &self.code_item {
+            code.disasm(dex_strings,
+                        dex_types,
+                        dex_fields,
+                        dex_protos,
+                        dex_methods,
+                        dex_classes);
+        }
     }
 }

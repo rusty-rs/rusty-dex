@@ -70,9 +70,16 @@ impl DexFile {
     }
 
     pub fn disasm(&self) {
-        /* println!("{:#?}", self.strings);
+        println!("{:#?}", self.strings);
         println!("-------------------------");
         for class in &self.classes.items {
+            class.disasm(&self.strings,
+                         &self.types,
+                         &self.fields,
+                         &self.protos,
+                         &self.methods,
+                         &self.classes);
+            /*
             println!("{}", self.types.items[class.class_idx as usize]);
             if let Some(class_data) = &class.class_data {
                 for method in &class_data.direct_methods {
@@ -95,7 +102,7 @@ impl DexFile {
                     }
                     println!("");
                 }
-            }
-        } */
+            }*/
+        }
     }
 }

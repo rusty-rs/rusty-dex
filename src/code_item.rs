@@ -1,8 +1,15 @@
 use std::io::{Seek, SeekFrom};
 
 use crate::dex_reader::DexReader;
-use crate::dex_types::DexTypes;
 use crate::instructions::{ InstructionsReader, InstructionHandler };
+
+use crate::dex_strings::DexStrings;
+use crate::dex_types::DexTypes;
+use crate::dex_protos::DexProtos;
+use crate::dex_fields::DexFields;
+use crate::dex_classes::DexClasses;
+use crate::dex_methods::DexMethods;
+use crate::disasm;
 
 #[derive(Debug)]
 pub struct TryItem {
@@ -30,7 +37,7 @@ pub struct CodeItem {
     ins_size      : u16,
     outs_size     : u16,
     debug_info_off: u32,
-    pub insns         : Option<Vec<Box<dyn InstructionHandler>>>,
+    insns         : Option<Vec<Box<dyn InstructionHandler>>>,
     tries         : Option<Vec<TryItem>>,
     handlers      : Option<Vec<EncodedCatchHandler>>
 }
@@ -138,6 +145,30 @@ impl CodeItem {
                 insns: parsed_ins,
                 tries: None,
                 handlers: None
+            }
+        }
+    }
+
+    pub fn disasm(&self,
+                  dex_strings: &DexStrings,
+                  dex_types: &DexTypes,
+                  dex_fields: &DexFields,
+                  dex_protos: &DexProtos,
+                  dex_methods: &DexMethods,
+                  dex_classes: &DexClasses) {
+        let mut offset = 0;
+        if let Some(insns) = &self.insns {
+            for ins in insns {
+                println!("{:>5}  |  {}",
+                         offset * 2,
+                         disasm::disasm_ins(ins.as_ref(),
+                                            dex_strings,
+                                            dex_types,
+                                            dex_fields,
+                                            dex_protos,
+                                            dex_methods,
+                                            dex_classes));
+                offset += ins.length();
             }
         }
     }
