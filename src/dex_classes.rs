@@ -273,7 +273,6 @@ impl ClassDefItem {
                                 dex_methods,
                                 dex_classes);
             }
-            println!();
         }
     }
 }

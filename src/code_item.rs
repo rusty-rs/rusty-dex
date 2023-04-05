@@ -171,5 +171,6 @@ impl CodeItem {
                 offset += ins.length();
             }
         }
+        println!();
     }
 }
