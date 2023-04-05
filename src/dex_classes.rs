@@ -20,7 +20,7 @@ pub struct ClassDefItem {
     annotations_off: u32,
     class_data_off: u32,
     static_value_off: u32,
-    pub class_data: Option<ClassDataItem>
+    class_data: Option<ClassDataItem>
 }
 
 #[derive(Debug)]
@@ -31,21 +31,17 @@ pub struct EncodedField {
 
 #[derive(Debug)]
 pub struct EncodedMethod {
-    pub proto: String,
+    proto: String,
     access_flags: Vec<AccessFlag>,
-    pub code_item: Option<CodeItem>,
+    code_item: Option<CodeItem>,
 }
 
 #[derive(Debug)]
 pub struct ClassDataItem {
-    static_fields_size: u32,
-    instance_fields_size: u32,
-    direct_methods_size: u32,
-    virtual_methods_size: u32,
-    pub static_fields: Vec<EncodedField>,
-    pub instance_fields: Vec<EncodedField>,
-    pub direct_methods: Vec<EncodedMethod>,
-    pub virtual_methods: Vec<EncodedMethod>,
+    static_fields: Vec<EncodedField>,
+    instance_fields: Vec<EncodedField>,
+    direct_methods: Vec<EncodedMethod>,
+    virtual_methods: Vec<EncodedMethod>,
 }
 
 #[derive(Debug)]
@@ -233,10 +229,6 @@ impl DexClasses {
                 dex_reader.bytes.seek(SeekFrom::Start(current_offset)).unwrap();
 
                 class_data = Some(ClassDataItem {
-                    static_fields_size,
-                    instance_fields_size,
-                    direct_methods_size,
-                    virtual_methods_size,
                     static_fields,
                     instance_fields,
                     direct_methods,
