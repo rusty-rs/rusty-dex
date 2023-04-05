@@ -70,8 +70,6 @@ impl DexFile {
     }
 
     pub fn disasm(&self) {
-        println!("{:#?}", self.strings);
-        println!("-------------------------");
         for class in &self.classes.items {
             class.disasm(&self.strings,
                          &self.types,
@@ -79,30 +77,6 @@ impl DexFile {
                          &self.protos,
                          &self.methods,
                          &self.classes);
-            /*
-            println!("{}", self.types.items[class.class_idx as usize]);
-            if let Some(class_data) = &class.class_data {
-                for method in &class_data.direct_methods {
-                    println!("  --> {}", &method.proto);
-                    if let Some(code) = &method.code_item {
-                        let mut offset = 0;
-                        if let Some(insns) = &code.insns {
-                            for ins in insns {
-                                println!("{} {}", offset * 2,
-                                         disasm::disasm_ins(ins.as_ref(),
-                                                            &self.strings,
-                                                            &self.types,
-                                                            &self.fields,
-                                                            &self.protos,
-                                                            &self.methods,
-                                                            &self.classes));
-                                offset += ins.length();
-                            }
-                        }
-                    }
-                    println!("");
-                }
-            }*/
         }
     }
 }
