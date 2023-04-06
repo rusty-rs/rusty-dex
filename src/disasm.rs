@@ -245,9 +245,9 @@ pub fn disasm_ins(ins: &(impl InstructionHandler + ?Sized),
                 format!("{} {} {}", ins.opcode(), args, proto)
             }
 
-        OpCode::INVOKE_DIRECT_RANGE       | OpCode::INVOKE_INTERFACE_RANGE
-            | OpCode::INVOKE_STATIC_RANGE | OpCode::INVOKE_SUPER_RANGE
-            | OpCode::INVOKE_VIRTUAL_RANGE
+        OpCode::INVOKE_DIRECT_RANGE        | OpCode::INVOKE_INTERFACE_RANGE
+            | OpCode::INVOKE_STATIC_RANGE  | OpCode::INVOKE_SUPER_RANGE
+            | OpCode::INVOKE_VIRTUAL_RANGE | OpCode::FILLED_NEW_ARRAY_RANGE
             => {
                 let proto = &methods.items[ins.b(ins.bytes()).unwrap() as usize];
                 let mut first_reg = ins.c(ins.bytes()).unwrap();
@@ -303,9 +303,6 @@ pub fn disasm_ins(ins: &(impl InstructionHandler + ?Sized),
 
                 format!("{} {} {}", ins.opcode(), args, array_type)
             }
-
-        OpCode::FILLED_NEW_ARRAY_RANGE
-            => todo!("TODO {}", ins.opcode()),
 
         /* Present in DEX files from version 038 onwards */
         OpCode::INVOKE_CUSTOM
