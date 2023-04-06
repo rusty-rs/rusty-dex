@@ -765,7 +765,7 @@ impl fmt::Display for OpCode {
             OpCode::NEW_INSTANCE => write!(f, "new-instance"),
             OpCode::NEW_ARRAY => write!(f, "new-array"),
             OpCode::FILLED_NEW_ARRAY => write!(f, "filled-new-array"),
-            OpCode::FILLED_NEW_ARRAY_RANGE => write!(f, "filled-new-array-range"),
+            OpCode::FILLED_NEW_ARRAY_RANGE => write!(f, "filled-new-array/range"),
             OpCode::FILL_ARRAY_DATA => write!(f, "fill-array-data"),
             OpCode::THROW => write!(f, "throw"),
             OpCode::GOTO => write!(f, "goto"),
@@ -2024,7 +2024,7 @@ mod tests {
         assert_eq!(opcode.to_string(), "filled-new-array");
 
         let opcode = OpCode::FILLED_NEW_ARRAY_RANGE;
-        assert_eq!(opcode.to_string(), "filled-new-array-range");
+        assert_eq!(opcode.to_string(), "filled-new-array/range");
 
         let opcode = OpCode::FILL_ARRAY_DATA;
         assert_eq!(opcode.to_string(), "fill-array-data");
