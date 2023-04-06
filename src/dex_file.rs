@@ -78,8 +78,18 @@ impl DexFile {
     }
 
     pub fn get_classes(&self) {
+        let mut class_names = Vec::new();
         for class in &self.classes.items {
-            println!("{}", class.get_class_name());
+            class_names.push((class.get_class_name(),
+                              class.get_access_flags()));
+        }
+
+        for (class_name, access_flags) in class_names.iter() {
+            if access_flags.is_empty() {
+                println!("{}", class_name);
+            } else {
+                println!("{} ({})", class_name, access_flags);
+            }
         }
     }
 }

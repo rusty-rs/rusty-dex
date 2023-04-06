@@ -285,6 +285,10 @@ impl ClassDefItem {
     pub fn get_class_name(&self) -> &String {
         &self.class_str
     }
+
+    pub fn get_access_flags(&self) -> String {
+        AccessFlag::vec_to_string(&self.access_flags)
+    }
 }
 
 impl EncodedMethod {
