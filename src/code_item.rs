@@ -5,9 +5,7 @@ use crate::instructions::{ InstructionsReader, InstructionHandler };
 
 use crate::dex_strings::DexStrings;
 use crate::dex_types::DexTypes;
-use crate::dex_protos::DexProtos;
 use crate::dex_fields::DexFields;
-use crate::dex_classes::DexClasses;
 use crate::dex_methods::DexMethods;
 use crate::disasm;
 
@@ -153,9 +151,7 @@ impl CodeItem {
                   dex_strings: &DexStrings,
                   dex_types: &DexTypes,
                   dex_fields: &DexFields,
-                  dex_protos: &DexProtos,
-                  dex_methods: &DexMethods,
-                  dex_classes: &DexClasses) {
+                  dex_methods: &DexMethods) {
         let mut offset = 0;
         if let Some(insns) = &self.insns {
             for ins in insns {
@@ -165,9 +161,7 @@ impl CodeItem {
                                             dex_strings,
                                             dex_types,
                                             dex_fields,
-                                            dex_protos,
-                                            dex_methods,
-                                            dex_classes));
+                                            dex_methods));
                 offset += ins.length();
             }
         }

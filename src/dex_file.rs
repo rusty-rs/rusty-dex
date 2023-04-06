@@ -6,7 +6,6 @@ use crate::dex_protos::DexProtos;
 use crate::dex_fields::DexFields;
 use crate::dex_methods::DexMethods;
 use crate::dex_classes::DexClasses;
-use crate::disasm;
 
 #[derive(Debug)]
 pub struct DexFile {
@@ -74,9 +73,7 @@ impl DexFile {
             class.disasm(&self.strings,
                          &self.types,
                          &self.fields,
-                         &self.protos,
-                         &self.methods,
-                         &self.classes);
+                         &self.methods);
         }
     }
 }

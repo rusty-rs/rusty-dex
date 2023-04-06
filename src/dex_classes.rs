@@ -6,7 +6,6 @@ use crate::code_item::CodeItem;
 
 use crate::dex_strings::DexStrings;
 use crate::dex_types::DexTypes;
-use crate::dex_protos::DexProtos;
 use crate::dex_fields::DexFields;
 use crate::dex_methods::DexMethods;
 
@@ -260,29 +259,23 @@ impl ClassDefItem {
                   dex_strings: &DexStrings,
                   dex_types: &DexTypes,
                   dex_fields: &DexFields,
-                  dex_protos: &DexProtos,
-                  dex_methods: &DexMethods,
-                  dex_classes: &DexClasses) {
+                  dex_methods: &DexMethods) {
 
         println!("{}", self.class_str);
         println!("―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――");
         if let Some(class_data) = &self.class_data {
             for method in class_data.direct_methods.iter() {
                 method.disasm(dex_strings,
-                                dex_types,
-                                dex_fields,
-                                dex_protos,
-                                dex_methods,
-                                dex_classes);
+                              dex_types,
+                              dex_fields,
+                              dex_methods);
             }
 
             for method in class_data.virtual_methods.iter() {
                 method.disasm(dex_strings,
-                                dex_types,
-                                dex_fields,
-                                dex_protos,
-                                dex_methods,
-                                dex_classes);
+                              dex_types,
+                              dex_fields,
+                              dex_methods);
             }
         } else {
             println!("No code in this class");
@@ -295,9 +288,7 @@ impl EncodedMethod {
                   dex_strings: &DexStrings,
                   dex_types: &DexTypes,
                   dex_fields: &DexFields,
-                  dex_protos: &DexProtos,
-                  dex_methods: &DexMethods,
-                  dex_classes: &DexClasses) {
+                  dex_methods: &DexMethods) {
         println!("     {}", self.proto);
         println!("     {}", AccessFlag::vec_to_string(&self.access_flags));
         println!("     ――――――――――――――――――――");
@@ -305,9 +296,7 @@ impl EncodedMethod {
             code.disasm(dex_strings,
                         dex_types,
                         dex_fields,
-                        dex_protos,
-                        dex_methods,
-                        dex_classes);
+                        dex_methods);
         } else {
             println!("     No code in this method\n");
         }

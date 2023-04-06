@@ -49,7 +49,7 @@ impl DexReader {
     }
 
     pub fn build_from_file(filepath: &str) -> Self {
-        let mut raw_dex = Self::open_from_file(filepath);
+        let raw_dex = Self::open_from_file(filepath);
         Self::build(raw_dex)
     }
 

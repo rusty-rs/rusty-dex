@@ -1,8 +1,6 @@
 use crate::dex_strings::DexStrings;
 use crate::dex_types::DexTypes;
-use crate::dex_protos::DexProtos;
 use crate::dex_fields::DexFields;
-use crate::dex_classes::DexClasses;
 use crate::dex_methods::DexMethods;
 
 use crate::instructions::InstructionHandler;
@@ -13,9 +11,7 @@ pub fn disasm_ins(ins: &(impl InstructionHandler + ?Sized),
                   strings: &DexStrings,
                   types: &DexTypes,
                   fields: &DexFields,
-                  protos: &DexProtos,
-                  methods: &DexMethods,
-                  class_defs: &DexClasses) -> String {
+                  methods: &DexMethods) -> String {
     match ins.opcode() {
         OpCode::GOTO | OpCode::GOTO_16
             | OpCode::GOTO_32 => format!("{} +{}",
