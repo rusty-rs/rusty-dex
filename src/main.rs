@@ -15,11 +15,11 @@ struct CliArgs {
     #[arg(short, long)]
     apk: String,
 
-    /// Loglevel
+    /// Log level
     #[arg(short, long, default_value_t = 0)]
     log_level: u8,
 
-    /// Command to run
+    /// Command to run (default: `disasm`)
     #[command(subcommand)]
     cmd: Option<Commands>,
 }
@@ -29,10 +29,16 @@ enum Commands {
     /// Disassemble the whole app
     Disasm, /* {
         // TODO might be cool to recreate the app structure
+        // when disassembling the full app
+        // TODO disassemble only a class/method
         /// Disassembly options
         #[arg(short, long)]
         output: bool,
     }, */
+    /// Get the list of class names in the app
+    Classes,  // TODO: allow for some primitive regex maybe?
+    /// Get the list of methods in the app
+    Methods,  // TODO: get methods only for a specific class
 }
 
 fn main() {
@@ -57,5 +63,6 @@ fn main() {
 
     match cmd {
         Commands::Disasm => dex_file.disasm(),
+        _ => todo!("foo"),
     }
 }
