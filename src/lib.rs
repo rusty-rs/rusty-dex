@@ -1,7 +1,5 @@
 #![allow(dead_code)]
 
-use clap::Parser;
-
 use crate::dex_reader::DexReader;
 use crate::dex_file::DexFile;
 
@@ -39,18 +37,6 @@ impl Default for Config {
             log_level: 0    // only show error messages
         }
     }
-}
-
-/// CLI args
-#[derive(Parser)]
-pub struct CliArgs {
-    /// The path to the file to read
-    #[arg(short, long)]
-    pub apk: String,
-
-    /// Loglevel
-    #[arg(short, long, default_value_t = 0)]
-    pub log_level: u8,
 }
 
 pub fn parse(filepath: &str) -> DexFile {
