@@ -281,6 +281,10 @@ impl ClassDefItem {
             println!("No code in this class");
         }
     }
+
+    pub fn get_class_name(&self) -> &String {
+        &self.class_str
+    }
 }
 
 impl EncodedMethod {

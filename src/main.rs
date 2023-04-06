@@ -63,6 +63,7 @@ fn main() {
 
     match cmd {
         Commands::Disasm => dex_file.disasm(),
+        Commands::Classes => dex_file.get_classes(),
         _ => todo!("foo"),
     }
 }

@@ -76,4 +76,10 @@ impl DexFile {
                          &self.methods);
         }
     }
+
+    pub fn get_classes(&self) {
+        for class in &self.classes.items {
+            println!("{}", class.get_class_name());
+        }
+    }
 }
