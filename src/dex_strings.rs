@@ -11,16 +11,16 @@ use crate::dex_reader::DexReader;
 
 #[derive(Debug, PartialEq)]
 pub struct DexStringsItem {
-    pub utf16_size: u32,
-    pub offset: u32,
-    pub is_raw: bool,  // sometimes decoding fails but we still need an entry
+    utf16_size: u32,
+    offset: u32,
+    is_raw: bool,  // sometimes decoding fails but we still need an entry
                    // in the list so we keep the raw bytes
-    pub string: String
+    string: String
 }
 
 #[derive(Debug)]
 pub struct DexStrings {
-    pub strings: Vec<DexStringsItem>
+    pub strings: Vec<String>
 }
 
 impl DexStrings {
@@ -83,9 +83,12 @@ impl DexStrings {
         }
 
         strings.sort_by(DexStrings::sort);
-        strings.dedup();
+        let mut uniq_strings: Vec<String> = strings.into_iter()
+                                                   .map(|x| x.string)
+                                                   .collect();
+        uniq_strings.dedup();
 
-        DexStrings { strings }
+        DexStrings { strings: uniq_strings }
     }
 }
 
@@ -133,27 +136,9 @@ mod tests {
         let dex_strings = DexStrings::build(&mut dex_reader, 50, 3);
 
         assert_eq!(dex_strings.strings.len(), 3);
-        assert_eq!(dex_strings.strings[0],
-                   DexStringsItem {
-                       utf16_size: 12,
-                       offset: 0x3E,
-                       is_raw: false,
-                       string: String::from("Hello!")
-                   });
-        assert_eq!(dex_strings.strings[1],
-                   DexStringsItem {
-                       utf16_size: 72,
-                       offset: 0x46,
-                       is_raw: false,
-                       string: String::from("This is a test. \"ABCD\" in MUTF-8")
-                   });
-        assert_eq!(dex_strings.strings[2],
-                   DexStringsItem {
-                       utf16_size: 0,
-                       offset: 0x68,
-                       is_raw: false,
-                       string: String::from(""),
-                   });
+        assert_eq!(dex_strings.strings[0], String::from("Hello!"));
+        assert_eq!(dex_strings.strings[1], String::from("This is a test. \"ABCD\" in MUTF-8"));
+        assert_eq!(dex_strings.strings[2], String::from(""));
     }
 
     #[test]
@@ -176,12 +161,6 @@ mod tests {
         let dex_strings = DexStrings::build(&mut dex_reader, 50, 1);
 
         assert_eq!(dex_strings.strings.len(), 1);
-        assert_eq!(dex_strings.strings[0],
-                   DexStringsItem {
-                       utf16_size: 2,
-                       offset: 54,
-                       is_raw: true,
-                       string: String::from(""),
-                   });
+        assert_eq!(dex_strings.strings[0], String::from(""));
     }
 }

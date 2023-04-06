@@ -1,25 +1,27 @@
 use std::io::{Seek, SeekFrom};
 
 use crate::dex_reader::DexReader;
-use crate::dex_fields::DexFields;
-use crate::dex_types::DexTypes;
-use crate::dex_methods::DexMethods;
 use crate::access_flags::{ AccessFlag, AccessFlagType };
 use crate::code_item::CodeItem;
+
+use crate::dex_strings::DexStrings;
+use crate::dex_types::DexTypes;
+use crate::dex_fields::DexFields;
+use crate::dex_methods::DexMethods;
 
 const NO_INDEX: u32 = 0xffffffff;
 
 #[derive(Debug)]
 pub struct ClassDefItem {
-    pub class_idx: u32,
+    class_str: String,
     access_flags: Vec<AccessFlag>,
-    pub superclass_idx: u32,
+    superclass_str: Option<String>,
     interfaces_off: u32,
-    source_file_idx: u32,
+    source_file_str: Option<String>,
     annotations_off: u32,
     class_data_off: u32,
     static_value_off: u32,
-    pub class_data: Option<ClassDataItem>
+    class_data: Option<ClassDataItem>
 }
 
 #[derive(Debug)]
@@ -30,21 +32,17 @@ pub struct EncodedField {
 
 #[derive(Debug)]
 pub struct EncodedMethod {
-    pub proto: String,
+    proto: String,
     access_flags: Vec<AccessFlag>,
-    pub code_item: Option<CodeItem>,
+    code_item: Option<CodeItem>,
 }
 
 #[derive(Debug)]
 pub struct ClassDataItem {
-    static_fields_size: u32,
-    instance_fields_size: u32,
-    direct_methods_size: u32,
-    virtual_methods_size: u32,
-    pub static_fields: Vec<EncodedField>,
-    pub instance_fields: Vec<EncodedField>,
-    pub direct_methods: Vec<EncodedMethod>,
-    pub virtual_methods: Vec<EncodedMethod>,
+    static_fields: Vec<EncodedField>,
+    instance_fields: Vec<EncodedField>,
+    direct_methods: Vec<EncodedMethod>,
+    virtual_methods: Vec<EncodedMethod>,
 }
 
 #[derive(Debug)]
@@ -58,6 +56,7 @@ impl DexClasses {
                  size: u32,
                  fields_list: &DexFields,
                  types_list: &DexTypes,
+                 strings_list: &DexStrings,
                  methods_list: &DexMethods) -> Self {
         dex_reader.bytes.seek(SeekFrom::Start(offset.into())).unwrap();
 
@@ -75,6 +74,24 @@ impl DexClasses {
             let annotations_off  = dex_reader.read_u32().unwrap();
             let class_data_off   = dex_reader.read_u32().unwrap();
             let static_value_off = dex_reader.read_u32().unwrap();
+
+            // Convert indexs into human-readable strings
+            let class_str = types_list.items
+                                      .get(class_idx as usize).unwrap();
+
+            let mut superclass_str = None;
+            if superclass_idx != NO_INDEX {
+                superclass_str = Some(types_list.items
+                                                .get(superclass_idx as usize)
+                                                .unwrap());
+            }
+
+            let mut source_file_str = None;
+            if source_file_idx != NO_INDEX {
+                source_file_str = Some(strings_list.strings
+                                                   .get(source_file_idx as usize)
+                                                   .unwrap());
+            }
 
             // If class_data_off == 0 then we have no class data
             let mut class_data = None;
@@ -213,10 +230,6 @@ impl DexClasses {
                 dex_reader.bytes.seek(SeekFrom::Start(current_offset)).unwrap();
 
                 class_data = Some(ClassDataItem {
-                    static_fields_size,
-                    instance_fields_size,
-                    direct_methods_size,
-                    virtual_methods_size,
                     static_fields,
                     instance_fields,
                     direct_methods,
@@ -225,11 +238,11 @@ impl DexClasses {
             }
 
             methods.push(ClassDefItem {
-                class_idx,
+                class_str: class_str.to_string(),
                 access_flags: access_flags_decoded,
-                superclass_idx,
+                superclass_str: superclass_str.cloned(),
                 interfaces_off,
-                source_file_idx,
+                source_file_str: source_file_str.cloned(),
                 annotations_off,
                 class_data_off,
                 static_value_off,
@@ -238,5 +251,55 @@ impl DexClasses {
         }
 
         DexClasses { items: methods }
+    }
+}
+
+impl ClassDefItem {
+    pub fn disasm(&self,
+                  dex_strings: &DexStrings,
+                  dex_types: &DexTypes,
+                  dex_fields: &DexFields,
+                  dex_methods: &DexMethods) {
+
+        println!("{}", self.class_str);
+        println!("―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――");
+        if let Some(class_data) = &self.class_data {
+            for method in class_data.direct_methods.iter() {
+                method.disasm(dex_strings,
+                              dex_types,
+                              dex_fields,
+                              dex_methods);
+            }
+
+            for method in class_data.virtual_methods.iter() {
+                method.disasm(dex_strings,
+                              dex_types,
+                              dex_fields,
+                              dex_methods);
+            }
+        } else {
+            println!("No code in this class");
+        }
+    }
+}
+
+impl EncodedMethod {
+    pub fn disasm(&self,
+                  dex_strings: &DexStrings,
+                  dex_types: &DexTypes,
+                  dex_fields: &DexFields,
+                  dex_methods: &DexMethods) {
+        println!("     {}", self.proto);
+        println!("     {}", AccessFlag::vec_to_string(&self.access_flags));
+        println!("     ――――――――――――――――――――");
+        if let Some(code) = &self.code_item {
+            code.disasm(dex_strings,
+                        dex_types,
+                        dex_fields,
+                        dex_methods);
+        } else {
+            println!("     No code in this method\n");
+        }
+        println!("     ――――――――――――――――――――");
     }
 }

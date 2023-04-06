@@ -4,9 +4,9 @@ use crate::dex_reader::DexReader;
 use crate::dex_strings::DexStrings;
 
 #[derive(Debug)]
-pub struct DexTypeItem {
+struct DexTypeItem {
     offset: u32,
-    pub str_type: String,
+    str_type: String,
 }
 
 #[derive(Debug)]
@@ -27,14 +27,14 @@ impl DexTypes {
             let offset = dex_reader.read_u32().unwrap();
             types.push(DexTypeItem {
                 offset,
-                str_type: strings_list.strings[offset as usize].string.clone()
+                str_type: strings_list.strings[offset as usize].clone()
             });
         }
         types.sort_by(|a, b| a.offset.cmp(&b.offset));
 
         let mut items = Vec::new();
-        for dex_type in types.iter() {
-            items.push(dex_type.str_type.clone());
+        for dex_type in types.into_iter() {
+            items.push(dex_type.str_type);
         }
         items.dedup();
 
@@ -45,7 +45,6 @@ impl DexTypes {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::dex_strings::DexStringsItem;
 
     #[test]
     fn test_build_dex_types_empty() {
@@ -81,30 +80,11 @@ mod tests {
 
         let mut dex_reader = DexReader::build(dex_data);
         let strings_list = DexStrings { strings: vec![
-            DexStringsItem {
-                utf16_size: 5,
-                offset: 0,
-                is_raw: false,
-                string: "Type0".to_string()
-            },
-            DexStringsItem {
-                utf16_size: 5,
-                offset: 1,
-                is_raw: false,
-                string: "Type1".to_string()
-            },
-            DexStringsItem {
-                utf16_size: 5,
-                offset: 2,
-                is_raw: false,
-                string: "Type2".to_string()
-            },
-            DexStringsItem {
-                utf16_size: 5,
-                offset: 3,
-                is_raw: false,
-                string: "Type3".to_string()
-            }]
+                "Type0".to_string(),
+                "Type1".to_string(),
+                "Type2".to_string(),
+                "Type3".to_string(),
+            ]
         };
 
         let dex_types = DexTypes::build(&mut dex_reader, 50, 4, &strings_list);
@@ -131,24 +111,10 @@ mod tests {
 
         let mut dex_reader = DexReader::build(dex_data);
         let strings_list = DexStrings { strings: vec![
-            DexStringsItem {
-                utf16_size: 5,
-                offset: 0,
-                is_raw: false,
-                string: "Type0".to_string()
-            },
-            DexStringsItem {
-                utf16_size: 5,
-                offset: 1,
-                is_raw: false,
-                string: "Type1".to_string()
-            },
-            DexStringsItem {
-                utf16_size: 5,
-                offset: 2,
-                is_raw: false,
-                string: "Type1".to_string()
-            }]
+                "Type0".to_string(),
+                "Type1".to_string(),
+                "Type1".to_string(),
+            ]
         };
 
         let dex_types = DexTypes::build(&mut dex_reader, 50, 2, &strings_list);

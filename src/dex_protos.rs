@@ -5,12 +5,12 @@ use crate::dex_reader::DexReader;
 use crate::dex_types::DexTypes;
 
 #[derive(Debug)]
-pub struct ProtoIdItem {
+struct ProtoIdItem {
     shorty_idx: u32,
     return_type_idx: u32,
     parameters_off: u32,
     parameters_off_list: Vec<u16>,  // used to sort items
-    pub proto: String,
+    proto: String,
 }
 
 #[derive(Debug)]
@@ -88,8 +88,8 @@ impl DexProtos {
         protos.sort_by(DexProtos::sort);
 
         let mut items = Vec::new();
-        for dex_proto in protos.iter() {
-            items.push(dex_proto.proto.clone());
+        for dex_proto in protos.into_iter() {
+            items.push(dex_proto.proto);
         }
         items.dedup();
 

@@ -6,7 +6,7 @@ use crate::dex_types::DexTypes;
 use crate::dex_strings::DexStrings;
 
 #[derive(Debug)]
-pub struct FieldIdItem {
+struct FieldIdItem {
     class_idx: u16,
     type_idx: u16,
     name_idx: u32,
@@ -53,7 +53,7 @@ impl DexFields {
             let mut decoded = String::new();
             decoded.push_str(types_list.items.get(class_idx as usize).unwrap());
             decoded.push_str("->");
-            decoded.push_str(&strings_list.strings.get(name_idx as usize).unwrap().string);
+            decoded.push_str(&strings_list.strings.get(name_idx as usize).unwrap());
             decoded.push(':');
             decoded.push_str(types_list.items.get(type_idx as usize).unwrap());
 
@@ -68,8 +68,8 @@ impl DexFields {
         fields.sort_by(DexFields::sort);
 
         let mut items = Vec::new();
-        for dex_field in fields.iter() {
-            items.push(dex_field.decoded.clone());
+        for dex_field in fields.into_iter() {
+            items.push(dex_field.decoded);
         }
         items.dedup();
 

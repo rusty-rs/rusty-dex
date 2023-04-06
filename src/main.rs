@@ -1,44 +1,68 @@
-use std::fs::File;
-use std::io::Read;
-use zip::ZipArchive;
-use clap::Parser;
+use clap::{ Parser, Subcommand };
 
 extern crate dex_parser;
 
 use dex_parser::logging;
-use dex_parser::{info, die};
+use dex_parser::{ info };
 
 use dex_parser::dex_reader::DexReader;
 use dex_parser::dex_file::DexFile;
 
+/// DEX parser or some cool other name
+#[derive(Parser)]
+struct CliArgs {
+    /// The path to the file to read
+    #[arg(short, long)]
+    apk: String,
+
+    /// Log level
+    #[arg(short, long, default_value_t = 0)]
+    log_level: u8,
+
+    /// Command to run (default: `disasm`)
+    #[command(subcommand)]
+    cmd: Option<Commands>,
+}
+
+#[derive(Subcommand)]
+enum Commands {
+    /// Disassemble the whole app
+    Disasm, /* {
+        // TODO might be cool to recreate the app structure
+        // when disassembling the full app
+        // TODO disassemble only a class/method
+        /// Disassembly options
+        #[arg(short, long)]
+        output: bool,
+    }, */
+    /// Get the list of class names in the app
+    Classes,  // TODO: allow for some primitive regex maybe?
+    /// Get the list of methods in the app
+    Methods,  // TODO: get methods only for a specific class
+}
+
 fn main() {
-    let cli_args = dex_parser::CliArgs::parse();
+    let cli_args = CliArgs::parse();
+
+    let cmd = match cli_args.cmd {
+        Some(cmd) => cmd,
+        None => {
+            info!("No command supplied: defaulting to `disasm`");
+            Commands::Disasm
+        }
+    };
+
     logging::set_log_level(cli_args.log_level);
     info!("Set log level to {}", cli_args.log_level);
 
     info!("Loading classes.dex from {}", cli_args.apk);
-    let raw_file = File::open(cli_args.apk)
-        .unwrap_or_else(|err| die!("Could not open input file: {err}"));
-    let mut zip_file = ZipArchive::new(raw_file)
-        .unwrap_or_else(|err| die!("Error: cannot create ZipArchive object: {err}"));
-
-    /* TODO: support merging of multiple DEX files
-     * I dug around a little and it seems like this should be
-     * pretty straightforward. Each classes.dex file in apps apps
-     * with multiple DEX files are basically all valid and can be
-     * parsed the same way. Then we can merge all the data into
-     * one `DexFile` struct by eliminating duplicates and
-     * re-sorting the list of values.
-     **/
-    let mut dex_entry = zip_file.by_name("classes.dex")
-                                .unwrap_or_else(|_| die!("Error: cannot find classes.dex in the APK"));
-
-    let mut raw_dex = Vec::new();
-    dex_entry.read_to_end(&mut raw_dex)
-             .unwrap_or_else(|err| die!("Could not read input file: {err}"));
+    let dex_reader = DexReader::build_from_file(&cli_args.apk);
 
     info!("Parsing DEX file");
-    let dex_reader = DexReader::build(raw_dex);
     let dex_file = DexFile::build(dex_reader);
-    dex_file.disasm();
+
+    match cmd {
+        Commands::Disasm => dex_file.disasm(),
+        _ => todo!("foo"),
+    }
 }

@@ -7,7 +7,7 @@ use crate::dex_protos::DexProtos;
 use crate::dex_strings::DexStrings;
 
 #[derive(Debug)]
-pub struct MethodIdItem {
+struct MethodIdItem {
     class_idx: u16,
     proto_idx: u16,
     name_idx: u32,
@@ -55,7 +55,7 @@ impl DexMethods {
             let mut decoded = String::new();
             decoded.push_str(types_list.items.get(class_idx as usize).unwrap());
             decoded.push_str("->");
-            decoded.push_str(&strings_list.strings.get(name_idx as usize).unwrap().string);
+            decoded.push_str(&strings_list.strings.get(name_idx as usize).unwrap());
             decoded.push_str(protos_list.items.get(proto_idx as usize).unwrap());
 
             methods.push(MethodIdItem {
@@ -69,8 +69,8 @@ impl DexMethods {
         methods.sort_by(DexMethods::sort);
 
         let mut items = Vec::new();
-        for dex_method in methods.iter() {
-            items.push(dex_method.decoded.clone());
+        for dex_method in methods.into_iter() {
+            items.push(dex_method.decoded);
         }
         items.dedup();
 
