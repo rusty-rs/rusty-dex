@@ -264,6 +264,8 @@ impl ClassDefItem {
                   dex_methods: &DexMethods,
                   dex_classes: &DexClasses) {
 
+        println!("{}", self.class_str);
+        println!("―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――");
         if let Some(class_data) = &self.class_data {
             for method in class_data.direct_methods.iter() {
                 method.disasm(dex_strings,
@@ -273,6 +275,17 @@ impl ClassDefItem {
                                 dex_methods,
                                 dex_classes);
             }
+
+            for method in class_data.virtual_methods.iter() {
+                method.disasm(dex_strings,
+                                dex_types,
+                                dex_fields,
+                                dex_protos,
+                                dex_methods,
+                                dex_classes);
+            }
+        } else {
+            println!("No code in this class");
         }
     }
 }
@@ -285,6 +298,9 @@ impl EncodedMethod {
                   dex_protos: &DexProtos,
                   dex_methods: &DexMethods,
                   dex_classes: &DexClasses) {
+        println!("     {}", self.proto);
+        println!("     {}", AccessFlag::vec_to_string(&self.access_flags));
+        println!("     ――――――――――――――――――――");
         if let Some(code) = &self.code_item {
             code.disasm(dex_strings,
                         dex_types,
@@ -292,6 +308,9 @@ impl EncodedMethod {
                         dex_protos,
                         dex_methods,
                         dex_classes);
+        } else {
+            println!("     No code in this method\n");
         }
+        println!("     ――――――――――――――――――――");
     }
 }
