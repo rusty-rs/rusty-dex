@@ -176,6 +176,46 @@ impl AccessFlag {
 
         flags
     }
+
+    pub fn vec_to_string(flags: &Vec<AccessFlag>) -> String {
+        let mut output = String::new();
+        let flags_len = flags.len();
+
+        for (idx, flag) in flags.iter().enumerate() {
+            output.push_str(&flag.to_string());
+            if idx < flags_len - 1{
+                output.push('|');
+            }
+        }
+
+        output
+    }
+}
+
+impl fmt::Display for AccessFlag {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match *self {
+            AccessFlag::ACC_PUBLIC => write!(f, "public" ),
+            AccessFlag::ACC_PRIVATE => write!(f, "private" ),
+            AccessFlag::ACC_PROTECTED => write!(f, "protected" ),
+            AccessFlag::ACC_STATIC => write!(f, "static" ),
+            AccessFlag::ACC_FINAL => write!(f, "final" ),
+            AccessFlag::ACC_SYNCHRONIZED => write!(f, "synchronized" ),
+            AccessFlag::ACC_VOLATILE => write!(f, "volatile" ),
+            AccessFlag::ACC_BRIDGE => write!(f, "bridge" ),
+            AccessFlag::ACC_TRANSIENT => write!(f, "transient" ),
+            AccessFlag::ACC_VARARGS => write!(f, "varargs" ),
+            AccessFlag::ACC_NATIVE => write!(f, "native" ),
+            AccessFlag::ACC_INTERFACE => write!(f, "interface" ),
+            AccessFlag::ACC_ABSTRACT => write!(f, "abstract" ),
+            AccessFlag::ACC_STRICT => write!(f, "strict" ),
+            AccessFlag::ACC_SYNTHETIC => write!(f, "synthetic" ),
+            AccessFlag::ACC_ANNOTATION => write!(f, "annotation" ),
+            AccessFlag::ACC_ENUM => write!(f, "enum" ),
+            AccessFlag::ACC_CONSTRUCTOR => write!(f, "constructor" ),
+            AccessFlag::ACC_DECLARED_SYNCHRONIZED => write!(f, "synchronized" ),
+        }
+    }
 }
 
 #[cfg(test)]
