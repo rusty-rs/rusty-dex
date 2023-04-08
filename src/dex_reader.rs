@@ -53,6 +53,39 @@ impl DexReader {
         Self::build(raw_dex)
     }
 
+    pub fn read_dex_entries(filepath: &str) -> Vec<DexReader> {
+        let raw_file = File::open(filepath)
+            .unwrap_or_else(|err| die!("could not open input file: {err}"));
+        let mut zip_file = ZipArchive::new(raw_file)
+            .unwrap_or_else(|err| die!("could not create ZipArchive object: {err}"));
+
+        /* TODO: support merging of multiple DEX files
+        * I dug around a little and it seems like this should be
+        * pretty straightforward. Each classes.dex file in apps apps
+        * with multiple DEX files are basically all valid and can be
+        * parsed the same way. Then we can merge all the data into
+        * one `DexFile` struct by eliminating duplicates and
+        * re-sorting the list of values.
+        **/
+        let dex_entries_names = zip_file.file_names()
+                                        .filter(|name| name.ends_with(".dex"))
+                                        .map(|name| name.to_string())
+                                        .collect::<Vec<String>>();
+
+        let mut readers = Vec::new();
+        for entry in dex_entries_names.iter() {
+            let mut dex_entry = zip_file.by_name(entry)
+                                        .unwrap_or_else(|_| die!("cannot find classes.dex in the APK"));
+            let mut raw_dex = Vec::new();
+            dex_entry.read_to_end(&mut raw_dex)
+                     .unwrap_or_else(|err| die!("Could not read input file: {err}"));
+            let reader = DexReader::build(raw_dex);
+            readers.push(reader);
+        }
+
+        readers
+    }
+
     pub fn build(raw_dex: Vec<u8>) -> Self {
         let endianness = DexReader::check_endianness(&raw_dex).unwrap();
 
