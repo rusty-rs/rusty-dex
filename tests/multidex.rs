@@ -1,6 +1,11 @@
 extern crate dex_parser;
 
 #[test]
+/// Simple test to make sure we get all the methods
+/// for apps using multidex
+///
+/// This test simply parse the test APK and checks the
+/// number of methods in the `manymethods` package.
 fn test_multidex() {
     let parsed = dex_parser::parse_multidex("tests/multidex.apk");
 
@@ -11,6 +16,6 @@ fn test_multidex() {
         }
     }
 
-    /* 80 classes with 1 constructor and 100 methods each */
+    /* 80 classes with 100 methods plus 1 constructor each */
     assert_eq!(many_methods_count, 80080);
 }
