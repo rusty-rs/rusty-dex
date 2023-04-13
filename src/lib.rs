@@ -40,12 +40,6 @@ impl Default for Config {
 }
 
 pub fn parse(filepath: &str) -> DexFile {
-    let dex_reader = DexReader::build_from_file(filepath);
-    DexFile::build(dex_reader)
-}
-
-pub fn parse_multidex(filepath: &str) -> DexFile {
-    // FIXME: this is only for development purposes, will be merged to build()
-    let dex_reader = DexReader::read_dex_entries(filepath);
-    DexFile::merge(dex_reader)
+    let readers = DexReader::build_from_file(filepath);
+    DexFile::merge(readers)
 }

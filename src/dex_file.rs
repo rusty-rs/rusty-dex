@@ -78,36 +78,36 @@ impl DexFile {
         let mut method_ids_list = Vec::new();
         let mut class_defs_list = Vec::new();
 
-        info!("start merging");
+        info!("start merging DEX files");
         for reader in readers.into_iter() {
             let current_dex_file = DexFile::build(reader);
 
-            info!("  [+] merging strings");
+            info!("  merging strings");
             for string in current_dex_file.strings.strings.into_iter() {
                 strings_list.push(string);
             }
 
-            info!("  [+] merging types");
+            info!("  merging types");
             for type_id in current_dex_file.types.items.into_iter() {
                 type_ids_list.push(type_id);
             }
 
-            info!("  [+] merging protos");
+            info!("  merging protos");
             for proto_id in current_dex_file.protos.items.into_iter() {
                 proto_ids_list.push(proto_id);
             }
 
-            info!("  [+] merging fields");
+            info!("  merging fields");
             for field_id in current_dex_file.fields.items.into_iter() {
                 field_ids_list.push(field_id);
             }
 
-            info!("  [+] merging methods");
+            info!("  merging methods");
             for method_id in current_dex_file.methods.items.into_iter() {
                 method_ids_list.push(method_id);
             }
 
-            info!("  [+] merging classes");
+            info!("  merging classes");
             for class_def_id in current_dex_file.classes.items.into_iter() {
                 class_defs_list.push(class_def_id);
             }
@@ -131,7 +131,7 @@ impl DexFile {
         // class_defs_list.dedup();
         // class_defs_list.sort();
 
-        info!("done");
+        info!("done merging");
 
         let header = DexHeader {
             version: [0x00; 3],

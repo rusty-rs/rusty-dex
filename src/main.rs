@@ -56,17 +56,13 @@ fn main() {
     info!("Set log level to {}", cli_args.log_level);
 
     info!("Loading classes.dex from {}", cli_args.apk);
-    let readers = DexReader::read_dex_entries(&cli_args.apk);
-    let merged = DexFile::merge(readers);
-    println!("{:#?}", merged.header);
+    let readers = DexReader::build_from_file(&cli_args.apk);
 
-    // let dex_reader = DexReader::build_from_file(&cli_args.apk);
-
-    // info!("Parsing DEX file");
-    // let dex_file = DexFile::build(dex_reader);
+    info!("Parsing DEX file");
+    let dex_file = DexFile::merge(readers);
 
     match cmd {
-        Commands::Disasm => merged.disasm(),
+        Commands::Disasm => dex_file.disasm(),
         _ => todo!("foo"),
     }
 }
