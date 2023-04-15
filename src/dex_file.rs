@@ -77,9 +77,18 @@ impl DexFile {
         }
     }
 
-    pub fn get_classes(&self) {
+    pub fn get_classes(&self, prefix: Option<String>) {
         let mut class_names = Vec::new();
+
+        let mut regex = String::new();
+        if let Some(prefix) = prefix {
+            regex = prefix.clone();
+        }
+
         for class in &self.classes.items {
+            if ! class.get_class_name().starts_with(&regex) {
+                continue;
+            }
             class_names.push((class.get_class_name(),
                               class.get_access_flags()));
         }

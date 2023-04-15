@@ -1,4 +1,4 @@
-use clap::{ Parser, Subcommand };
+use clap::{ Parser, Subcommand, Args };
 
 extern crate dex_parser;
 
@@ -24,7 +24,7 @@ struct CliArgs {
     cmd: Option<Commands>,
 }
 
-#[derive(Subcommand)]
+#[derive(Subcommand, Debug)]
 enum Commands {
     /// Disassemble the whole app
     Disasm, /* {
@@ -36,9 +36,14 @@ enum Commands {
         output: bool,
     }, */
     /// Get the list of class names in the app
-    Classes,  // TODO: allow for some primitive regex maybe?
+    Classes(PrefixArg),
     /// Get the list of methods in the app
     Methods,  // TODO: get methods only for a specific class
+}
+
+#[derive(Args, Debug)]
+struct PrefixArg {
+    prefix: Option<String>
 }
 
 fn main() {
@@ -63,7 +68,7 @@ fn main() {
 
     match cmd {
         Commands::Disasm => dex_file.disasm(),
-        Commands::Classes => dex_file.get_classes(),
+        Commands::Classes(arg) => dex_file.get_classes(arg.prefix),
         _ => todo!("foo"),
     }
 }
