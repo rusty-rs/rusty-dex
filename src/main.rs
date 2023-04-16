@@ -38,7 +38,7 @@ enum Commands {
     /// Get the list of class names in the app
     Classes(PrefixArg),
     /// Get the list of methods in the app
-    Methods,  // TODO: get methods only for a specific class
+    Methods(PrefixArg),
 }
 
 #[derive(Args, Debug)]
@@ -70,6 +70,7 @@ fn main() {
     match cmd {
         Commands::Disasm => dex_file.disasm(),
         Commands::Classes(arg) => dex_file.get_classes(arg.prefix),
+        Commands::Methods(arg) => dex_file.get_methods(arg.prefix),
         _ => todo!("foo"),
     }
 }

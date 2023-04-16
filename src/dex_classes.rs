@@ -171,7 +171,7 @@ impl DexClasses {
                     if code_offset == 0 {
                         // Abstract or native methods have no code
                         direct_methods.push(EncodedMethod {
-                            proto,
+                            proto: proto.to_string(),
                             access_flags: decoded_flags,
                             code_item: None
                         });
@@ -183,7 +183,7 @@ impl DexClasses {
                         dex_reader.bytes.seek(SeekFrom::Start(current_offset)).unwrap();
 
                         direct_methods.push(EncodedMethod {
-                            proto,
+                            proto: proto.to_string(),
                             access_flags: decoded_flags,
                             code_item: Some(code_item),
                         });
@@ -207,7 +207,7 @@ impl DexClasses {
                     if code_offset == 0 {
                         // Abstract or native methods have no code
                         virtual_methods.push(EncodedMethod {
-                            proto,
+                            proto: proto.to_string(),
                             access_flags: decoded_flags,
                             code_item: None
                         });
@@ -219,7 +219,7 @@ impl DexClasses {
                         dex_reader.bytes.seek(SeekFrom::Start(current_offset)).unwrap();
 
                         virtual_methods.push(EncodedMethod {
-                            proto,
+                            proto: proto.to_string(),
                             access_flags: decoded_flags,
                             code_item: Some(code_item),
                         });
@@ -289,9 +289,25 @@ impl ClassDefItem {
     pub fn get_access_flags(&self) -> String {
         AccessFlag::vec_to_string(&self.access_flags)
     }
+
+    pub fn get_methods(&self) -> &[EncodedMethod] {
+        if let Some(class_data) = &self.class_data {
+            &class_data.direct_methods
+        } else {
+            &[]
+        }
+    }
 }
 
 impl EncodedMethod {
+    pub fn get_proto(&self) -> &str {
+        &self.proto
+    }
+
+    pub fn get_access_flags(&self) -> String {
+        AccessFlag::vec_to_string(&self.access_flags)
+    }
+
     pub fn disasm(&self,
                   dex_strings: &DexStrings,
                   dex_types: &DexTypes,

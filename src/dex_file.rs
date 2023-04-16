@@ -89,6 +89,7 @@ impl DexFile {
             if ! class.get_class_name().starts_with(&regex) {
                 continue;
             }
+
             class_names.push((class.get_class_name(),
                               class.get_access_flags()));
         }
@@ -100,6 +101,39 @@ impl DexFile {
                 println!("{}", class_name);
             } else {
                 println!("{} ({})", class_name, access_flags);
+            }
+        }
+    }
+
+    pub fn get_methods(&self, prefix: Option<String>) {
+        let mut method_names = Vec::new();
+
+        let mut regex = String::from("->");
+        match prefix {
+            Some(prefix) => regex.push_str(&prefix), // .clone()),
+            None => ()
+        };
+
+        for class in &self.classes.items {
+            for method in class.get_methods() {
+                let method_proto = method.get_proto();
+
+                if ! method_proto.contains(&regex) {
+                    continue;
+                }
+
+                method_names.push((method_proto,
+                                   method.get_access_flags()));
+            }
+        }
+
+        method_names.sort();
+
+        for (method_name, access_flags) in method_names.iter() {
+            if access_flags.is_empty() {
+                println!("{}", method_name);
+            } else {
+                println!("{} ({})", method_name, access_flags);
             }
         }
     }
