@@ -68,12 +68,21 @@ impl DexFile {
         }
     }
 
-    pub fn disasm(&self) {
+    pub fn disasm(&self, class_names: Option<Vec<String>>) {
+        let allowlist = match class_names {
+            Some(names) => names,
+            None => Vec::new()
+        };
+
         for class in &self.classes.items {
-            class.disasm(&self.strings,
-                         &self.types,
-                         &self.fields,
-                         &self.methods);
+            // FIXME no comment
+            if allowlist.len() == 0 ||
+                    allowlist.contains(class.get_class_name()) {
+                class.disasm(&self.strings,
+                            &self.types,
+                            &self.fields,
+                            &self.methods);
+            }
         }
     }
 

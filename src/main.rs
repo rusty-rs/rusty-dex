@@ -3,7 +3,7 @@ use clap::{ Parser, Subcommand, Args };
 extern crate dex_parser;
 
 use dex_parser::logging;
-use dex_parser::{ info };
+use dex_parser::{ info, die };
 
 use dex_parser::dex_reader::DexReader;
 use dex_parser::dex_file::DexFile;
@@ -26,8 +26,8 @@ struct CliArgs {
 
 #[derive(Subcommand, Debug)]
 enum Commands {
-    /// Disassemble the whole app
-    Disasm, /* {
+    /// Disassemble the whole app or a specific class/method
+    Disasm(DisasmArgs), /* {
         // TODO might be cool to recreate the app structure
         // when disassembling the full app
         // TODO disassemble only a class/method
@@ -36,23 +36,33 @@ enum Commands {
         output: bool,
     }, */
     /// Get the list of class names in the app
-    Classes(ClassesArg),
+    Classes(ClassesArgs),
     /// Get the list of methods in the app
-    Methods(MethodsArg),
+    Methods(MethodsArgs),
 }
 
 #[derive(Args, Debug)]
-struct ClassesArg {
+struct DisasmArgs {
+    // /// Save disassembly output to this folder
+    // #[arg(short, long)]
+    // output: Option<String>,
+    /// Only disassemble the specific class(es)
+    #[arg(short, long)]
+    class_names: Option<Vec<String>>,
+}
+
+#[derive(Args, Debug)]
+struct ClassesArgs {
     /// Only show class names starting with this prefix
     #[arg(short, long)]
     prefix: Option<String>
 }
 
 #[derive(Args, Debug)]
-struct MethodsArg {
-    /// Only show method from this class
+struct MethodsArgs {
+    /// Only show methods from classes which names start with this prefix
     #[arg(short, long)]
-    class_name: Option<String>,
+    class_prefix: Option<String>,
     /// Only show method names starting with this prefix
     #[arg(short, long)]
     method_prefix: Option<String>
@@ -64,8 +74,8 @@ fn main() {
     let cmd = match cli_args.cmd {
         Some(cmd) => cmd,
         None => {
-            info!("No command supplied: defaulting to `disasm`");
-            Commands::Disasm
+            die!("No command supplied: defaulting to `disasm`");
+            // Commands::Disasm(DisasmArgs { output: None })
         }
     };
 
@@ -79,9 +89,9 @@ fn main() {
     let dex_file = DexFile::build(dex_reader);
 
     match cmd {
-        Commands::Disasm => dex_file.disasm(),
+        Commands::Disasm(arg) => dex_file.disasm(arg.class_names),
         Commands::Classes(arg) => dex_file.get_classes(arg.prefix),
-        Commands::Methods(arg) => dex_file.get_methods(arg.class_name,
+        Commands::Methods(arg) => dex_file.get_methods(arg.class_prefix,
                                                        arg.method_prefix),
         _ => todo!("foo"),
     }
