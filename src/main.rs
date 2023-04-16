@@ -15,7 +15,7 @@ struct CliArgs {
     #[arg(short, long)]
     apk: String,
 
-    /// Log level
+    /// Log level, 0 (errors only) to 3 (debug messages)
     #[arg(short, long, default_value_t = 0)]
     log_level: u8,
 
@@ -43,6 +43,7 @@ enum Commands {
 
 #[derive(Args, Debug)]
 struct PrefixArg {
+    /// Only show names starting with this prefix
     prefix: Option<String>
 }
 
