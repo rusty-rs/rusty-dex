@@ -36,15 +36,25 @@ enum Commands {
         output: bool,
     }, */
     /// Get the list of class names in the app
-    Classes(PrefixArg),
+    Classes(ClassesArg),
     /// Get the list of methods in the app
-    Methods(PrefixArg),
+    Methods(MethodsArg),
 }
 
 #[derive(Args, Debug)]
-struct PrefixArg {
-    /// Only show names starting with this prefix
+struct ClassesArg {
+    /// Only show class names starting with this prefix
     prefix: Option<String>
+}
+
+#[derive(Args, Debug)]
+struct MethodsArg {
+    /// Only show method from this class
+    #[arg(short, long)]
+    class_name: Option<String>,
+    /// Only show method names starting with this prefix
+    #[arg(short, long)]
+    method_prefix: Option<String>
 }
 
 fn main() {
@@ -70,7 +80,8 @@ fn main() {
     match cmd {
         Commands::Disasm => dex_file.disasm(),
         Commands::Classes(arg) => dex_file.get_classes(arg.prefix),
-        Commands::Methods(arg) => dex_file.get_methods(arg.prefix),
+        Commands::Methods(arg) => dex_file.get_methods(arg.class_name,
+                                                       arg.method_prefix),
         _ => todo!("foo"),
     }
 }

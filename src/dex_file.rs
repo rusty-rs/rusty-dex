@@ -105,20 +105,31 @@ impl DexFile {
         }
     }
 
-    pub fn get_methods(&self, prefix: Option<String>) {
+    pub fn get_methods(&self,
+                       c_prefix: Option<String>,
+                       m_prefix: Option<String>) {
         let mut method_names = Vec::new();
 
-        let mut regex = String::from("->");
-        match prefix {
-            Some(prefix) => regex.push_str(&prefix), // .clone()),
+        let class_prefix = match c_prefix {
+            Some(name) => name,
+            None => String::new()
+        };
+
+        let mut method_prefix = String::from("->");
+        match m_prefix {
+            Some(prefix) => method_prefix.push_str(&prefix), // .clone()),
             None => ()
         };
 
         for class in &self.classes.items {
+            if ! class.get_class_name().starts_with(&class_prefix) {
+                continue;
+            }
+
             for method in class.get_methods() {
                 let method_proto = method.get_proto();
 
-                if ! method_proto.contains(&regex) {
+                if ! method_proto.contains(&method_prefix) {
                     continue;
                 }
 
