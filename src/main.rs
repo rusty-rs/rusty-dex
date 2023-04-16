@@ -44,6 +44,7 @@ enum Commands {
 #[derive(Args, Debug)]
 struct ClassesArg {
     /// Only show class names starting with this prefix
+    #[arg(short, long)]
     prefix: Option<String>
 }
 
