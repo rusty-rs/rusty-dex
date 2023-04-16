@@ -93,6 +93,8 @@ impl DexFile {
                               class.get_access_flags()));
         }
 
+        class_names.sort();
+
         for (class_name, access_flags) in class_names.iter() {
             if access_flags.is_empty() {
                 println!("{}", class_name);
