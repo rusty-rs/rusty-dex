@@ -1,8 +1,11 @@
 use std::io::{Seek, SeekFrom};
+use lazy_static::lazy_static;
+use regex::Regex;
 
 use crate::dex_reader::DexReader;
 use crate::access_flags::{ AccessFlag, AccessFlagType };
 use crate::code_item::CodeItem;
+use crate::{ warning, debug };
 
 use crate::dex_strings::DexStrings;
 use crate::dex_types::DexTypes;
@@ -259,23 +262,30 @@ impl ClassDefItem {
                   dex_strings: &DexStrings,
                   dex_types: &DexTypes,
                   dex_fields: &DexFields,
-                  dex_methods: &DexMethods) {
+                  dex_methods: &DexMethods,
+                  m_allowlist: &[String]) {
 
         println!("{}", self.class_str);
         println!("―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――");
         if let Some(class_data) = &self.class_data {
             for method in class_data.direct_methods.iter() {
-                method.disasm(dex_strings,
-                              dex_types,
-                              dex_fields,
-                              dex_methods);
+                if m_allowlist.is_empty() ||
+                        m_allowlist.contains(&method.get_method_name().to_string()) {
+                    method.disasm(dex_strings,
+                                  dex_types,
+                                  dex_fields,
+                                  dex_methods);
+                }
             }
 
             for method in class_data.virtual_methods.iter() {
-                method.disasm(dex_strings,
-                              dex_types,
-                              dex_fields,
-                              dex_methods);
+                if m_allowlist.is_empty() ||
+                        m_allowlist.contains(&method.get_method_name().to_string()) {
+                    method.disasm(dex_strings,
+                                  dex_types,
+                                  dex_fields,
+                                  dex_methods);
+                }
             }
         } else {
             println!("No code in this class");
@@ -302,6 +312,35 @@ impl ClassDefItem {
 impl EncodedMethod {
     pub fn get_proto(&self) -> &str {
         &self.proto
+    }
+
+    pub fn get_method_name(&self) -> &str {
+        lazy_static!{
+            static ref METHOD_REGEX: Regex = Regex::new(r"(?x)
+                (?P<class>L[a-zA-Z/$0-9]+;)
+                (->)
+                (?P<method><?[a-zA-Z0-9]+>?[\$\d+]*)
+                (?P<args>\(.*\).*)
+            ").unwrap();
+        }
+
+        let matches = METHOD_REGEX.captures(&self.proto);
+        let method_name = match matches {
+            Some(matched) => {
+                match matched.name("method") {
+                    Some(name) => name.as_str(),
+                    None => ""
+                }
+            },
+            None => ""
+        };
+
+        if method_name.is_empty() {
+            warning!("Cannot retrieve method name from prototype");
+            debug!("Prototype: {}", &self.proto);
+        };
+
+        method_name
     }
 
     pub fn get_access_flags(&self) -> String {

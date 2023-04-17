@@ -49,6 +49,10 @@ struct DisasmArgs {
     /// Only disassemble the specific class(es)
     #[arg(short, long)]
     class_names: Option<Vec<String>>,
+    /// Only disassemble the specific method(s).
+    /// Works best in conjunction with `--classes`
+    #[arg(short, long)]
+    method_names: Option<Vec<String>>,
 }
 
 #[derive(Args, Debug)]
@@ -89,7 +93,8 @@ fn main() {
     let dex_file = DexFile::build(dex_reader);
 
     match cmd {
-        Commands::Disasm(arg) => dex_file.disasm(arg.class_names),
+        Commands::Disasm(arg) => dex_file.disasm(arg.class_names,
+                                                 arg.method_names),
         Commands::Classes(arg) => dex_file.get_classes(arg.prefix),
         Commands::Methods(arg) => dex_file.get_methods(arg.class_prefix,
                                                        arg.method_prefix),
