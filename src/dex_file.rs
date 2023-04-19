@@ -84,8 +84,7 @@ impl DexFile {
         };
 
         for class in &self.classes.items {
-            // FIXME no comment
-            if c_allowlist.len() == 0 ||
+            if c_allowlist.is_empty() ||
                     c_allowlist.contains(class.get_class_name()) {
                 class.disasm(&self.strings,
                              &self.types,
