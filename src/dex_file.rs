@@ -69,6 +69,7 @@ impl DexFile {
     }
 
     pub fn disasm(&self,
+                  output_folder: Option<String>,
                   class_names: Option<Vec<String>>,
                   method_names: Option<Vec<String>>) {
 
