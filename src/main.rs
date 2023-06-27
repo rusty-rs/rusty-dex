@@ -96,7 +96,7 @@ fn main() {
         Commands::Disasm(arg) => dex_file.disasm(arg.output,
                                                  arg.class_names,
                                                  arg.method_names),
-        Commands::Classes(arg) => dex_file.get_classes(arg.prefix),
+        Commands::Classes(arg) => dex_file.print_classes_with_prefix(arg.prefix),
         Commands::Methods(arg) => dex_file.get_methods(arg.class_prefix,
                                                        arg.method_prefix),
         _ => todo!("foo"),

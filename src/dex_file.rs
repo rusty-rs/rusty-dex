@@ -95,7 +95,11 @@ impl DexFile {
         }
     }
 
-    pub fn get_classes(&self, prefix: Option<String>) {
+    pub fn get_classes(&self) -> Vec<&String> {
+        self.get_classes_with_prefix(None)
+    }
+
+    pub fn get_classes_with_prefix(&self, prefix: Option<String>) -> Vec<&String> {
         let mut class_names = Vec::new();
 
         let regex = match prefix {
@@ -108,18 +112,19 @@ impl DexFile {
                 continue;
             }
 
-            class_names.push((class.get_class_name(),
-                              class.get_access_flags()));
+            class_names.push(class.get_class_name());
         }
 
         class_names.sort();
 
-        for (class_name, access_flags) in class_names.iter() {
-            if access_flags.is_empty() {
-                println!("{}", class_name);
-            } else {
-                println!("{} ({})", class_name, access_flags);
-            }
+        class_names
+    }
+
+    pub fn print_classes_with_prefix(&self, prefix: Option<String>) {
+        let class_names = self.get_classes_with_prefix(prefix);
+
+        for class_name in class_names.iter() {
+            println!("{}", class_name);
         }
     }
 
