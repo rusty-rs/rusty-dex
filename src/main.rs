@@ -78,7 +78,7 @@ fn main() {
     let cmd = match cli_args.cmd {
         Some(cmd) => cmd,
         None => {
-            die!("No command supplied: defaulting to `disasm`");
+            die!("No command supplied");
             // Commands::Disasm(DisasmArgs { output: None })
         }
     };
