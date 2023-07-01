@@ -7,12 +7,12 @@ use crate::dex_reader::DexReader;
 
 #[derive(Debug)]
 pub struct DexHeader {
-    version: [u8; 3],
-    checksum: u32,
-    signature: [u8; 20],
+    pub version: [u8; 3],
+    pub checksum: u32,
+    pub signature: [u8; 20],
     pub file_size: u32,
     pub header_size: u32,
-    endian_tag: u32,
+    pub endian_tag: u32,
     pub link_size: u32,
     pub link_off: u32,
     pub map_off: u32,

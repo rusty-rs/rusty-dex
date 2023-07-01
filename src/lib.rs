@@ -40,6 +40,6 @@ impl Default for Config {
 }
 
 pub fn parse(filepath: &str) -> DexFile {
-    let dex_reader = DexReader::build_from_file(filepath);
-    DexFile::build(dex_reader)
+    let readers = DexReader::build_from_file(filepath);
+    DexFile::merge(readers)
 }
