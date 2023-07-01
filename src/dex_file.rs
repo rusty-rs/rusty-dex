@@ -90,7 +90,8 @@ impl DexFile {
                              &self.types,
                              &self.fields,
                              &self.methods,
-                             &m_allowlist);
+                             &m_allowlist,
+                             &output_folder);
             }
         }
     }

@@ -1,4 +1,5 @@
-use std::io::{Seek, SeekFrom};
+use std::fs::{File, create_dir_all};
+use std::io::{Seek, SeekFrom, Write};
 use lazy_static::lazy_static;
 use regex::Regex;
 
@@ -263,10 +264,9 @@ impl ClassDefItem {
                   dex_types: &DexTypes,
                   dex_fields: &DexFields,
                   dex_methods: &DexMethods,
-                  m_allowlist: &[String]) {
+                  m_allowlist: &[String],
+                  output_folder: &Option<String>) {
 
-        println!("{}", self.class_str);
-        println!("―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――");
         if let Some(class_data) = &self.class_data {
             for method in class_data.direct_methods.iter() {
                 if m_allowlist.is_empty() ||
@@ -274,7 +274,9 @@ impl ClassDefItem {
                     method.disasm(dex_strings,
                                   dex_types,
                                   dex_fields,
-                                  dex_methods);
+                                  dex_methods,
+                                  &self.class_str,
+                                  output_folder);
                 }
             }
 
@@ -284,11 +286,11 @@ impl ClassDefItem {
                     method.disasm(dex_strings,
                                   dex_types,
                                   dex_fields,
-                                  dex_methods);
+                                  dex_methods,
+                                  &self.class_str,
+                                  output_folder);
                 }
             }
-        } else {
-            println!("No code in this class");
         }
     }
 
@@ -351,18 +353,48 @@ impl EncodedMethod {
                   dex_strings: &DexStrings,
                   dex_types: &DexTypes,
                   dex_fields: &DexFields,
-                  dex_methods: &DexMethods) {
-        println!("     {}", self.proto);
-        println!("     {}", AccessFlag::vec_to_string(&self.access_flags));
-        println!("     ――――――――――――――――――――");
+                  dex_methods: &DexMethods,
+                  class_str: &str,
+                  output_folder: &Option<String>) {
+
+        // Create output dirs
+        let root = match output_folder {
+            Some(folder) => format!("./{}/", folder),
+            None => "./".to_string(),
+        };
+
+        // Class names are under the format "L{foo};"
+        // we first remove the 'L' and ';'
+        let mut cname = class_str.chars();
+        cname.next();           // remove first char
+        cname.next_back();      // remove last char
+
+        // We also need to remove the last token (the actual
+        // class name) from the rest (the namespace)
+        let (ns, _class) = cname.as_str()
+                               .rsplit_once('/')
+                               .expect("Error: cannot get file name");
+
+        // We can create the folder corresponding to the namespace
+        let target_folder = format!("{}{}", root, ns);
+        create_dir_all(target_folder).expect("Error: cannot create destination folder");
+
+        // We can create a file corresponding to the class name
+        let target_file_name = format!("{}{}.smali", root, cname.as_str());
+        let mut target_file = File::create(target_file_name).expect("Error: cannot create destination file");
+
+        writeln!(&mut target_file, "{}", format!("     {}", self.proto)).unwrap();
+        writeln!(&mut target_file, "{}", format!("     {}", AccessFlag::vec_to_string(&self.access_flags))).unwrap();
+        writeln!(&mut target_file, "     ――――――――――――――――――――").unwrap();
         if let Some(code) = &self.code_item {
             code.disasm(dex_strings,
                         dex_types,
                         dex_fields,
-                        dex_methods);
+                        dex_methods,
+                        &mut target_file);
         } else {
-            println!("     No code in this method\n");
+            writeln!(&mut target_file, "     No code in this method").unwrap();
         }
-        println!("     ――――――――――――――――――――");
+        writeln!(&mut target_file, "     ――――――――――――――――――――").unwrap();
     }
 }

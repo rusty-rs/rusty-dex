@@ -1,4 +1,5 @@
-use std::io::{Seek, SeekFrom};
+use std::fs::File;
+use std::io::{Seek, SeekFrom, Write};
 
 use crate::dex_reader::DexReader;
 use crate::instructions::{ InstructionsReader, InstructionHandler };
@@ -151,20 +152,22 @@ impl CodeItem {
                   dex_strings: &DexStrings,
                   dex_types: &DexTypes,
                   dex_fields: &DexFields,
-                  dex_methods: &DexMethods) {
+                  dex_methods: &DexMethods,
+                  target_file: &mut File) {
         let mut offset = 0;
         if let Some(insns) = &self.insns {
             for ins in insns {
-                println!("{:>5}  |  {}",
+                writeln!(target_file,
+                         "{:>5}  |  {}",
                          offset * 2,
                          disasm::disasm_ins(ins.as_ref(),
                                             dex_strings,
                                             dex_types,
                                             dex_fields,
-                                            dex_methods));
+                                            dex_methods)).unwrap();
                 offset += ins.length();
             }
         }
-        println!();
+        writeln!(target_file, "");
     }
 }
