@@ -1,9 +1,9 @@
-use clap::{ Parser, Subcommand };
+use clap::{ Parser, Subcommand, Args };
 
 extern crate dex_parser;
 
 use dex_parser::logging;
-use dex_parser::{ info };
+use dex_parser::{ info, die };
 
 use dex_parser::dex_reader::DexReader;
 use dex_parser::dex_file::DexFile;
@@ -15,7 +15,7 @@ struct CliArgs {
     #[arg(short, long)]
     apk: String,
 
-    /// Log level
+    /// Log level, 0 (errors only) to 3 (debug messages)
     #[arg(short, long, default_value_t = 0)]
     log_level: u8,
 
@@ -24,10 +24,10 @@ struct CliArgs {
     cmd: Option<Commands>,
 }
 
-#[derive(Subcommand)]
+#[derive(Subcommand, Debug)]
 enum Commands {
-    /// Disassemble the whole app
-    Disasm, /* {
+    /// Disassemble the whole app or a specific class/method
+    Disasm(DisasmArgs), /* {
         // TODO might be cool to recreate the app structure
         // when disassembling the full app
         // TODO disassemble only a class/method
@@ -36,9 +36,40 @@ enum Commands {
         output: bool,
     }, */
     /// Get the list of class names in the app
-    Classes,  // TODO: allow for some primitive regex maybe?
+    Classes(ClassesArgs),
     /// Get the list of methods in the app
-    Methods,  // TODO: get methods only for a specific class
+    Methods(MethodsArgs),
+}
+
+#[derive(Args, Debug)]
+struct DisasmArgs {
+    /// Save disassembly output to this folder
+    #[arg(short, long)]
+    output: Option<String>,
+    /// Only disassemble the specific class(es)
+    #[arg(short, long)]
+    class_names: Option<Vec<String>>,
+    /// Only disassemble the specific method(s).
+    /// Works best in conjunction with `--classes`
+    #[arg(short, long)]
+    method_names: Option<Vec<String>>,
+}
+
+#[derive(Args, Debug)]
+struct ClassesArgs {
+    /// Only show class names starting with this prefix
+    #[arg(short, long)]
+    prefix: Option<String>
+}
+
+#[derive(Args, Debug)]
+struct MethodsArgs {
+    /// Only show methods from classes which names start with this prefix
+    #[arg(short, long)]
+    class_prefix: Option<String>,
+    /// Only show method names starting with this prefix
+    #[arg(short, long)]
+    method_prefix: Option<String>
 }
 
 fn main() {
@@ -47,8 +78,8 @@ fn main() {
     let cmd = match cli_args.cmd {
         Some(cmd) => cmd,
         None => {
-            info!("No command supplied: defaulting to `disasm`");
-            Commands::Disasm
+            die!("No command supplied");
+            // Commands::Disasm(DisasmArgs { output: None })
         }
     };
 
@@ -62,7 +93,12 @@ fn main() {
     let dex_file = DexFile::merge(readers);
 
     match cmd {
-        Commands::Disasm => dex_file.disasm(),
+        Commands::Disasm(arg) => dex_file.disasm(arg.output,
+                                                 arg.class_names,
+                                                 arg.method_names),
+        Commands::Classes(arg) => dex_file.print_classes_with_prefix(arg.prefix),
+        Commands::Methods(arg) => dex_file.get_methods(arg.class_prefix,
+                                                       arg.method_prefix),
         _ => todo!("foo"),
     }
 }
