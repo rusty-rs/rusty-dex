@@ -256,6 +256,16 @@ impl DexClasses {
 
         DexClasses { items: methods }
     }
+
+    pub fn get_class_def(&self, class_name: &String) -> Option<&ClassDefItem> {
+        for item in self.items.iter() {
+            if &item.class_str == class_name {
+                return Some(&item);
+            }
+        }
+
+        None
+    }
 }
 
 impl ClassDefItem {
@@ -302,12 +312,15 @@ impl ClassDefItem {
         AccessFlag::vec_to_string(&self.access_flags)
     }
 
-    pub fn get_methods(&self) -> &[EncodedMethod] {
+    pub fn get_methods(&self) -> Vec<&EncodedMethod> {
+        let mut methods = Vec::new();
+
         if let Some(class_data) = &self.class_data {
-            &class_data.direct_methods
-        } else {
-            &[]
+            methods.extend(&class_data.direct_methods);
+            methods.extend(&class_data.virtual_methods);
         }
+
+        methods
     }
 }
 

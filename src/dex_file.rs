@@ -7,7 +7,7 @@ use crate::dex_types::DexTypes;
 use crate::dex_protos::DexProtos;
 use crate::dex_fields::DexFields;
 use crate::dex_methods::DexMethods;
-use crate::dex_classes::DexClasses;
+use crate::dex_classes::{ DexClasses, ClassDefItem, EncodedMethod };
 
 #[derive(Debug)]
 pub struct DexFile {
@@ -198,8 +198,19 @@ impl DexFile {
         }
     }
 
-    pub fn get_classes(&self) -> Vec<&String> {
+    pub fn get_classes_names(&self) -> Vec<&String> {
         self.get_classes_with_prefix(None)
+    }
+
+    pub fn get_class_def(&self, class_name: &String) -> Option<&ClassDefItem> {
+        self.classes.get_class_def(class_name)
+    }
+
+    pub fn get_methods_for_class(&self, class_name: &String) -> Vec<&EncodedMethod> {
+        if let Some(class_def) = self.get_class_def(class_name) {
+            return class_def.get_methods();
+        }
+        Vec::new()
     }
 
     pub fn get_classes_with_prefix(&self, prefix: Option<String>) -> Vec<&String> {
