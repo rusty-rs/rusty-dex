@@ -36,9 +36,9 @@ pub struct EncodedField {
 
 #[derive(Debug)]
 pub struct EncodedMethod {
-    proto: String,
-    access_flags: Vec<AccessFlag>,
-    code_item: Option<CodeItem>,
+    pub proto: String,
+    pub access_flags: Vec<AccessFlag>,
+    pub code_item: Option<CodeItem>,
 }
 
 #[derive(Debug)]

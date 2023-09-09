@@ -3,15 +3,17 @@ use crate::dex_types::DexTypes;
 use crate::dex_fields::DexFields;
 use crate::dex_methods::DexMethods;
 
-use crate::instructions::InstructionHandler;
+use crate::instructions_new::*;
 use crate::opcodes::OpCode;
-use crate::warning;
+use crate::error;
 
-pub fn disasm_ins(ins: &(impl InstructionHandler + ?Sized),
+pub fn disasm_ins(ins: &Instructions,
                   strings: &DexStrings,
                   types: &DexTypes,
                   fields: &DexFields,
                   methods: &DexMethods) -> String {
+    "foo".to_string()
+    /*
     match ins.opcode() {
         OpCode::GOTO | OpCode::GOTO_16
             | OpCode::GOTO_32 => format!("{} +{}",
@@ -319,4 +321,184 @@ pub fn disasm_ins(ins: &(impl InstructionHandler + ?Sized),
             => todo!("TODO {}", ins.opcode()),
 
     }
+    */
+}
+
+
+fn disasm_ins_10t(ins: &Instruction10t) -> String {
+    format!("{} +{}", ins.opcode, ins.a())
+}
+
+fn disasm_ins_10x(ins: &Instruction10x) -> String {
+    format!("{}", ins.opcode)
+}
+
+fn disasm_ins_11n(ins: &Instruction11n) -> String {
+    format!("{} v{} #+{}", ins.opcode, ins.a(), ins.b())
+}
+
+fn disasm_ins_11x(ins: &Instruction11x) -> String {
+    format!("{} v{}", ins.opcode, ins.a())
+}
+
+fn disasm_ins_12x(ins: &Instruction12x) -> String {
+    format!("{} v{} v{}", ins.opcode, ins.a(), ins.b())
+}
+
+fn disasm_ins_20t(ins: &Instruction20t) -> String {
+    format!("{} +{}", ins.opcode, ins.a())
+}
+
+fn disasm_ins_21c(ins: &Instruction21c,
+                  strings: &DexStrings,
+                  types: &DexTypes) -> String {
+    match ins.opcode {
+        OpCode::CHECK_CAST | OpCode::CONST_CLASS => {
+            let class_name = &types.items[ins.b() as usize];
+            format!("{} v{} {}", ins.opcode, ins.a(), class_name)
+        },
+        OpCode::CONST_METHOD_HANDLE => todo!(),
+        OpCode::CONST_METHOD_TYPE => todo!(),
+        OpCode::CONST_STRING => {
+            let string = &strings.strings[ins.b() as usize];
+            format!("{} v{} \"{}\"", ins.opcode, ins.a(), string)
+        },
+        _ => {
+            String::from("")
+            // panic!("Invalid opcode for instruction 21c");
+        }
+    }
+}
+
+fn disasm_ins_21h(ins: &Instruction21h) -> String {
+    match ins.opcode {
+        OpCode::CONST_HIGH16 => {
+            format!("{} v{} #+{}0000", ins.opcode, ins.a(), ins.b())
+        },
+        OpCode::CONST_WIDE_HIGH16 => {
+            format!("{} v{} #+{}000000000000", ins.opcode, ins.a(), ins.b())
+        },
+        _ => {
+            String::from("")
+            // panic!("Invalid opcode for instruction 21h");
+        }
+    }
+}
+
+fn disasm_ins_21s(ins: &Instruction21s) -> String {
+    format!("{} v{} #+{}", ins.opcode, ins.a(), ins.b())
+}
+
+fn disasm_ins_21t(ins: &Instruction21t) -> String {
+    format!("{} v{} +{}", ins.opcode, ins.a(), ins.b())
+}
+
+fn disasm_ins_22b(ins: &Instruction22b) -> String {
+    format!("{} v{} v{} #+{}", ins.opcode, ins.a(), ins.b(), ins.c())
+}
+
+fn disasm_ins_22c(ins: &Instruction22c) -> String {
+    // FIXME
+    format!("{}", ins.opcode)
+}
+
+fn disasm_ins_22s(ins: &Instruction22s) -> String {
+    format!("{} v{} v{} #+{}", ins.opcode, ins.a(), ins.b(), ins.c())
+}
+
+fn disasm_ins_22t(ins: &Instruction22t) -> String {
+    format!("{} v{} v{} +{}", ins.opcode, ins.a(), ins.b(), ins.c())
+}
+
+fn disasm_ins_22x(ins: &Instruction22x) -> String {
+    format!("{} v{} v{}", ins.opcode, ins.a(), ins.b())
+}
+
+fn disasm_ins_23x(ins: &Instruction23x) -> String {
+    format!("{} v{} v{} v{}", ins.opcode, ins.a(), ins.b(), ins.c())
+}
+
+fn disasm_ins_30t(ins: &Instruction30t) -> String {
+    format!("{} +{}", ins.opcode, ins.a())
+}
+
+fn disasm_ins_31c(ins: &Instruction31c, strings: &DexStrings) -> String {
+    let string = &strings.strings[ins.b() as usize];
+    format!("{} v{} \"{}\"", ins.opcode, ins.a(), string)
+}
+
+fn disasm_ins_31i(ins: &Instruction31i) -> String {
+    format!("{} v{} #+{}", ins.opcode, ins.a(), ins.b())
+}
+
+fn disasm_ins_31t(ins: &Instruction31t) -> String {
+    format!("{} v{} +{}", ins.opcode, ins.a(), ins.b())
+}
+
+fn disasm_ins_32x(ins: &Instruction32x) -> String {
+    format!("{} v{} v{}", ins.opcode, ins.a(), ins.b())
+}
+
+fn disasm_ins_35c(ins: &Instruction35c) -> String {
+    // FIXME
+    format!("{}", ins.opcode)
+}
+
+fn disasm_ins_3rc(ins: &Instruction3rc) -> String {
+    // FIXME
+    format!("{}", ins.opcode)
+}
+
+fn disasm_ins_45cc(ins: &Instruction45cc) -> String {
+    // FIXME
+    format!("{}", ins.opcode)
+}
+
+fn disasm_ins_4rcc(ins: &Instruction4rcc) -> String {
+    // FIXME
+    format!("{}", ins.opcode)
+}
+
+fn disasm_ins_51l(ins: &Instruction51l) -> String {
+    format!("{} v{} #+{}", ins.opcode, ins.a(), ins.b())
+}
+
+pub fn disasm_ins_new(instructions: &Instructions,
+                      strings: &DexStrings,
+                      types: &DexTypes,
+                      fields: &DexFields,
+                      methods: &DexMethods) -> String {
+    // for ins in instructions.iter() {
+        match instructions {
+            Instructions::Instruction10t(ins) => disasm_ins_10t(&ins),
+            Instructions::Instruction10x(ins) => disasm_ins_10x(&ins),
+            Instructions::Instruction11n(ins) => disasm_ins_11n(&ins),
+            Instructions::Instruction11x(ins) => disasm_ins_11x(&ins),
+            Instructions::Instruction12x(ins) => disasm_ins_12x(&ins),
+            Instructions::Instruction20t(ins) => disasm_ins_20t(&ins),
+            Instructions::Instruction21c(ins) => disasm_ins_21c(&ins, &strings, &types),
+            Instructions::Instruction21h(ins) => disasm_ins_21h(&ins),
+            Instructions::Instruction21s(ins) => disasm_ins_21s(&ins),
+            Instructions::Instruction21t(ins) => disasm_ins_21t(&ins),
+            Instructions::Instruction22b(ins) => disasm_ins_22b(&ins),
+            Instructions::Instruction22c(ins) => disasm_ins_22c(&ins),
+            Instructions::Instruction22s(ins) => disasm_ins_22s(&ins),
+            Instructions::Instruction22t(ins) => disasm_ins_22t(&ins),
+            Instructions::Instruction22x(ins) => disasm_ins_22x(&ins),
+            Instructions::Instruction23x(ins) => disasm_ins_23x(&ins),
+            Instructions::Instruction30t(ins) => disasm_ins_30t(&ins),
+            Instructions::Instruction31c(ins) => disasm_ins_31c(&ins, &strings),
+            Instructions::Instruction31i(ins) => disasm_ins_31i(&ins),
+            Instructions::Instruction31t(ins) => disasm_ins_31t(&ins),
+            Instructions::Instruction32x(ins) => disasm_ins_32x(&ins),
+            Instructions::Instruction35c(ins) => disasm_ins_35c(&ins),
+            Instructions::Instruction3rc(ins) => disasm_ins_3rc(&ins),
+            Instructions::Instruction45cc(ins) => disasm_ins_45cc(&ins),
+            Instructions::Instruction4rcc(ins) => disasm_ins_4rcc(&ins),
+            Instructions::Instruction51l(ins) => disasm_ins_51l(&ins),
+            Instructions::PackedSwitchPayload(inst) => String::from("TODO PACKED_SWITCH_PAYLOAD"),
+            Instructions::SparseSwitchPayload(inst) => String::from("TODO SPARSE_SWITCH_PAYLOAD"),
+            Instructions::FillArrayDataPayload(inst) => String::from("TODO FILL_ARRAY_DATA_PAYLOAD"),
+        }
+    // }
 }

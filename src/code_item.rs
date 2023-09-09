@@ -1,8 +1,10 @@
 use std::fs::File;
 use std::io::{Seek, SeekFrom, Write};
 
+use crate::error;
 use crate::dex_reader::DexReader;
-use crate::instructions::{ InstructionsReader, InstructionHandler };
+// use crate::instructions::{ InstructionsReader, InstructionHandler };
+use crate::instructions_new::{ InstructionsReader, Instructions };
 
 use crate::dex_strings::DexStrings;
 use crate::dex_types::DexTypes;
@@ -10,21 +12,21 @@ use crate::dex_fields::DexFields;
 use crate::dex_methods::DexMethods;
 use crate::disasm;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct TryItem {
     start_addr : u32,
     insn_count : u16,
     handler_off: u16
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct EncodedCatchHandler {
     size          : i32,
     handlers      : Vec<EncodedTypeAddrPair>,
     catch_all_addr: Option<u32>,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct EncodedTypeAddrPair {
     decoded_type: String,
     addr        : u32,
@@ -36,7 +38,7 @@ pub struct CodeItem {
     ins_size      : u16,
     outs_size     : u16,
     debug_info_off: u32,
-    insns         : Option<Vec<Box<dyn InstructionHandler>>>,
+    pub insns         : Option<Vec<Instructions>>,
     tries         : Option<Vec<TryItem>>,
     handlers      : Option<Vec<EncodedCatchHandler>>
 }
@@ -160,14 +162,14 @@ impl CodeItem {
                 writeln!(target_file,
                          "{:>5}  |  {}",
                          offset * 2,
-                         disasm::disasm_ins(ins.as_ref(),
-                                            dex_strings,
-                                            dex_types,
-                                            dex_fields,
-                                            dex_methods)).unwrap();
+                         disasm::disasm_ins_new(ins,
+                                                dex_strings,
+                                                dex_types,
+                                                dex_fields,
+                                                dex_methods)).unwrap();
                 offset += ins.length();
             }
         }
-        writeln!(target_file, "");
+        writeln!(target_file, "").unwrap_or_else(|_| error!("Cannot write to file"));
     }
 }
