@@ -397,9 +397,22 @@ fn disasm_ins_22b(ins: &Instruction22b) -> String {
     format!("{} v{} v{} #+{}", ins.opcode, ins.a(), ins.b(), ins.c())
 }
 
-fn disasm_ins_22c(ins: &Instruction22c) -> String {
-    // FIXME
-    format!("{}", ins.opcode)
+fn disasm_ins_22c(ins: &Instruction22c,
+                  strings: &DexStrings,
+                  types: &DexTypes) -> String {
+    match ins.opcode {
+        OpCode::CONST_STRING => {
+            let string = &strings.strings[ins.b() as usize];
+            format!("{} v{} {}", ins.opcode, ins.a(), string)
+        },
+        OpCode::CONST_CLASS => {
+            let class_name = &types.items[ins.b() as usize];
+            format!("{} v{} {}", ins.opcode, ins.a(), class_name)
+        }
+        _ => {
+            String::from("")
+        }
+    }
 }
 
 fn disasm_ins_22s(ins: &Instruction22s) -> String {
@@ -439,9 +452,46 @@ fn disasm_ins_32x(ins: &Instruction32x) -> String {
     format!("{} v{} v{}", ins.opcode, ins.a(), ins.b())
 }
 
-fn disasm_ins_35c(ins: &Instruction35c) -> String {
-    // FIXME
-    format!("{}", ins.opcode)
+fn disasm_ins_35c(ins: &Instruction35c,
+                  types: &DexTypes,
+                  methods: &DexMethods) -> String {
+    let mut arg_regs = Vec::new();
+    if ins.a() >= 1 {
+        arg_regs.push(format!("v{}", ins.c()));
+    }
+    if ins.a() >= 2 {
+        arg_regs.push(format!("v{}", ins.d()));
+    }
+    if ins.a() >= 3 {
+        arg_regs.push(format!("v{}", ins.e()));
+    }
+    if ins.a() >= 4 {
+        arg_regs.push(format!("v{}", ins.f()));
+    }
+    if ins.a() == 5 {
+        arg_regs.push(format!("v{}", ins.g()));
+    }
+
+    match ins.opcode {
+        OpCode::FILLED_NEW_ARRAY => {
+            let type_name = &types.items[ins.b() as usize];
+            format!("{} {{{}}} {}", ins.opcode, arg_regs.join(","), type_name)
+        },
+        OpCode::INVOKE_VIRTUAL
+            | OpCode::INVOKE_SUPER
+            | OpCode::INVOKE_DIRECT
+            | OpCode::INVOKE_STATIC
+            | OpCode::INVOKE_INTERFACE => {
+            let meth_name = &methods.items[ins.b() as usize];
+            format!("{} {{{}}} {}", ins.opcode, arg_regs.join(","), meth_name)
+        },
+        OpCode::INVOKE_CUSTOM => {
+            todo!()
+        },
+        _ => {
+            String::from("")
+        }
+    }
 }
 
 fn disasm_ins_3rc(ins: &Instruction3rc) -> String {
@@ -481,7 +531,7 @@ pub fn disasm_ins_new(instructions: &Instructions,
             Instructions::Instruction21s(ins) => disasm_ins_21s(&ins),
             Instructions::Instruction21t(ins) => disasm_ins_21t(&ins),
             Instructions::Instruction22b(ins) => disasm_ins_22b(&ins),
-            Instructions::Instruction22c(ins) => disasm_ins_22c(&ins),
+            Instructions::Instruction22c(ins) => disasm_ins_22c(&ins, &strings, &types),
             Instructions::Instruction22s(ins) => disasm_ins_22s(&ins),
             Instructions::Instruction22t(ins) => disasm_ins_22t(&ins),
             Instructions::Instruction22x(ins) => disasm_ins_22x(&ins),
@@ -491,7 +541,7 @@ pub fn disasm_ins_new(instructions: &Instructions,
             Instructions::Instruction31i(ins) => disasm_ins_31i(&ins),
             Instructions::Instruction31t(ins) => disasm_ins_31t(&ins),
             Instructions::Instruction32x(ins) => disasm_ins_32x(&ins),
-            Instructions::Instruction35c(ins) => disasm_ins_35c(&ins),
+            Instructions::Instruction35c(ins) => disasm_ins_35c(&ins, &types, &methods),
             Instructions::Instruction3rc(ins) => disasm_ins_3rc(&ins),
             Instructions::Instruction45cc(ins) => disasm_ins_45cc(&ins),
             Instructions::Instruction4rcc(ins) => disasm_ins_4rcc(&ins),
