@@ -263,9 +263,9 @@ pub fn disasm_ins(ins: &Instructions,
                 format!("{} {}{}", ins.opcode(), args, proto)
             },
 
-        OpCode::INVOKE_POLYMORPHIC => todo!("TODO {}", ins.opcode()),
+        OpCode::INVOKE_POLYMORPHIC => todo!("{}", ins.opcode()),
 
-        OpCode::INVOKE_POLYMORPHIC_RANGE => todo!("TODO {}", ins.opcode()),
+        OpCode::INVOKE_POLYMORPHIC_RANGE => todo!("{}", ins.opcode()),
 
         OpCode::PACKED_SWITCH_PAYLOAD
             | OpCode::SPARSE_SWITCH_PAYLOAD
@@ -308,17 +308,17 @@ pub fn disasm_ins(ins: &Instructions,
 
         /* Present in DEX files from version 038 onwards */
         OpCode::INVOKE_CUSTOM
-            => todo!("TODO {}", ins.opcode()),
+            => todo!("{}", ins.opcode()),
 
         OpCode::INVOKE_CUSTOM_RANGE
-            => todo!("TODO {}", ins.opcode()),
+            => todo!("{}", ins.opcode()),
 
         /* Present in DEX files from version 039 onwards */
         OpCode::CONST_METHOD_HANDLE
-            => todo!("TODO {}", ins.opcode()),
+            => todo!("{}", ins.opcode()),
 
         OpCode::CONST_METHOD_TYPE
-            => todo!("TODO {}", ins.opcode()),
+            => todo!("{}", ins.opcode()),
 
     }
     */
@@ -351,21 +351,42 @@ fn disasm_ins_20t(ins: &Instruction20t) -> String {
 
 fn disasm_ins_21c(ins: &Instruction21c,
                   strings: &DexStrings,
-                  types: &DexTypes) -> String {
+                  types: &DexTypes,
+                  fields: &DexFields) -> String {
     match ins.opcode {
-        OpCode::CHECK_CAST | OpCode::CONST_CLASS => {
+        OpCode::CHECK_CAST
+            | OpCode::CONST_CLASS
+            | OpCode::NEW_INSTANCE => {
             let class_name = &types.items[ins.b() as usize];
             format!("{} v{} {}", ins.opcode, ins.a(), class_name)
         },
-        OpCode::CONST_METHOD_HANDLE => todo!(),
-        OpCode::CONST_METHOD_TYPE => todo!(),
+        OpCode::CONST_METHOD_HANDLE => todo!("{}", ins.opcode),
+        OpCode::CONST_METHOD_TYPE => todo!("{}", ins.opcode),
         OpCode::CONST_STRING => {
             let string = &strings.strings[ins.b() as usize];
             format!("{} v{} \"{}\"", ins.opcode, ins.a(), string)
         },
+
+        OpCode::SGET
+            | OpCode::SGET_WIDE
+            | OpCode::SGET_OBJECT
+            | OpCode::SGET_BOOLEAN
+            | OpCode::SGET_BYTE
+            | OpCode::SGET_CHAR
+            | OpCode::SGET_SHORT
+            | OpCode::SPUT
+            | OpCode::SPUT_WIDE
+            | OpCode::SPUT_OBJECT
+            | OpCode::SPUT_BOOLEAN
+            | OpCode::SPUT_BYTE
+            | OpCode::SPUT_CHAR
+            | OpCode::SPUT_SHORT => {
+            let field = &fields.items[ins.b() as usize];
+            format!("{} v{} \"{}\"", ins.opcode, ins.a(), field)
+        },
+
         _ => {
-            String::from("")
-            // panic!("Invalid opcode for instruction 21c");
+            panic!("Invalid opcode for instruction 21c: {}", ins.opcode);
         }
     }
 }
@@ -379,8 +400,7 @@ fn disasm_ins_21h(ins: &Instruction21h) -> String {
             format!("{} v{} #+{}000000000000", ins.opcode, ins.a(), ins.b())
         },
         _ => {
-            String::from("")
-            // panic!("Invalid opcode for instruction 21h");
+            panic!("Invalid opcode for instruction 21h: {}", ins.opcode);
         }
     }
 }
@@ -398,19 +418,32 @@ fn disasm_ins_22b(ins: &Instruction22b) -> String {
 }
 
 fn disasm_ins_22c(ins: &Instruction22c,
-                  strings: &DexStrings,
-                  types: &DexTypes) -> String {
+                  types: &DexTypes,
+                  fields: &DexFields) -> String {
     match ins.opcode {
-        OpCode::CONST_STRING => {
-            let string = &strings.strings[ins.b() as usize];
-            format!("{} v{} {}", ins.opcode, ins.a(), string)
+        OpCode::IGET
+            | OpCode::IGET_WIDE
+            | OpCode::IGET_OBJECT
+            | OpCode::IGET_BOOLEAN
+            | OpCode::IGET_BYTE
+            | OpCode::IGET_CHAR
+            | OpCode::IGET_SHORT
+            | OpCode::IPUT
+            | OpCode::IPUT_WIDE
+            | OpCode::IPUT_OBJECT
+            | OpCode::IPUT_BOOLEAN
+            | OpCode::IPUT_BYTE
+            | OpCode::IPUT_CHAR
+            | OpCode::IPUT_SHORT => {
+            let field = &fields.items[ins.b() as usize];
+            format!("{} v{} {}", ins.opcode, ins.a(), field)
         },
-        OpCode::CONST_CLASS => {
+        OpCode::INSTANCE_OF | OpCode::NEW_ARRAY => {
             let class_name = &types.items[ins.b() as usize];
             format!("{} v{} {}", ins.opcode, ins.a(), class_name)
         }
         _ => {
-            String::from("")
+            panic!("Invalid opcode for instruction 22c: {}", ins.opcode);
         }
     }
 }
@@ -486,27 +519,24 @@ fn disasm_ins_35c(ins: &Instruction35c,
             format!("{} {{{}}} {}", ins.opcode, arg_regs.join(","), meth_name)
         },
         OpCode::INVOKE_CUSTOM => {
-            todo!()
+            todo!("{}", ins.opcode)
         },
         _ => {
-            String::from("")
+            panic!("Invalid opcode for instruction 35c: {}", ins.opcode);
         }
     }
 }
 
 fn disasm_ins_3rc(ins: &Instruction3rc) -> String {
-    // FIXME
-    format!("{}", ins.opcode)
+    todo!("{}", ins.opcode)
 }
 
 fn disasm_ins_45cc(ins: &Instruction45cc) -> String {
-    // FIXME
-    format!("{}", ins.opcode)
+    todo!("{}", ins.opcode)
 }
 
 fn disasm_ins_4rcc(ins: &Instruction4rcc) -> String {
-    // FIXME
-    format!("{}", ins.opcode)
+    todo!("{}", ins.opcode)
 }
 
 fn disasm_ins_51l(ins: &Instruction51l) -> String {
@@ -526,12 +556,12 @@ pub fn disasm_ins_new(instructions: &Instructions,
             Instructions::Instruction11x(ins) => disasm_ins_11x(&ins),
             Instructions::Instruction12x(ins) => disasm_ins_12x(&ins),
             Instructions::Instruction20t(ins) => disasm_ins_20t(&ins),
-            Instructions::Instruction21c(ins) => disasm_ins_21c(&ins, &strings, &types),
+            Instructions::Instruction21c(ins) => disasm_ins_21c(&ins, &strings, &types, &fields),
             Instructions::Instruction21h(ins) => disasm_ins_21h(&ins),
             Instructions::Instruction21s(ins) => disasm_ins_21s(&ins),
             Instructions::Instruction21t(ins) => disasm_ins_21t(&ins),
             Instructions::Instruction22b(ins) => disasm_ins_22b(&ins),
-            Instructions::Instruction22c(ins) => disasm_ins_22c(&ins, &strings, &types),
+            Instructions::Instruction22c(ins) => disasm_ins_22c(&ins, &types, &fields),
             Instructions::Instruction22s(ins) => disasm_ins_22s(&ins),
             Instructions::Instruction22t(ins) => disasm_ins_22t(&ins),
             Instructions::Instruction22x(ins) => disasm_ins_22x(&ins),
