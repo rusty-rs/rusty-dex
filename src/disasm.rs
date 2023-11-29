@@ -527,8 +527,34 @@ fn disasm_ins_35c(ins: &Instruction35c,
     }
 }
 
-fn disasm_ins_3rc(ins: &Instruction3rc) -> String {
-    todo!("{}", ins.opcode)
+fn disasm_ins_3rc(ins: &Instruction3rc,
+                  types: &DexTypes,
+                  methods: &DexMethods) -> String {
+    let mut arg_regs = Vec::new();
+    for i in ins.c()..(ins.a() as u16 + ins.c() - 1) {
+        arg_regs.push(format!("v{}", ins.c() + i));
+    }
+
+    match ins.opcode {
+        OpCode::FILLED_NEW_ARRAY_RANGE => {
+            let type_name = &types.items[ins.b() as usize];
+            format!("{} {{{}}} {}", ins.opcode, arg_regs.join(","), type_name)
+        },
+        OpCode::INVOKE_VIRTUAL_RANGE
+            | OpCode::INVOKE_SUPER_RANGE
+            | OpCode::INVOKE_DIRECT_RANGE
+            | OpCode::INVOKE_STATIC_RANGE
+            | OpCode::INVOKE_INTERFACE_RANGE => {
+            let method = &methods.items[ins.b() as usize];
+            format!("{} {{{}}} {}", ins.opcode, arg_regs.join(","), method)
+        },
+        OpCode::INVOKE_CUSTOM_RANGE => {
+            todo!("{}", ins.opcode)
+        },
+        _ => {
+            panic!("Invalid opcode for instruction 3rc: {}", ins.opcode);
+        }
+    }
 }
 
 fn disasm_ins_45cc(ins: &Instruction45cc) -> String {
@@ -572,7 +598,7 @@ pub fn disasm_ins_new(instructions: &Instructions,
             Instructions::Instruction31t(ins) => disasm_ins_31t(&ins),
             Instructions::Instruction32x(ins) => disasm_ins_32x(&ins),
             Instructions::Instruction35c(ins) => disasm_ins_35c(&ins, &types, &methods),
-            Instructions::Instruction3rc(ins) => disasm_ins_3rc(&ins),
+            Instructions::Instruction3rc(ins) => disasm_ins_3rc(&ins, &types, &methods),
             Instructions::Instruction45cc(ins) => disasm_ins_45cc(&ins),
             Instructions::Instruction4rcc(ins) => disasm_ins_4rcc(&ins),
             Instructions::Instruction51l(ins) => disasm_ins_51l(&ins),
