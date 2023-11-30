@@ -192,6 +192,7 @@ impl DexFile {
                              &self.types,
                              &self.fields,
                              &self.methods,
+                             &self.protos,
                              &m_allowlist,
                              &output_folder);
             }

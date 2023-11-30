@@ -2,6 +2,7 @@ use crate::dex_strings::DexStrings;
 use crate::dex_types::DexTypes;
 use crate::dex_fields::DexFields;
 use crate::dex_methods::DexMethods;
+use crate::dex_protos::DexProtos;
 
 use crate::instructions_new::*;
 use crate::opcodes::OpCode;
@@ -557,8 +558,13 @@ fn disasm_ins_3rc(ins: &Instruction3rc,
     }
 }
 
-fn disasm_ins_45cc(ins: &Instruction45cc) -> String {
-    todo!("{}", ins.opcode)
+fn disasm_ins_45cc(ins: &Instruction45cc,
+                   methods: &DexMethods,
+                   protos: &DexProtos) -> String {
+    let method = &methods.items[ins.b() as usize];
+    let proto = &protos.items[ins.h() as usize];
+    format!("{} {{{},{},{},{},{}}} {}{}",
+            ins.opcode, ins.c(), ins.d(), ins.e(), ins.f(), ins.g(), method, proto)
 }
 
 fn disasm_ins_4rcc(ins: &Instruction4rcc) -> String {
@@ -573,7 +579,8 @@ pub fn disasm_ins_new(instructions: &Instructions,
                       strings: &DexStrings,
                       types: &DexTypes,
                       fields: &DexFields,
-                      methods: &DexMethods) -> String {
+                      methods: &DexMethods,
+                      protos: &DexProtos) -> String {
     // for ins in instructions.iter() {
         match instructions {
             Instructions::Instruction10t(ins) => disasm_ins_10t(&ins),
@@ -599,7 +606,7 @@ pub fn disasm_ins_new(instructions: &Instructions,
             Instructions::Instruction32x(ins) => disasm_ins_32x(&ins),
             Instructions::Instruction35c(ins) => disasm_ins_35c(&ins, &types, &methods),
             Instructions::Instruction3rc(ins) => disasm_ins_3rc(&ins, &types, &methods),
-            Instructions::Instruction45cc(ins) => disasm_ins_45cc(&ins),
+            Instructions::Instruction45cc(ins) => disasm_ins_45cc(&ins, &methods, &protos),
             Instructions::Instruction4rcc(ins) => disasm_ins_4rcc(&ins),
             Instructions::Instruction51l(ins) => disasm_ins_51l(&ins),
             Instructions::PackedSwitchPayload(inst) => String::from("TODO PACKED_SWITCH_PAYLOAD"),

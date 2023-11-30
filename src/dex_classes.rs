@@ -12,6 +12,7 @@ use crate::dex_strings::DexStrings;
 use crate::dex_types::DexTypes;
 use crate::dex_fields::DexFields;
 use crate::dex_methods::DexMethods;
+use crate::dex_protos::DexProtos;
 
 const NO_INDEX: u32 = 0xffffffff;
 
@@ -274,6 +275,7 @@ impl ClassDefItem {
                   dex_types: &DexTypes,
                   dex_fields: &DexFields,
                   dex_methods: &DexMethods,
+                  dex_protos: &DexProtos,
                   m_allowlist: &[String],
                   output_folder: &Option<String>) {
 
@@ -285,6 +287,7 @@ impl ClassDefItem {
                                   dex_types,
                                   dex_fields,
                                   dex_methods,
+                                  dex_protos,
                                   &self.class_str,
                                   output_folder);
                 }
@@ -297,6 +300,7 @@ impl ClassDefItem {
                                   dex_types,
                                   dex_fields,
                                   dex_methods,
+                                  dex_protos,
                                   &self.class_str,
                                   output_folder);
                 }
@@ -367,6 +371,7 @@ impl EncodedMethod {
                   dex_types: &DexTypes,
                   dex_fields: &DexFields,
                   dex_methods: &DexMethods,
+                  dex_protos: &DexProtos,
                   class_str: &str,
                   output_folder: &Option<String>) {
 
@@ -404,6 +409,7 @@ impl EncodedMethod {
                         dex_types,
                         dex_fields,
                         dex_methods,
+                        dex_protos,
                         &mut target_file);
         } else {
             writeln!(&mut target_file, "     No code in this method").unwrap();

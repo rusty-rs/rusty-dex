@@ -1,6 +1,7 @@
 use std::fs::File;
 use std::io::{Seek, SeekFrom, Write};
 
+use crate::dex_protos::DexProtos;
 use crate::error;
 use crate::dex_reader::DexReader;
 // use crate::instructions::{ InstructionsReader, InstructionHandler };
@@ -155,6 +156,7 @@ impl CodeItem {
                   dex_types: &DexTypes,
                   dex_fields: &DexFields,
                   dex_methods: &DexMethods,
+                  dex_protos: &DexProtos,
                   target_file: &mut File) {
         let mut offset = 0;
         if let Some(insns) = &self.insns {
@@ -166,7 +168,8 @@ impl CodeItem {
                                                 dex_strings,
                                                 dex_types,
                                                 dex_fields,
-                                                dex_methods)).unwrap();
+                                                dex_methods,
+                                                dex_protos)).unwrap();
                 offset += ins.length();
             }
         }
