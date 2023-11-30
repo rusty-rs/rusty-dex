@@ -389,9 +389,15 @@ impl EncodedMethod {
 
         // We also need to remove the last token (the actual
         // class name) from the rest (the namespace)
-        let (ns, _class) = cname.as_str()
-                               .rsplit_once('/')
-                               .expect("Error: cannot get file name");
+        // Sometimes we just have the namespace, in which case we
+        // do not split and use "defpackage" as namespace
+        let mut ns = "defpackage";
+        if cname.as_str().contains('/') {
+            ns = cname.as_str()
+                      .rsplit_once('/')
+                      .expect(&format!("Error: cannot get namespace from {}", cname.as_str()))
+                      .0;
+        }
 
         // We can create the folder corresponding to the namespace
         let target_folder = format!("{}{}", root, ns);
