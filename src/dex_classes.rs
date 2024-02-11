@@ -12,6 +12,7 @@ use crate::dex_strings::DexStrings;
 use crate::dex_types::DexTypes;
 use crate::dex_fields::DexFields;
 use crate::dex_methods::DexMethods;
+use crate::dex_protos::DexProtos;
 
 const NO_INDEX: u32 = 0xffffffff;
 
@@ -36,9 +37,9 @@ pub struct EncodedField {
 
 #[derive(Debug)]
 pub struct EncodedMethod {
-    proto: String,
-    access_flags: Vec<AccessFlag>,
-    code_item: Option<CodeItem>,
+    pub proto: String,
+    pub access_flags: Vec<AccessFlag>,
+    pub code_item: Option<CodeItem>,
 }
 
 #[derive(Debug)]
@@ -274,6 +275,7 @@ impl ClassDefItem {
                   dex_types: &DexTypes,
                   dex_fields: &DexFields,
                   dex_methods: &DexMethods,
+                  dex_protos: &DexProtos,
                   m_allowlist: &[String],
                   output_folder: &Option<String>) {
 
@@ -285,6 +287,7 @@ impl ClassDefItem {
                                   dex_types,
                                   dex_fields,
                                   dex_methods,
+                                  dex_protos,
                                   &self.class_str,
                                   output_folder);
                 }
@@ -297,6 +300,7 @@ impl ClassDefItem {
                                   dex_types,
                                   dex_fields,
                                   dex_methods,
+                                  dex_protos,
                                   &self.class_str,
                                   output_folder);
                 }
@@ -367,6 +371,7 @@ impl EncodedMethod {
                   dex_types: &DexTypes,
                   dex_fields: &DexFields,
                   dex_methods: &DexMethods,
+                  dex_protos: &DexProtos,
                   class_str: &str,
                   output_folder: &Option<String>) {
 
@@ -384,9 +389,15 @@ impl EncodedMethod {
 
         // We also need to remove the last token (the actual
         // class name) from the rest (the namespace)
-        let (ns, _class) = cname.as_str()
-                               .rsplit_once('/')
-                               .expect("Error: cannot get file name");
+        // Sometimes we just have the namespace, in which case we
+        // do not split and use "defpackage" as namespace
+        let mut ns = "defpackage";
+        if cname.as_str().contains('/') {
+            ns = cname.as_str()
+                      .rsplit_once('/')
+                      .expect(&format!("Error: cannot get namespace from {}", cname.as_str()))
+                      .0;
+        }
 
         // We can create the folder corresponding to the namespace
         let target_folder = format!("{}{}", root, ns);
@@ -404,6 +415,7 @@ impl EncodedMethod {
                         dex_types,
                         dex_fields,
                         dex_methods,
+                        dex_protos,
                         &mut target_file);
         } else {
             writeln!(&mut target_file, "     No code in this method").unwrap();
