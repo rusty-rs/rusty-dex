@@ -4,7 +4,7 @@ use crate::dex_fields::DexFields;
 use crate::dex_methods::DexMethods;
 use crate::dex_protos::DexProtos;
 
-use crate::instructions_new::*;
+use crate::instructions::*;
 use crate::opcodes::OpCode;
 use crate::error;
 

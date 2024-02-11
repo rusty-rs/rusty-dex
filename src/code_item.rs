@@ -4,8 +4,7 @@ use std::io::{Seek, SeekFrom, Write};
 use crate::dex_protos::DexProtos;
 use crate::error;
 use crate::dex_reader::DexReader;
-// use crate::instructions::{ InstructionsReader, InstructionHandler };
-use crate::instructions_new::{ InstructionsReader, Instructions };
+use crate::instructions::{ InstructionsReader, Instructions };
 
 use crate::dex_strings::DexStrings;
 use crate::dex_types::DexTypes;
