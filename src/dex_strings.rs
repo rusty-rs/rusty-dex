@@ -55,6 +55,11 @@ impl DexStrings {
                 dex_reader.bytes.read_until(0, &mut raw_string).unwrap();
                 raw_string.pop();
 
+                // TODO: `mutf8::decode()` has some issues which leads to
+                // string ordering issues. For now we use `String::from_utf8_lossy()`
+                // which works as long as the app doesn't actually use UTF-16
+                let decoded = String::from_utf8_lossy(&raw_string).to_string();
+                /*
                 let (decoded, is_raw) = match mutf8::decode(&raw_string) {
                     Ok(decoded) => (decoded, false),
                     Err(_) => {
@@ -62,11 +67,12 @@ impl DexStrings {
                         (String::from(""), true)
                     }
                 };
+                */
 
                 strings.push(DexStringsItem {
                     utf16_size,
                     offset: string_offset,
-                    is_raw,
+                    is_raw: true,
                     string: decoded,
                 });
             } else {
