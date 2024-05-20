@@ -2,6 +2,7 @@
 
 use crate::dex_reader::DexReader;
 use crate::dex_file::DexFile;
+use crate::instructions::Instructions;
 
 pub mod logging;
 pub mod dex_header;
@@ -58,4 +59,18 @@ pub fn get_qualified_method_names(dex: &DexFile) -> Vec<String> {
     }
 
     methods
+}
+
+pub fn get_bytecode_for_method(dex: &DexFile,
+                               class_name: &String,
+                               method_name: &String) -> Option<Vec<Instructions>> {
+    if let Some(class_def) = dex.get_class_def(class_name) {
+        if let Some(encoded_method) = class_def.get_encoded_method(method_name) {
+            if let Some(code_item) = &encoded_method.code_item {
+                return code_item.insns.clone();
+            }
+        }
+    }
+
+    None
 }

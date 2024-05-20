@@ -326,6 +326,22 @@ impl ClassDefItem {
 
         methods
     }
+
+    pub fn get_encoded_method(&self, method_name: &String) -> Option<&EncodedMethod> {
+        if let Some(class_data) = &self.class_data {
+            for method in &class_data.direct_methods {
+                if method.get_method_name() == method_name {
+                    return Some(method);
+                }
+            }
+            for method in &class_data.virtual_methods {
+                if method.get_method_name() == method_name {
+                    return Some(method);
+                }
+            }
+        }
+        None
+    }
 }
 
 impl EncodedMethod {
