@@ -170,35 +170,6 @@ impl DexFile {
         }
     }
 
-    pub fn disasm(&self,
-                  output_folder: Option<String>,
-                  class_names: Option<Vec<String>>,
-                  method_names: Option<Vec<String>>) {
-
-        let c_allowlist = match class_names {
-            Some(names) => names,
-            None => Vec::new()
-        };
-
-        let m_allowlist = match method_names {
-            Some(names) => names,
-            None => Vec::new()
-        };
-
-        for class in &self.classes.items {
-            if c_allowlist.is_empty() ||
-                    c_allowlist.contains(class.get_class_name()) {
-                class.disasm(&self.strings,
-                             &self.types,
-                             &self.fields,
-                             &self.methods,
-                             &self.protos,
-                             &m_allowlist,
-                             &output_folder);
-            }
-        }
-    }
-
     pub fn get_classes_names(&self) -> Vec<&String> {
         self.get_classes_with_prefix(None)
     }

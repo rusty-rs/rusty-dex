@@ -270,44 +270,6 @@ impl DexClasses {
 }
 
 impl ClassDefItem {
-    pub fn disasm(&self,
-                  dex_strings: &DexStrings,
-                  dex_types: &DexTypes,
-                  dex_fields: &DexFields,
-                  dex_methods: &DexMethods,
-                  dex_protos: &DexProtos,
-                  m_allowlist: &[String],
-                  output_folder: &Option<String>) {
-
-        if let Some(class_data) = &self.class_data {
-            for method in class_data.direct_methods.iter() {
-                if m_allowlist.is_empty() ||
-                        m_allowlist.contains(&method.get_method_name().to_string()) {
-                    method.disasm(dex_strings,
-                                  dex_types,
-                                  dex_fields,
-                                  dex_methods,
-                                  dex_protos,
-                                  &self.class_str,
-                                  output_folder);
-                }
-            }
-
-            for method in class_data.virtual_methods.iter() {
-                if m_allowlist.is_empty() ||
-                        m_allowlist.contains(&method.get_method_name().to_string()) {
-                    method.disasm(dex_strings,
-                                  dex_types,
-                                  dex_fields,
-                                  dex_methods,
-                                  dex_protos,
-                                  &self.class_str,
-                                  output_folder);
-                }
-            }
-        }
-    }
-
     pub fn get_class_name(&self) -> &String {
         &self.class_str
     }
@@ -380,62 +342,5 @@ impl EncodedMethod {
 
     pub fn get_access_flags(&self) -> String {
         AccessFlag::vec_to_string(&self.access_flags)
-    }
-
-    pub fn disasm(&self,
-                  dex_strings: &DexStrings,
-                  dex_types: &DexTypes,
-                  dex_fields: &DexFields,
-                  dex_methods: &DexMethods,
-                  dex_protos: &DexProtos,
-                  class_str: &str,
-                  output_folder: &Option<String>) {
-
-        // Create output dirs
-        let root = match output_folder {
-            Some(folder) => format!("./{}/", folder),
-            None => "./".to_string(),
-        };
-
-        // Class names are under the format "L{foo};"
-        // we first remove the 'L' and ';'
-        let mut cname = class_str.chars();
-        cname.next();           // remove first char
-        cname.next_back();      // remove last char
-
-        // We also need to remove the last token (the actual
-        // class name) from the rest (the namespace)
-        // Sometimes we just have the namespace, in which case we
-        // do not split and use "defpackage" as namespace
-        let mut ns = "defpackage";
-        if cname.as_str().contains('/') {
-            ns = cname.as_str()
-                      .rsplit_once('/')
-                      .expect(&format!("Error: cannot get namespace from {}", cname.as_str()))
-                      .0;
-        }
-
-        // We can create the folder corresponding to the namespace
-        let target_folder = format!("{}{}", root, ns);
-        create_dir_all(target_folder).expect("Error: cannot create destination folder");
-
-        // We can create a file corresponding to the class name
-        let target_file_name = format!("{}{}.smali", root, cname.as_str());
-        let mut target_file = File::create(target_file_name).expect("Error: cannot create destination file");
-
-        writeln!(&mut target_file, "{}", format!("     {}", self.proto)).unwrap();
-        writeln!(&mut target_file, "{}", format!("     {}", AccessFlag::vec_to_string(&self.access_flags))).unwrap();
-        writeln!(&mut target_file, "     ――――――――――――――――――――").unwrap();
-        if let Some(code) = &self.code_item {
-            code.disasm(dex_strings,
-                        dex_types,
-                        dex_fields,
-                        dex_methods,
-                        dex_protos,
-                        &mut target_file);
-        } else {
-            writeln!(&mut target_file, "     No code in this method").unwrap();
-        }
-        writeln!(&mut target_file, "     ――――――――――――――――――――").unwrap();
     }
 }

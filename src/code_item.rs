@@ -10,7 +10,6 @@ use crate::dex_strings::DexStrings;
 use crate::dex_types::DexTypes;
 use crate::dex_fields::DexFields;
 use crate::dex_methods::DexMethods;
-use crate::disasm;
 
 #[derive(Clone, Debug)]
 pub struct TryItem {
@@ -153,30 +152,5 @@ impl CodeItem {
                 handlers: None
             }
         }
-    }
-
-    pub fn disasm(&self,
-                  dex_strings: &DexStrings,
-                  dex_types: &DexTypes,
-                  dex_fields: &DexFields,
-                  dex_methods: &DexMethods,
-                  dex_protos: &DexProtos,
-                  target_file: &mut File) {
-        let mut offset = 0;
-        if let Some(insns) = &self.insns {
-            for ins in insns {
-                writeln!(target_file,
-                         "{:>5}  |  {}",
-                         offset * 2,
-                         disasm::disasm_ins_new(ins,
-                                                dex_strings,
-                                                dex_types,
-                                                dex_fields,
-                                                dex_methods,
-                                                dex_protos)).unwrap();
-                offset += ins.length();
-            }
-        }
-        writeln!(target_file, "").unwrap_or_else(|_| error!("Cannot write to file"));
     }
 }
