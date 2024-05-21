@@ -1196,22 +1196,24 @@ pub struct InstructionsReader<'a>
     pub bytes: &'a [u16],
     offset: usize,
     length: usize,
+    nb_ins: usize,
     endianness: &'a DexEndianness,
 }
 
 impl<'a> InstructionsReader<'a> {
-    pub fn new(bytes: &'a [u16], endianness: &'a DexEndianness) -> Self {
+    pub fn new(bytes: &'a [u16], endianness: &'a DexEndianness, nb_ins: usize) -> Self {
         InstructionsReader {
             bytes,
             offset: 0,
             length: bytes.len(),
+            nb_ins,
             endianness
         }
     }
 
     /// Parses all instructions from the bytecode and move the cursor parser
     pub fn parse_instructions(&mut self) -> Option<Vec<Instructions>> {
-        let mut instructions = Vec::new();
+        let mut instructions = Vec::with_capacity(self.nb_ins);
 
         while self.offset < self.length {
             let ins = parse(self.bytes, self.offset, self.endianness);

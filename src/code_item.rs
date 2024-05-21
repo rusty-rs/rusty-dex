@@ -64,7 +64,12 @@ impl CodeItem {
             insns.push(dex_reader.read_u16().unwrap());
         }
 
-        let mut reader = InstructionsReader::new(&insns, &dex_reader.endianness);
+        // We don't have the number of instructions, just the number of 16-bit code units the
+        // bytecode takes. However, the majority of instructions take 2 16-bits code units so we
+        // can get a reasonable approximation of the number of instructions. This in turns allows
+        // us to pre-allocate the vector that will store the parsed instructions and improve the
+        // performance of the parser.
+        let mut reader = InstructionsReader::new(&insns, &dex_reader.endianness, (insns_size / 2) as usize);
         let parsed_ins = reader.parse_instructions();
 
         /* Check if there is some padding */
