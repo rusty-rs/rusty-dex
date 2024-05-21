@@ -4,9 +4,6 @@ use std::io::{Seek, SeekFrom};
 use std::io::BufRead;
 use std::cmp::Ordering;
 
-use crate::mutf8;
-
-use crate::error;
 use crate::dex_reader::DexReader;
 
 #[derive(Debug, PartialEq)]

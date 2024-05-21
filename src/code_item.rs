@@ -1,15 +1,9 @@
-use std::fs::File;
-use std::io::{Seek, SeekFrom, Write};
+use std::io::{Seek, SeekFrom};
 
-use crate::dex_protos::DexProtos;
-use crate::error;
 use crate::dex_reader::DexReader;
 use crate::instructions::{ InstructionsReader, Instructions };
 
-use crate::dex_strings::DexStrings;
 use crate::dex_types::DexTypes;
-use crate::dex_fields::DexFields;
-use crate::dex_methods::DexMethods;
 
 #[derive(Clone, Debug)]
 pub struct TryItem {

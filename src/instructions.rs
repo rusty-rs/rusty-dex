@@ -1,4 +1,3 @@
-use crate::error;
 use crate::opcodes::OpCode;
 use crate::dex_reader::DexEndianness;
 

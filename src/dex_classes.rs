@@ -1,5 +1,4 @@
-use std::fs::{File, create_dir_all};
-use std::io::{Seek, SeekFrom, Write};
+use std::io::{Seek, SeekFrom};
 use lazy_static::lazy_static;
 use regex::Regex;
 
@@ -12,7 +11,6 @@ use crate::dex_strings::DexStrings;
 use crate::dex_types::DexTypes;
 use crate::dex_fields::DexFields;
 use crate::dex_methods::DexMethods;
-use crate::dex_protos::DexProtos;
 
 const NO_INDEX: u32 = 0xffffffff;
 
