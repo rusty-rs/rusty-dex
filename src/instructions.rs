@@ -879,12 +879,10 @@ pub enum Instructions {
 
 
 /////////////////////////////////////////////////////////////////
-pub fn parse(raw_bytes: &[u16],
+pub fn parse(bytes: &[u16],
              offset: usize,
              endianness: &DexEndianness) -> Instructions
 {
-    let bytes = raw_bytes.to_vec();
-
     // TODO: make this prettier
     assert!(offset <= bytes.len());
 
