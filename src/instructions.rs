@@ -198,7 +198,8 @@ impl PackedSwitchPayload {
     fn build(reader: &mut DexReader) -> Self {
         let size = reader.read_u16().unwrap();
         let first_key = reader.read_i32().unwrap();
-        let mut targets = Vec::new();
+
+        let mut targets = Vec::with_capacity(size.into());
         for _ in 0..size {
             targets.push(reader.read_i32().unwrap());
         }
@@ -249,12 +250,12 @@ impl SparseSwitchPayload {
     fn build(reader: &mut DexReader) -> Self {
         let size = reader.read_u16().unwrap();
 
-        let mut keys = Vec::new();
+        let mut keys = Vec::with_capacity(size.into());
         for _ in 0..size {
             keys.push(reader.read_i32().unwrap());
         }
 
-        let mut targets = Vec::new();
+        let mut targets = Vec::with_capacity(size.into());
         for _ in 0..size {
             targets.push(reader.read_i32().unwrap());
         }
@@ -306,7 +307,7 @@ impl FillArrayDataPayload {
         let element_width = reader.read_u16().unwrap();
         let size = reader.read_u32().unwrap();
 
-        let mut data = Vec::new();
+        let mut data = Vec::with_capacity((size * element_width as u32).try_into().unwrap());
         for _ in 0..size {
             for _ in 0..element_width {
                 data.push(reader.read_u8().unwrap());
