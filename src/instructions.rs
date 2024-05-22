@@ -1,10 +1,11 @@
 use crate::opcodes::OpCode;
 use crate::dex_reader::DexEndianness;
+use crate::DexReader;
 
 /// Utility function to read i32 from [u16]
 fn read_i32(bytes: &[u16],
             offset: usize,
-            endianness: &DexEndianness) -> i32
+            endianness: DexEndianness) -> i32
 {
     match endianness {
         DexEndianness::LittleEndian =>
@@ -16,57 +17,57 @@ fn read_i32(bytes: &[u16],
 
 // TODO replace old instructions by these ones (remove prefix too)
 #[derive(Debug, Clone)]
-pub struct Instruction10t  { pub(crate) opcode: OpCode, length: usize, bytes: Vec<u16> }
+pub struct Instruction10t  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 1] }
 #[derive(Debug, Clone)]
-pub struct Instruction10x  { pub(crate) opcode: OpCode, length: usize, bytes: Vec<u16> }
+pub struct Instruction10x  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 1] }
 #[derive(Debug, Clone)]
-pub struct Instruction11n  { pub(crate) opcode: OpCode, length: usize, bytes: Vec<u16> }
+pub struct Instruction11n  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 1] }
 #[derive(Debug, Clone)]
-pub struct Instruction11x  { pub(crate) opcode: OpCode, length: usize, bytes: Vec<u16> }
+pub struct Instruction11x  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 1] }
 #[derive(Debug, Clone)]
-pub struct Instruction12x  { pub(crate) opcode: OpCode, length: usize, bytes: Vec<u16> }
+pub struct Instruction12x  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 1] }
 #[derive(Debug, Clone)]
-pub struct Instruction20t  { pub(crate) opcode: OpCode, length: usize, bytes: Vec<u16> }
+pub struct Instruction20t  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 2] }
 #[derive(Debug, Clone)]
-pub struct Instruction21c  { pub(crate) opcode: OpCode, length: usize, bytes: Vec<u16> }
+pub struct Instruction21c  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 2] }
 #[derive(Debug, Clone)]
-pub struct Instruction21h  { pub(crate) opcode: OpCode, length: usize, bytes: Vec<u16> }
+pub struct Instruction21h  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 2] }
 #[derive(Debug, Clone)]
-pub struct Instruction21s  { pub(crate) opcode: OpCode, length: usize, bytes: Vec<u16> }
+pub struct Instruction21s  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 2] }
 #[derive(Debug, Clone)]
-pub struct Instruction21t  { pub(crate) opcode: OpCode, length: usize, bytes: Vec<u16> }
+pub struct Instruction21t  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 2] }
 #[derive(Debug, Clone)]
-pub struct Instruction22b  { pub(crate) opcode: OpCode, length: usize, bytes: Vec<u16> }
+pub struct Instruction22b  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 2] }
 #[derive(Debug, Clone)]
-pub struct Instruction22c  { pub(crate) opcode: OpCode, length: usize, bytes: Vec<u16> }
+pub struct Instruction22c  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 2] }
 #[derive(Debug, Clone)]
-pub struct Instruction22s  { pub(crate) opcode: OpCode, length: usize, bytes: Vec<u16> }
+pub struct Instruction22s  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 2] }
 #[derive(Debug, Clone)]
-pub struct Instruction22t  { pub(crate) opcode: OpCode, length: usize, bytes: Vec<u16> }
+pub struct Instruction22t  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 2] }
 #[derive(Debug, Clone)]
-pub struct Instruction22x  { pub(crate) opcode: OpCode, length: usize, bytes: Vec<u16> }
+pub struct Instruction22x  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 2] }
 #[derive(Debug, Clone)]
-pub struct Instruction23x  { pub(crate) opcode: OpCode, length: usize, bytes: Vec<u16> }
+pub struct Instruction23x  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 2] }
 #[derive(Debug, Clone)]
-pub struct Instruction30t  { pub(crate) opcode: OpCode, length: usize, bytes: Vec<u16> }
+pub struct Instruction30t  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 3] }
 #[derive(Debug, Clone)]
-pub struct Instruction31c  { pub(crate) opcode: OpCode, length: usize, bytes: Vec<u16> }
+pub struct Instruction31c  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 3] }
 #[derive(Debug, Clone)]
-pub struct Instruction31i  { pub(crate) opcode: OpCode, length: usize, bytes: Vec<u16> }
+pub struct Instruction31i  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 3] }
 #[derive(Debug, Clone)]
-pub struct Instruction31t  { pub(crate) opcode: OpCode, length: usize, bytes: Vec<u16> }
+pub struct Instruction31t  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 3] }
 #[derive(Debug, Clone)]
-pub struct Instruction32x  { pub(crate) opcode: OpCode, length: usize, bytes: Vec<u16> }
+pub struct Instruction32x  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 3] }
 #[derive(Debug, Clone)]
-pub struct Instruction35c  { pub(crate) opcode: OpCode, length: usize, bytes: Vec<u16> }
+pub struct Instruction35c  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 3] }
 #[derive(Debug, Clone)]
-pub struct Instruction3rc  { pub(crate) opcode: OpCode, length: usize, bytes: Vec<u16> }
+pub struct Instruction3rc  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 3] }
 #[derive(Debug, Clone)]
-pub struct Instruction45cc { pub(crate) opcode: OpCode, length: usize, bytes: Vec<u16> }
+pub struct Instruction45cc { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 4] }
 #[derive(Debug, Clone)]
-pub struct Instruction4rcc { pub(crate) opcode: OpCode, length: usize, bytes: Vec<u16> }
+pub struct Instruction4rcc { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 4] }
 #[derive(Debug, Clone)]
-pub struct Instruction51l  { pub(crate) opcode: OpCode, length: usize, bytes: Vec<u16> }
+pub struct Instruction51l  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 5] }
 #[derive(Debug, Clone)]
 pub struct PackedSwitchPayload {
     pub(crate) opcode: OpCode,
@@ -194,17 +195,12 @@ impl Instructions {
 }
 
 impl PackedSwitchPayload {
-    fn build(bytes: &[u16],
-             offset: usize,
-             endianness: &DexEndianness) -> Self
-    {
-        let size = bytes[offset + 1];
-        let first_key = read_i32(bytes, offset + 2, endianness);
+    fn build(reader: &mut DexReader) -> Self {
+        let size = reader.read_u16().unwrap();
+        let first_key = reader.read_i32().unwrap();
         let mut targets = Vec::new();
-        let mut ioffset = 4;
         for _ in 0..size {
-            targets.push(read_i32(bytes, offset + ioffset, endianness));
-            ioffset += 2;
+            targets.push(reader.read_i32().unwrap());
         }
 
         PackedSwitchPayload {
@@ -250,24 +246,17 @@ impl PackedSwitchPayload {
 }
 
 impl SparseSwitchPayload {
-    fn build(bytes: &[u16],
-             offset: usize,
-             endianness: &DexEndianness) -> Self
-    {
-        let size = bytes[offset + 1];
+    fn build(reader: &mut DexReader) -> Self {
+        let size = reader.read_u16().unwrap();
 
         let mut keys = Vec::new();
-        let mut ioffset = 2;
         for _ in 0..size {
-            keys.push(read_i32(bytes, offset + ioffset, endianness));
-            ioffset += 2;
+            keys.push(reader.read_i32().unwrap());
         }
 
         let mut targets = Vec::new();
-        let mut ioffset = 2 + (size as usize) * 2;
         for _ in 0..size {
-            targets.push(read_i32(bytes, offset + ioffset, endianness));
-            ioffset += 2;
+            targets.push(reader.read_i32().unwrap());
         }
 
         SparseSwitchPayload {
@@ -312,36 +301,17 @@ impl SparseSwitchPayload {
 }
 
 impl FillArrayDataPayload {
-    fn build(bytes: &[u16],
-             offset: usize,
-             endianness: &DexEndianness) -> Self
-    {
+    fn build(reader: &mut DexReader) -> Self {
         // FIXME the bytes come up empty, check the bounds of the for loop
-        let element_width = bytes[offset + 1];
-        let size = match endianness {
-            DexEndianness::LittleEndian =>
-                ((bytes[offset + 3] as u32) << 16) + bytes[offset + 2] as u32,
-            DexEndianness::BigEndian =>
-                ((bytes[offset + 2] as u32) << 16) + bytes[offset + 3] as u32,
-        };
+        let element_width = reader.read_u16().unwrap();
+        let size = reader.read_u32().unwrap();
+
         let mut data = Vec::new();
-        let mut ioffset = 4;
-        match endianness {
-            DexEndianness::LittleEndian =>
-                for _ in 0..((size / element_width as u32) / 2) {
-                    let _b = bytes[offset + ioffset].to_le_bytes();
-                    data.push(_b[0]);
-                    data.push(_b[1]);
-                    ioffset += 1;
-                },
-            DexEndianness::BigEndian =>
-                for _ in 0..((size / element_width as u32) / 2) {
-                    let _b = bytes[offset + ioffset].to_be_bytes();
-                    data.push(_b[0]);
-                    data.push(_b[1]);
-                    ioffset += 1;
-                },
-        };
+        for _ in 0..size {
+            for _ in 0..element_width {
+                data.push(reader.read_u8().unwrap());
+            }
+        }
 
         FillArrayDataPayload {
             opcode: OpCode::FILL_ARRAY_DATA_PAYLOAD,
@@ -364,7 +334,7 @@ impl FillArrayDataPayload {
     }
 
     fn length(&self) -> usize {
-        ((self.size * self.element_width as u32 + 1) / 2 + 4) as usize
+        ((self.size * self.element_width as u32) / 2 + 4) as usize
     }
 
     fn opcode(&self) -> OpCode {
@@ -420,55 +390,85 @@ pub enum Instructions {
 
 
 /////////////////////////////////////////////////////////////////
-pub fn parse(bytes: &[u16],
-             offset: usize,
-             endianness: &DexEndianness) -> Instructions
-{
-    // TODO: make this prettier
-    assert!(offset <= bytes.len());
 
-    let opcode = match OpCode::parse((bytes[offset] & 0xff).try_into().unwrap()) {
+pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> usize {
+    println!("----------------- start parse_read()");
+    // check opcode, infer length
+    // read appropriate amount of bytes
+    // convert to Instructions enum member
+    // return
+
+    let offset = reader.bytes.position();
+    println!("initial position: {offset}");
+    let raw_opcode = reader.read_u16().unwrap();
+    println!("raw opcode: {raw_opcode:#06X?} | position {}", reader.bytes.position());
+    println!("          : {:#04X?}", raw_opcode & 0xff);
+    println!("          : {:#04X?}", raw_opcode >> 8);
+
+    let opcode = match OpCode::parse((raw_opcode & 0xff).try_into().unwrap()) {
         // Deal with the special cases of fill-array-data-payload,
         // packed-switch-payload, and sparse-switch-payload
-        Some(OpCode::NOP) => match bytes[offset] >> 8 {
+        Some(OpCode::NOP) => match raw_opcode >> 8 {
             0x01 => OpCode::PACKED_SWITCH_PAYLOAD,
             0x02 => OpCode::SPARSE_SWITCH_PAYLOAD,
             0x03 => OpCode::FILL_ARRAY_DATA_PAYLOAD,
             _    => OpCode::NOP
         },
         Some(code) => code,
-        None => panic!("Cannot parse instruction from: 0x{:X?}", bytes[offset] & 0xff)
+        None => panic!("Cannot parse instruction from: 0x{:X?}", raw_opcode & 0xff)
     };
 
+    println!("got opcode: {opcode:?} | position {}", reader.bytes.position());
+
     match opcode {
-        OpCode::GOTO => Instructions::Instruction10t(Instruction10t {
-            opcode,
-            bytes: Vec::from(&bytes[offset..offset + 1]),
-            length: 1
-        }),
+        OpCode::GOTO => {
+            let mut bytes = [0u16; 1];
+            bytes[0] = raw_opcode;
+            container.push(Instructions::Instruction10t(Instruction10t {
+                opcode,
+                bytes,
+                length: 1
+            }));
+            return 1;
+        },
 
-        OpCode::NOP | OpCode::RETURN_VOID => Instructions::Instruction10x(Instruction10x{
-            opcode,
-            bytes: Vec::from(&bytes[offset..offset + 1]),
-            length: 1
-        }),
+        OpCode::NOP | OpCode::RETURN_VOID => {
+            let mut bytes = [0u16; 1];
+            bytes[0] = raw_opcode;
+            container.push(Instructions::Instruction10x(Instruction10x{
+                opcode,
+                bytes,
+                length: 1
+            }));
+            return 1;
+        },
 
-        OpCode::CONST_4 => Instructions::Instruction11n(Instruction11n{
-            opcode,
-            bytes: Vec::from(&bytes[offset..offset + 1]),
-            length: 1
-        }),
+        OpCode::CONST_4 => {
+            let mut bytes = [0u16; 1];
+            bytes[0] = raw_opcode;
+            container.push(Instructions::Instruction11n(Instruction11n{
+                opcode,
+                bytes,
+                length: 1
+            }));
+            return 1;
+        },
 
         OpCode::MONITOR_ENTER            | OpCode::MONITOR_EXIT
             | OpCode::MOVE_EXCEPTION     | OpCode::MOVE_RESULT
             | OpCode::MOVE_RESULT_OBJECT | OpCode::MOVE_RESULT_WIDE
             | OpCode::RETURN             | OpCode::RETURN_OBJECT
             | OpCode::RETURN_WIDE        | OpCode::THROW
-            => Instructions::Instruction11x(Instruction11x{
-                opcode,
-                bytes: Vec::from(&bytes[offset..offset + 1]),
-                length: 1
-            }),
+            => {
+                let mut bytes = [0u16; 1];
+                bytes[0] = raw_opcode;
+                container.push(Instructions::Instruction11x(Instruction11x{
+                    opcode,
+                    bytes,
+                    length: 1
+                }));
+                return 1;
+            },
 
         OpCode::ADD_DOUBLE_2ADDR      | OpCode::ADD_FLOAT_2ADDR
             | OpCode::ADD_INT_2ADDR   | OpCode::ADD_LONG_2ADDR
@@ -499,17 +499,28 @@ pub fn parse(bytes: &[u16],
             | OpCode::SUB_LONG_2ADDR  | OpCode::USHR_INT_2ADDR
             | OpCode::USHR_LONG_2ADDR | OpCode::XOR_INT_2ADDR
             | OpCode::XOR_LONG_2ADDR
-            => Instructions::Instruction12x(Instruction12x{
-                opcode,
-                bytes: Vec::from(&bytes[offset..offset + 1]),
-                length: 1
-            }),
+            => {
+                let mut bytes = [0u16; 1];
+                bytes[0] = raw_opcode;
+                container.push(Instructions::Instruction12x(Instruction12x{
+                    opcode,
+                    bytes,
+                    length: 1
+                }));
+                return 1;
+            },
 
-        OpCode::GOTO_16 => Instructions::Instruction20t(Instruction20t{
-            opcode,
-            bytes: Vec::from(&bytes[offset..offset + 2]),
-            length: 2
-        }),
+        OpCode::GOTO_16 => {
+            let mut bytes = [0u16; 2];
+            bytes[0] = raw_opcode;
+            bytes[1] = reader.read_u16().unwrap();
+            container.push(Instructions::Instruction20t(Instruction20t{
+                opcode,
+                bytes,
+                length: 2
+            }));
+            return 2;
+        },
 
         OpCode::CHECK_CAST                | OpCode::CONST_CLASS
             | OpCode::CONST_METHOD_HANDLE | OpCode::CONST_METHOD_TYPE
@@ -521,34 +532,58 @@ pub fn parse(bytes: &[u16],
             | OpCode::SPUT_BYTE           | OpCode::SPUT_CHAR
             | OpCode::SPUT                | OpCode::SPUT_OBJECT
             | OpCode::SPUT_SHORT          | OpCode::SPUT_WIDE
-            => Instructions::Instruction21c(Instruction21c{
-                opcode,
-                bytes: Vec::from(&bytes[offset..offset + 2]),
-                length: 2
-            }),
+            => {
+                let mut bytes = [0u16; 2];
+                bytes[0] = raw_opcode;
+                bytes[1] = reader.read_u16().unwrap();
+                container.push(Instructions::Instruction21c(Instruction21c {
+                    opcode,
+                    bytes,
+                    length: 2
+                }));
+                return 2;
+            },
 
         OpCode::CONST_HIGH16 | OpCode::CONST_WIDE_HIGH16
-            => Instructions::Instruction21h(Instruction21h{
-                opcode,
-                bytes: Vec::from(&bytes[offset..offset + 2]),
-                length: 2
-            }),
+            => {
+                let mut bytes = [0u16; 2];
+                bytes[0] = raw_opcode;
+                bytes[1] = reader.read_u16().unwrap();
+                container.push(Instructions::Instruction21h(Instruction21h {
+                    opcode,
+                    bytes,
+                    length: 2
+                }));
+                return 2;
+            },
 
         OpCode::CONST_16 | OpCode::CONST_WIDE_16
-            => Instructions::Instruction21s(Instruction21s{
-                opcode,
-                bytes: Vec::from(&bytes[offset..offset + 2]),
-                length: 2
-            }),
+            => {
+                let mut bytes = [0u16; 2];
+                bytes[0] = raw_opcode;
+                bytes[1] = reader.read_u16().unwrap();
+                container.push(Instructions::Instruction21s(Instruction21s {
+                    opcode,
+                    bytes,
+                    length: 2
+                }));
+                return 2;
+            },
 
         OpCode::IF_EQZ       | OpCode::IF_GEZ
             | OpCode::IF_GTZ | OpCode::IF_LEZ
             | OpCode::IF_LTZ | OpCode::IF_NEZ
-            => Instructions::Instruction21t(Instruction21t{
-                opcode,
-                bytes: Vec::from(&bytes[offset..offset + 2]),
-                length: 2
-            }),
+            => {
+                let mut bytes = [0u16; 2];
+                bytes[0] = raw_opcode;
+                bytes[1] = reader.read_u16().unwrap();
+                container.push(Instructions::Instruction21t(Instruction21t {
+                    opcode,
+                    bytes,
+                    length: 2
+                }));
+                return 2;
+            },
 
         OpCode::ADD_INT_LIT8        | OpCode::AND_INT_LIT8
             | OpCode::DIV_INT_LIT8  | OpCode::MUL_INT_LIT8
@@ -556,11 +591,17 @@ pub fn parse(bytes: &[u16],
             | OpCode::RSUB_INT_LIT8 | OpCode::SHL_INT_LIT8
             | OpCode::SHR_INT_LIT8  | OpCode::USHR_INT_LIT8
             | OpCode::XOR_INT_LIT8
-            => Instructions::Instruction22b(Instruction22b{
-                opcode,
-                bytes: Vec::from(&bytes[offset..offset + 2]),
-                length: 2
-            }),
+            => {
+                let mut bytes = [0u16; 2];
+                bytes[0] = raw_opcode;
+                bytes[1] = reader.read_u16().unwrap();
+                container.push(Instructions::Instruction22b(Instruction22b {
+                    opcode,
+                    bytes,
+                    length: 2
+                }));
+                return 2;
+            },
 
         OpCode::IGET_BOOLEAN       | OpCode::IGET_BYTE
             | OpCode::IGET_CHAR    | OpCode::IGET
@@ -570,38 +611,62 @@ pub fn parse(bytes: &[u16],
             | OpCode::IPUT_CHAR    | OpCode::IPUT
             | OpCode::IPUT_OBJECT  | OpCode::IPUT_SHORT
             | OpCode::IPUT_WIDE    | OpCode::NEW_ARRAY
-            => Instructions::Instruction22c(Instruction22c{
-                opcode,
-                bytes: Vec::from(&bytes[offset..offset + 2]),
-                length: 2
-            }),
+            => {
+                let mut bytes = [0u16; 2];
+                bytes[0] = raw_opcode;
+                bytes[1] = reader.read_u16().unwrap();
+                container.push(Instructions::Instruction22c(Instruction22c {
+                    opcode,
+                    bytes,
+                    length: 2
+                }));
+                return 2;
+            },
 
         OpCode::ADD_INT_LIT16       | OpCode::AND_INT_LIT16
             | OpCode::DIV_INT_LIT16 | OpCode::MUL_INT_LIT16
             | OpCode::OR_INT_LIT16  | OpCode::REM_INT_LIT16
             | OpCode::RSUB_INT      | OpCode::XOR_INT_LIT16
-            => Instructions::Instruction22s(Instruction22s{
-                opcode,
-                bytes: Vec::from(&bytes[offset..offset + 2]),
-                length: 2
-            }),
+            => {
+                let mut bytes = [0u16; 2];
+                bytes[0] = raw_opcode;
+                bytes[1] = reader.read_u16().unwrap();
+                container.push(Instructions::Instruction22s(Instruction22s {
+                    opcode,
+                    bytes,
+                    length: 2
+                }));
+                return 2;
+            },
 
         OpCode::IF_EQ       | OpCode::IF_GE
             | OpCode::IF_GT | OpCode::IF_LE
             | OpCode::IF_LT | OpCode::IF_NE
-            => Instructions::Instruction22t(Instruction22t{
-                opcode,
-                bytes: Vec::from(&bytes[offset..offset + 2]),
-                length: 2
-            }),
+            => {
+                let mut bytes = [0u16; 2];
+                bytes[0] = raw_opcode;
+                bytes[1] = reader.read_u16().unwrap();
+                container.push(Instructions::Instruction22t(Instruction22t {
+                    opcode,
+                    bytes,
+                    length: 2
+                }));
+                return 2;
+            },
 
         OpCode::MOVE_FROM16 | OpCode::MOVE_OBJECT_FROM16
             | OpCode::MOVE_WIDE_FROM16
-            => Instructions::Instruction22x(Instruction22x{
-                opcode,
-                bytes: Vec::from(&bytes[offset..offset + 2]),
-                length: 2
-            }),
+            => {
+                let mut bytes = [0u16; 2];
+                bytes[0] = raw_opcode;
+                bytes[1] = reader.read_u16().unwrap();
+                container.push(Instructions::Instruction22x(Instruction22x {
+                    opcode,
+                    bytes,
+                    length: 2
+                }));
+                return 2;
+            },
 
         OpCode::ADD_DOUBLE         | OpCode::ADD_FLOAT
             | OpCode::ADD_INT      | OpCode::ADD_LONG
@@ -629,143 +694,185 @@ pub fn parse(bytes: &[u16],
             | OpCode::SUB_LONG     | OpCode::USHR_INT
             | OpCode::USHR_LONG    | OpCode::XOR_INT
             | OpCode::XOR_LONG
-            => Instructions::Instruction23x(Instruction23x{
+            => {
+                let mut bytes = [0u16; 2];
+                bytes[0] = raw_opcode;
+                bytes[1] = reader.read_u16().unwrap();
+                container.push(Instructions::Instruction23x(Instruction23x {
+                    opcode,
+                    bytes,
+                    length: 2
+                }));
+                return 2;
+            },
+
+        OpCode::GOTO_32 => {
+            let mut bytes = [0u16; 3];
+            bytes[0] = raw_opcode;
+            bytes[1] = reader.read_u16().unwrap();
+            bytes[2] = reader.read_u16().unwrap();
+            container.push(Instructions::Instruction30t(Instruction30t {
                 opcode,
-                bytes: Vec::from(&bytes[offset..offset + 2]),
-                length: 2
-            }),
+                bytes,
+                length: 3
+            }));
+            return 3;
+        },
 
-        OpCode::GOTO_32 => Instructions::Instruction30t(Instruction30t{
-            opcode,
-            bytes: Vec::from(&bytes[offset..offset + 3]),
-            length: 3
-        }),
-
-        OpCode::CONST_STRING_JUMBO => Instructions::Instruction31c(Instruction31c{
-            opcode,
-            bytes: Vec::from(&bytes[offset..offset + 3]),
-            length: 3
-        }),
+        OpCode::CONST_STRING_JUMBO => {
+            let mut bytes = [0u16; 3];
+            bytes[0] = raw_opcode;
+            bytes[1] = reader.read_u16().unwrap();
+            bytes[2] = reader.read_u16().unwrap();
+            container.push(Instructions::Instruction31c(Instruction31c {
+                opcode,
+                bytes,
+                length: 3
+            }));
+            return 3;
+        },
 
         OpCode::CONST | OpCode::CONST_WIDE_32
-            => Instructions::Instruction31i(Instruction31i{
-                opcode,
-                bytes: Vec::from(&bytes[offset..offset + 3]),
-                length: 3
-            }),
+            => {
+                let mut bytes = [0u16; 3];
+                bytes[0] = raw_opcode;
+                bytes[1] = reader.read_u16().unwrap();
+                bytes[2] = reader.read_u16().unwrap();
+                container.push(Instructions::Instruction31i(Instruction31i {
+                    opcode,
+                    bytes,
+                    length: 3
+                }));
+                return 3;
+            },
 
         OpCode::FILL_ARRAY_DATA | OpCode::PACKED_SWITCH
-            | OpCode::SPARSE_SWITCH => Instructions::Instruction31t(Instruction31t{
-                opcode,
-                bytes: Vec::from(&bytes[offset..offset + 3]),
-                length: 3
-            }),
+            | OpCode::SPARSE_SWITCH => {
+                let mut bytes = [0u16; 3];
+                bytes[0] = raw_opcode;
+                bytes[1] = reader.read_u16().unwrap();
+                bytes[2] = reader.read_u16().unwrap();
+                container.push(Instructions::Instruction31t(Instruction31t {
+                    opcode,
+                    bytes,
+                    length: 3
+                }));
+                return 3;
+            },
 
         OpCode::MOVE_16 | OpCode::MOVE_OBJECT_16
-            | OpCode::MOVE_WIDE_16 => Instructions::Instruction32x(Instruction32x{
-                opcode,
-                bytes: Vec::from(&bytes[offset..offset + 3]),
-                length: 3
-            }),
+            | OpCode::MOVE_WIDE_16 => {
+                let mut bytes = [0u16; 3];
+                bytes[0] = raw_opcode;
+                bytes[1] = reader.read_u16().unwrap();
+                bytes[2] = reader.read_u16().unwrap();
+                container.push(Instructions::Instruction32x(Instruction32x {
+                    opcode,
+                    bytes,
+                    length: 3
+                }));
+                return 3;
+            },
 
         OpCode::FILLED_NEW_ARRAY    | OpCode::INVOKE_CUSTOM
             | OpCode::INVOKE_DIRECT | OpCode::INVOKE_INTERFACE
             | OpCode::INVOKE_STATIC | OpCode::INVOKE_SUPER
             | OpCode::INVOKE_VIRTUAL
-            => Instructions::Instruction35c(Instruction35c{
-                opcode,
-                bytes: Vec::from(&bytes[offset..offset + 3]),
-                length: 3
-            }),
+            => {
+                let mut bytes = [0u16; 3];
+                bytes[0] = raw_opcode;
+                bytes[1] = reader.read_u16().unwrap();
+                bytes[2] = reader.read_u16().unwrap();
+                container.push(Instructions::Instruction35c(Instruction35c {
+                    opcode,
+                    bytes,
+                    length: 3
+                }));
+                return 3;
+            },
 
         OpCode::FILLED_NEW_ARRAY_RANGE    | OpCode::INVOKE_CUSTOM_RANGE
             | OpCode::INVOKE_DIRECT_RANGE | OpCode::INVOKE_INTERFACE_RANGE
             | OpCode::INVOKE_STATIC_RANGE | OpCode::INVOKE_SUPER_RANGE
             | OpCode::INVOKE_VIRTUAL_RANGE
-            => Instructions::Instruction3rc(Instruction3rc{
+            => {
+                let mut bytes = [0u16; 3];
+                bytes[0] = raw_opcode;
+                bytes[1] = reader.read_u16().unwrap();
+                bytes[2] = reader.read_u16().unwrap();
+                container.push(Instructions::Instruction3rc(Instruction3rc {
+                    opcode,
+                    bytes,
+                    length: 3
+                }));
+                return 3;
+            },
+
+        OpCode::INVOKE_POLYMORPHIC => {
+            let mut bytes = [0u16; 4];
+            bytes[0] = raw_opcode;
+            bytes[1] = reader.read_u16().unwrap();
+            bytes[2] = reader.read_u16().unwrap();
+            bytes[3] = reader.read_u16().unwrap();
+            container.push(Instructions::Instruction45cc(Instruction45cc {
                 opcode,
-                bytes: Vec::from(&bytes[offset..offset + 3]),
-                length: 3
-            }),
-
-        OpCode::INVOKE_POLYMORPHIC => Instructions::Instruction45cc(Instruction45cc{
-            opcode,
-            bytes: Vec::from(&bytes[offset..offset + 4]),
-            length: 4
-        }),
-
-        OpCode::INVOKE_POLYMORPHIC_RANGE => Instructions::Instruction4rcc(Instruction4rcc{
-            opcode,
-            bytes: Vec::from(&bytes[offset..offset + 4]),
-            length: 4
-        }),
-
-        OpCode::CONST_WIDE => Instructions::Instruction51l(Instruction51l{
-            opcode,
-            bytes: Vec::from(&bytes[offset..offset + 5]),
-            length: 5
-        }),
-
-        // TODO: refactor this shit
-        OpCode::PACKED_SWITCH_PAYLOAD
-            => {
-                let inst = PackedSwitchPayload::build(&bytes, offset, endianness);
-                return Instructions::PackedSwitchPayload(inst);
+                bytes,
+                length: 4
+            }));
+            return 4;
         },
 
-        OpCode::SPARSE_SWITCH_PAYLOAD
-            => {
-                let inst = SparseSwitchPayload::build(&bytes, offset, endianness);
-                return Instructions::SparseSwitchPayload(inst);
+        OpCode::INVOKE_POLYMORPHIC_RANGE => {
+            let mut bytes = [0u16; 4];
+            bytes[0] = raw_opcode;
+            bytes[1] = reader.read_u16().unwrap();
+            bytes[2] = reader.read_u16().unwrap();
+            bytes[3] = reader.read_u16().unwrap();
+            container.push(Instructions::Instruction4rcc(Instruction4rcc {
+                opcode,
+                bytes,
+                length: 4
+            }));
+            return 4;
         },
 
-        OpCode::FILL_ARRAY_DATA_PAYLOAD
-            => {
-                let inst = FillArrayDataPayload::build(&bytes, offset, endianness);
-                return Instructions::FillArrayDataPayload(inst);
-        }
-    }
-}
+        OpCode::CONST_WIDE => {
+            let mut bytes = [0u16; 5];
+            bytes[0] = raw_opcode;
+            bytes[1] = reader.read_u16().unwrap();
+            bytes[2] = reader.read_u16().unwrap();
+            bytes[3] = reader.read_u16().unwrap();
+            bytes[4] = reader.read_u16().unwrap();
+            container.push(Instructions::Instruction51l(Instruction51l {
+                opcode,
+                bytes,
+                length: 5
+            }));
+            return 5;
+        },
 
-/////////////////////////////////////////////////////////////////
+        OpCode::PACKED_SWITCH_PAYLOAD => {
+            let inst = PackedSwitchPayload::build(reader);
+            let len = inst.length();
+            container.push(Instructions::PackedSwitchPayload(inst));
+            reader.align_cursor();
+            return len;
+        },
 
-#[derive(Debug)]
-pub struct InstructionsReader<'a>
-{
-    pub bytes: &'a [u16],
-    offset: usize,
-    length: usize,
-    nb_ins: usize,
-    endianness: &'a DexEndianness,
-}
+        OpCode::SPARSE_SWITCH_PAYLOAD => {
+            let inst = SparseSwitchPayload::build(reader);
+            let len = inst.length();
+            container.push(Instructions::SparseSwitchPayload(inst));
+            reader.align_cursor();
+            return len;
+        },
 
-impl<'a> InstructionsReader<'a> {
-    pub fn new(bytes: &'a [u16], endianness: &'a DexEndianness, nb_ins: usize) -> Self {
-        InstructionsReader {
-            bytes,
-            offset: 0,
-            length: bytes.len(),
-            nb_ins,
-            endianness
-        }
-    }
-
-    /// Parses all instructions from the bytecode and move the cursor parser
-    pub fn parse_instructions(&mut self) -> Option<Vec<Instructions>> {
-        let mut instructions = Vec::with_capacity(self.nb_ins);
-
-        while self.offset < self.length {
-            let ins = parse(self.bytes, self.offset, self.endianness);
-            self.offset += ins.length();
-            instructions.push(ins);
-        }
-
-        // TODO: refactor this
-        assert_eq!(self.offset, self.length);
-
-        match instructions.len() {
-            0 => None,
-            _ => Some(instructions)
+        OpCode::FILL_ARRAY_DATA_PAYLOAD => {
+            let inst = FillArrayDataPayload::build(reader);
+            let len = inst.length();
+            container.push(Instructions::FillArrayDataPayload(inst));
+            reader.align_cursor();
+            return len;
         }
     }
 }

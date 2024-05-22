@@ -1,7 +1,7 @@
 use std::io::{Seek, SeekFrom};
 
 use crate::dex_reader::DexReader;
-use crate::instructions::{ InstructionsReader, Instructions };
+use crate::{ instructions, instructions::Instructions };
 
 use crate::dex_types::DexTypes;
 
@@ -40,6 +40,7 @@ impl CodeItem {
     pub fn build(dex_reader: &mut DexReader,
                  offset: u32,
                  types_list: &DexTypes) -> Self {
+
         /* Go to start of code item */
         dex_reader.bytes.seek(SeekFrom::Start(offset.into())).unwrap();
 
@@ -53,17 +54,11 @@ impl CodeItem {
 
         /* Get the actual bytecode */
         let mut insns = Vec::with_capacity(insns_size as usize);
-        for _ in 0..insns_size {
-            insns.push(dex_reader.read_u16().unwrap());
-        }
+        let end_offset = dex_reader.bytes.position() + (insns_size * 2) as u64;
 
-        // We don't have the number of instructions, just the number of 16-bit code units the
-        // bytecode takes. However, the majority of instructions take 2 16-bits code units so we
-        // can get a reasonable approximation of the number of instructions. This in turns allows
-        // us to pre-allocate the vector that will store the parsed instructions and improve the
-        // performance of the parser.
-        let mut reader = InstructionsReader::new(&insns, &dex_reader.endianness, (insns_size / 2) as usize);
-        let parsed_ins = reader.parse_instructions();
+        while dex_reader.bytes.position() < end_offset {
+            instructions::parse_read(dex_reader, &mut insns);
+        }
 
         /* Check if there is some padding */
         if tries_size != 0 && insns_size % 2 == 1 {
@@ -97,7 +92,7 @@ impl CodeItem {
                 for _ in 0..handler_size.abs() {
                     let (type_idx, _) = dex_reader.read_uleb128().unwrap();
                     let decoded_type = types_list.items.get(type_idx as usize)
-                                                       .unwrap()
+                                                       .unwrap_or(&String::from("MISSINGTYPE"))  // FIXME
                                                        .to_string();
                     let (addr, _) = dex_reader.read_uleb128().unwrap();
 
@@ -131,7 +126,8 @@ impl CodeItem {
                 ins_size,
                 outs_size,
                 debug_info_off,
-                insns: parsed_ins,
+                // insns: parsed_ins,
+                insns: Some(insns),
                 tries: Some(tries),
                 handlers: Some(handlers)
             }
@@ -141,7 +137,8 @@ impl CodeItem {
                 ins_size,
                 outs_size,
                 debug_info_off,
-                insns: parsed_ins,
+                // insns: parsed_ins,
+                insns: Some(insns),
                 tries: None,
                 handlers: None
             }

@@ -10,7 +10,7 @@ use crate::error::DexError;
 const ENDIAN_CONSTANT: [u8; 4] = [0x12, 0x34, 0x56, 0x78];
 const REVERSE_ENDIAN_CONSTANT: [u8; 4] = [0x78, 0x56, 0x34, 0x12];
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Clone, Copy, PartialEq)]
 pub enum DexEndianness {
     LittleEndian,
     BigEndian,
@@ -79,6 +79,14 @@ impl DexReader {
         }
     }
 
+    /// Check if the cursor is on an even-numbered bytecode offsets
+    /// and, if not, consume data until it is
+    pub fn align_cursor(&mut self) {
+        while ! (self.bytes.position() % 4 == 0) {
+            let _ = self.read_u8().unwrap();
+        }
+    }
+
     pub fn read_u8(&mut self) -> Result<u8, DexError> {
         if self.bytes.position() >= self.bytes_len {
             return Err(DexError::new("Error: no data left to read"));
@@ -106,6 +114,17 @@ impl DexReader {
         match self.endianness {
             DexEndianness::BigEndian => Ok(self.bytes.read_u32::<BigEndian>().unwrap()),
             DexEndianness::LittleEndian => Ok(self.bytes.read_u32::<LittleEndian>().unwrap()),
+        }
+    }
+
+    pub fn read_i32(&mut self) -> Result<i32, DexError> {
+        if self.bytes.position() > self.bytes_len - 4 {
+            return Err(DexError::new("Error: no data left to read"));
+        }
+
+        match self.endianness {
+            DexEndianness::BigEndian => Ok(self.bytes.read_i32::<BigEndian>().unwrap()),
+            DexEndianness::LittleEndian => Ok(self.bytes.read_i32::<LittleEndian>().unwrap()),
         }
     }
 
