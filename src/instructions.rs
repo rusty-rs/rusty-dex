@@ -393,18 +393,7 @@ pub enum Instructions {
 /////////////////////////////////////////////////////////////////
 
 pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> usize {
-    println!("----------------- start parse_read()");
-    // check opcode, infer length
-    // read appropriate amount of bytes
-    // convert to Instructions enum member
-    // return
-
-    let offset = reader.bytes.position();
-    println!("initial position: {offset}");
     let raw_opcode = reader.read_u16().unwrap();
-    println!("raw opcode: {raw_opcode:#06X?} | position {}", reader.bytes.position());
-    println!("          : {:#04X?}", raw_opcode & 0xff);
-    println!("          : {:#04X?}", raw_opcode >> 8);
 
     let opcode = match OpCode::parse((raw_opcode & 0xff).try_into().unwrap()) {
         // Deal with the special cases of fill-array-data-payload,
@@ -418,8 +407,6 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
         Some(code) => code,
         None => panic!("Cannot parse instruction from: 0x{:X?}", raw_opcode & 0xff)
     };
-
-    println!("got opcode: {opcode:?} | position {}", reader.bytes.position());
 
     match opcode {
         OpCode::GOTO => {
