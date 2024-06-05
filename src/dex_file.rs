@@ -1,3 +1,13 @@
+//! Representation of a DEX file
+//!
+//! This is the main class of the parser. When creating `DexFile` object, the builder will parse
+//! the header and from there decode the contents of the file (strings, methods, etc). Some apps
+//! will have multiple DEX files. In this case, the builder will initially create a `DexFile`
+//! object per DEX file and then merge them into one. This extra step is needed as the contents of
+//! the final `DexFile` object must contain all the contents of the intermediary DEX files but
+//! sorted (the actual sorting method depends on the type of content being sorted -- see the
+//! classes documentations for details).
+
 use crate::info;
 
 use crate::dex_reader::DexReader;
@@ -9,6 +19,7 @@ use crate::dex_fields::DexFields;
 use crate::dex_methods::DexMethods;
 use crate::dex_classes::{ DexClasses, ClassDefItem, EncodedMethod };
 
+/// Representation of a DEX file
 #[derive(Debug)]
 pub struct DexFile {
     pub header: DexHeader,
@@ -21,6 +32,7 @@ pub struct DexFile {
 }
 
 impl DexFile {
+    /// Parse a DEX file from the reader and create a `DexFile` object
     pub fn build(mut dex_reader: DexReader) -> Self {
         let dex_header = DexHeader::new(&mut dex_reader).unwrap();
 
@@ -70,6 +82,9 @@ impl DexFile {
         }
     }
 
+    /// Create a `DexFile` from a collection of `DexReader`.
+    /// This function will create an intermediary `DexFile` object for each reader and then merge
+    /// them into the final `DexFile`.
     pub fn merge(readers: Vec<DexReader>) -> Self {
         let mut strings_list = Vec::new();
         let mut type_ids_list = Vec::new();

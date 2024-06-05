@@ -1,30 +1,46 @@
+//! Module to compute and verify the Adler-32 checksum of a file
+//!
+//! DEX files use Adler-32 to detect file corruption. Each DEX file contains a checksum value to
+//! compare against. The checksum must be computed from the whole file except the magic number and
+//! the checksum field in the header.
+//!
+//! # Example
+//!
+//! ```
+//! use dex_parser::adler32::verify_from_bytes;
+//!
+//! let bytes: [u8; 16] = [0x44, 0x45, 0x58, 0x0a,
+//!                        0x30, 0x33, 0x35, 0x00,
+//!                        0x00, 0x00, 0x00, 0x00,
+//!                        0x00, 0x00, 0x00, 0x00];
+//! assert!(verify_from_bytes(&bytes, 0x14300184).unwrap());
+//! ```
+
 use crate::error::DexError;
 
+/// Constant used in the checksum computation
 const MOD_ADLER: u32 = 65521;
 
-/* Each DEX header contains an Adler-32 checksum of the file, minus the first
- * 11 bytes, which correspond to the space taken by the magic and the checksum.
- * This function computes the checksum of the file, and compares it to the one
- * found in the header.
- */
+/// Each DEX header contains an Adler-32 checksum of the file, minus the first
+/// 11 bytes, which correspond to the space taken by the magic and the checksum.
+/// This function computes the checksum of the file, and compares it to the one
+/// found in the header.
 pub fn verify_from_bytes(bytes: &[u8], checksum: u32) -> Result<bool, DexError> {
 
-    /* Define variable for checksum computation */
+    // Define variable for checksum computation
     let mut a: u32 = 1;
     let mut b: u32 = 0;
 
-    /* Main computation
-     * We must ignore the first 11 bytes of the file (which
-     * correspond to the magic number and the checksum). */
+    // Main computation
     for byte in bytes {
         a = (a + *byte as u32) % MOD_ADLER;
         b = (b + a) % MOD_ADLER;
     }
 
-    /* Concatenating A and B */
+    // Concatenating A and B
     let computed_checksum = (b << 16) | a;
 
-    /* Verification of the checksum read from the DEX header */
+    // Verification of the checksum read from the DEX header
     if computed_checksum == checksum {
         Ok(true)
     } else {

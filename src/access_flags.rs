@@ -1,8 +1,27 @@
 #![allow(non_camel_case_types)]
 
+//! Helper functions to manipulate access flags
+//!
+//! Access flags are stored as an unsigned 32 bits integer and can be used for classes, fields, or
+//! methods. In this module we define structs to represent these flags and help methods to parse
+//! and print them.
+//!
+//! # Example
+//!
+//! ```
+//! use dex_parser::access_flags::{ AccessFlag, AccessFlagType };
+//!
+//! let flags = AccessFlag::parse(0x0001_0009, AccessFlagType::Method);
+//!
+//! assert_eq!(flags, vec![AccessFlag::ACC_PUBLIC,
+//!                        AccessFlag::ACC_STATIC,
+//!                        AccessFlag::ACC_CONSTRUCTOR]);
+//! ```
+
 use std::fmt;
 use crate::warning;
 
+/// Representation of the different access flag types: for classes, fields, or methods
 #[derive(Debug)]
 pub enum AccessFlagType {
     Class,
@@ -10,6 +29,7 @@ pub enum AccessFlagType {
     Method
 }
 
+/// Implementation of the `Display` trait for access flag types
 impl fmt::Display for AccessFlagType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
@@ -20,8 +40,9 @@ impl fmt::Display for AccessFlagType {
     }
 }
 
-/* Bitfields of these flags are used to indicate the accessibility
- * and overall properties of classes and class members. */
+/// Representation of the different access flag
+/// Bitfields of these flags are used to indicate the accessibility and overall properties of
+/// classes and class members.
 #[derive(Debug, PartialEq)]
 pub enum AccessFlag {
     ACC_PUBLIC,
@@ -46,7 +67,7 @@ pub enum AccessFlag {
 }
 
 impl AccessFlag {
-    // TODO: replace `is_field` by something more robust and `match` on it
+    /// Converts a raw flag (an unsigned 32 bits integer) into a vector for access flags
     pub fn parse(raw: u32, for_type: AccessFlagType) -> Vec<Self> {
         let mut flags = Vec::new();
 
@@ -177,6 +198,7 @@ impl AccessFlag {
         flags
     }
 
+    /// Pretty print a vector of access flags
     pub fn vec_to_string(flags: &Vec<AccessFlag>) -> String {
         let mut output = String::new();
         let flags_len = flags.len();
@@ -192,6 +214,7 @@ impl AccessFlag {
     }
 }
 
+/// Implementation of the `Display` trait for access flags
 impl fmt::Display for AccessFlag {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {

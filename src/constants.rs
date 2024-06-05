@@ -1,6 +1,8 @@
+//! Various constants defined in Dalvik files
+
 #[allow(non_camel_case_types)]
 
-/* Types of items present in the header map of a DEX file */
+/// Types of items present in the header map of a DEX file
 pub struct MapItemType;
 impl MapItemType {
     pub const HEADER_ITEM               : u16 = 0x0000;
@@ -26,32 +28,32 @@ impl MapItemType {
     pub const HIDDENAPI_CLASS_DATA_ITEM : u16 = 0xF000;
 }
 
-/* Method types */
+/// Representation of the different method types
 pub struct MethodHandleType;
 impl MethodHandleType {
-    /* Method handle is a static field setter (accessor) */
+    /// Method handle is a static field setter (accessor)
     pub const METHOD_HANDLE_TYPE_STATIC_PUT        : u16 = 0x00;
-    /* Method handle is a static field getter (accessor) */
+    /// Method handle is a static field getter (accessor)
     pub const METHOD_HANDLE_TYPE_STATIC_GET        : u16 = 0x01;
-    /* Method handle is an instance field setter (accessor) */
+    /// Method handle is an instance field setter (accessor)
     pub const METHOD_HANDLE_TYPE_INSTANCE_PUT      : u16 = 0x02;
-    /* Method handle is an instance field getter (accessor) */
+    /// Method handle is an instance field getter (accessor)
     pub const METHOD_HANDLE_TYPE_INSTANCE_GET      : u16 = 0x03;
-    /* Method handle is a static method invoker */
+    /// Method handle is a static method invoker
     pub const METHOD_HANDLE_TYPE_INVOKE_STATIC     : u16 = 0x04;
-    /* Method handle is an instance method invoker */
+    /// Method handle is an instance method invoker
     pub const METHOD_HANDLE_TYPE_INVOKE_INSTANCE   : u16 = 0x05;
-    /* Method handle is a constructor method invoker */
+    /// Method handle is a constructor method invoker
     pub const METHOD_HANDLE_TYPE_INVOKE_CONSTRUCTOR: u16 = 0x06;
-    /* Method handle is a direct method invoker */
+    /// Method handle is a direct method invoker
     pub const METHOD_HANDLE_TYPE_INVOKE_DIRECT     : u16 = 0x07;
-    /* Method handle is an interface method invoker */
+    /// Method handle is an interface method invoker
     pub const METHOD_HANDLE_TYPE_INVOKE_INTERFACE  : u16 = 0x08;
 }
 
-/* An encoded value is an encoded piece of (nearly) arbitrary
- * hierarchically structured data. The encoding is meant to be
- * both compact and straightforward to parse. */
+/// An encoded value is an encoded piece of (nearly) arbitrary
+/// hierarchically structured data. The encoding is meant to be
+/// both compact and straightforward to parse.
 pub struct EncodedValueFormat;
 impl EncodedValueFormat {
     pub const VALUE_BYTE         : u8 = 0x00;
