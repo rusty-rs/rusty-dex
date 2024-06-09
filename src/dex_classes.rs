@@ -13,6 +13,15 @@ use crate::dex_fields::DexFields;
 use crate::dex_methods::DexMethods;
 
 const NO_INDEX: u32 = 0xffffffff;
+lazy_static!{
+    static ref METHOD_REGEX: Regex = Regex::new(r"(?x)
+        (?P<class>L[a-zA-Z/$0-9]+;)
+        (->)
+        (?P<method><?[a-zA-Z0-9]+>?[\$\d+]*)
+        (?P<args>\(.*\).*)
+    ").unwrap();
+}
+
 
 #[derive(Debug)]
 pub struct ClassDefItem {
@@ -310,15 +319,6 @@ impl EncodedMethod {
     }
 
     pub fn get_method_name(&self) -> &str {
-        lazy_static!{
-            static ref METHOD_REGEX: Regex = Regex::new(r"(?x)
-                (?P<class>L[a-zA-Z/$0-9]+;)
-                (->)
-                (?P<method><?[a-zA-Z0-9]+>?[\$\d+]*)
-                (?P<args>\(.*\).*)
-            ").unwrap();
-        }
-
         let matches = METHOD_REGEX.captures(&self.proto);
         let method_name = match matches {
             Some(matched) => {
