@@ -24,8 +24,11 @@ use crate::warning;
 /// Representation of the different access flag types: for classes, fields, or methods
 #[derive(Debug)]
 pub enum AccessFlagType {
+    /// Flag for a class
     Class,
+    /// Flag for a class field
     Field,
+    /// Flag for a method
     Method
 }
 
@@ -45,24 +48,62 @@ impl fmt::Display for AccessFlagType {
 /// classes and class members.
 #[derive(Debug, PartialEq)]
 pub enum AccessFlag {
+    /// Public: visible everywhere
     ACC_PUBLIC,
+    /// Private: only visible to defining class
     ACC_PRIVATE,
+    /// Protected: visible to package and subclasses
     ACC_PROTECTED,
+    /// Static: meaning depends of where the flag is used
+    ///   * for classes: is not constructed with an outer `this` reference
+    ///   * for methods: does not take a `this` argument
+    ///   * for fields: global to defining class
     ACC_STATIC,
+    /// Final: meaning depends of where the flag is used
+    ///   * for classes: not subclassable
+    ///   * for methods: not overridable
+    ///   * for fields: immutable after construction
     ACC_FINAL,
+    /// Synchronized (only valid for methods): associated lock automatically
+    /// acquired around call to this method.
+    /// Note: only valid to set when `ACC_NATIVE` is also set.
     ACC_SYNCHRONIZED,
+    /// Volatile (only valid for fields): special access rules to help with
+    /// thread safety
     ACC_VOLATILE,
+    /// Bridge (only valid for methods): method added automatically by the
+    /// compiler as a type-safe bridge
     ACC_BRIDGE,
+    /// Transient (only valid for fields): the field must not be saved by
+    /// default serialization
     ACC_TRANSIENT,
+    /// Varargs (only valid for methods): the last argument to this method
+    /// should be treated as a "rest" argument by the compiler
     ACC_VARARGS,
+    /// Native (only valid for methods): this method is implemented in
+    /// native code
     ACC_NATIVE,
+    /// Interface (only valid for classes): multiply-implementable abstract class
     ACC_INTERFACE,
+    /// Abstract (only valid for classes and methods):
+    ///   * for classes: not directly instantiable
+    ///   * for methods: unimplemented by this class
     ACC_ABSTRACT,
+    /// Strict floating-point (only valid for methods): strict rules for
+    /// floating-point arithmetic
     ACC_STRICT,
+    /// Synthetic: not directly defined in source code
     ACC_SYNTHETIC,
+    /// Annotation (only valid for classes): declared as an annotation class
     ACC_ANNOTATION,
+    /// Enum (only valid for classes and fields):
+    ///   * for classes: declared as an enumerated type
+    ///   * for fields: declared as an enumerated value
     ACC_ENUM,
+    /// Constructor (only valid for methods): contructor method
     ACC_CONSTRUCTOR,
+    /// Declared synchronized (only valid for methods): method declared
+    /// as `synchronized`
     ACC_DECLARED_SYNCHRONIZED,
 }
 

@@ -22,12 +22,19 @@ use crate::dex_classes::{ DexClasses, ClassDefItem, EncodedMethod };
 /// Representation of a DEX file
 #[derive(Debug)]
 pub struct DexFile {
+    /// Header of the file
     pub header: DexHeader,
+    /// List of strings defined in the DEX file
     pub strings: DexStrings,
+    /// List of types defined in the DEX file
     pub types: DexTypes,
+    /// List of prototypes defined in the DEX file
     pub protos: DexProtos,
+    /// List of class fields defined in the DEX file
     pub fields: DexFields,
+    /// List of methods defined in the DEX file
     pub methods: DexMethods,
+    /// List of classes defined in the DEX file
     pub classes: DexClasses,
 }
 
