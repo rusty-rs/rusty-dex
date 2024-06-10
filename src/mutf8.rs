@@ -1,4 +1,4 @@
-use crate::{error, debug};
+use log::{error, debug};
 
 pub fn decode(raw: &Vec<u8>) -> Result<String, &'static str> {
     let raw_len = raw.len();

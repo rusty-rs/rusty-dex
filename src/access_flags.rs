@@ -19,7 +19,7 @@
 //! ```
 
 use std::fmt;
-use crate::warning;
+use log::warn;
 
 /// Representation of the different access flag types: for classes, fields, or methods
 #[derive(Debug)]
@@ -123,14 +123,14 @@ impl AccessFlag {
                     flags.push(AccessFlag::ACC_SYNCHRONIZED);
                 },
                 _ => {
-                    warning!("Ignoring invalid flag for {for_type}: 0x20");
+                    warn!("Ignoring invalid flag for {for_type}: 0x20");
                 }
             }
         }
         if raw & 0x40 != 0 {
             match for_type {
                 AccessFlagType::Class => {
-                    warning!("Ignoring invalid flag for {for_type}: 0x40");
+                    warn!("Ignoring invalid flag for {for_type}: 0x40");
                 },
                 AccessFlagType::Field => {
                     flags.push(AccessFlag::ACC_VOLATILE);
@@ -143,7 +143,7 @@ impl AccessFlag {
         if raw & 0x80 != 0 {
             match for_type {
                 AccessFlagType::Class => {
-                    warning!("Ignoring invalid flag for {for_type}: 0x80");
+                    warn!("Ignoring invalid flag for {for_type}: 0x80");
                 },
                 AccessFlagType::Field => {
                     flags.push(AccessFlag::ACC_TRANSIENT);
@@ -159,7 +159,7 @@ impl AccessFlag {
                     flags.push(AccessFlag::ACC_NATIVE);
                 },
                 _ => {
-                    warning!("Ignoring invalid flag for {for_type}: 0x100");
+                    warn!("Ignoring invalid flag for {for_type}: 0x100");
                 }
             }
         }
@@ -169,14 +169,14 @@ impl AccessFlag {
                     flags.push(AccessFlag::ACC_INTERFACE);
                 },
                 _ => {
-                    warning!("Ignoring invalid flag for {for_type}: 0x200");
+                    warn!("Ignoring invalid flag for {for_type}: 0x200");
                 }
             }
         }
         if raw & 0x400 != 0 {
             match for_type {
                 AccessFlagType::Field => {
-                    warning!("Ignoring invalid flag for {for_type}: 0x400");
+                    warn!("Ignoring invalid flag for {for_type}: 0x400");
                 },
                 _ => {
                     flags.push(AccessFlag::ACC_ABSTRACT);
@@ -189,7 +189,7 @@ impl AccessFlag {
                     flags.push(AccessFlag::ACC_STRICT);
                 },
                 _ => {
-                    warning!("Ignoring invalid flag for {for_type}: 0x800");
+                    warn!("Ignoring invalid flag for {for_type}: 0x800");
                 }
             }
         }
@@ -200,28 +200,28 @@ impl AccessFlag {
                     flags.push(AccessFlag::ACC_ANNOTATION);
                 },
                 _ => {
-                    warning!("Ignoring invalid flag for {for_type}: 0x2000");
+                    warn!("Ignoring invalid flag for {for_type}: 0x2000");
                 }
             }
         }
         if raw & 0x4000 != 0 {
             match for_type {
                 AccessFlagType::Method => {
-                    warning!("Ignoring invalid flag for {for_type}: 0x4000");
+                    warn!("Ignoring invalid flag for {for_type}: 0x4000");
                 },
                 _ => {
                     flags.push(AccessFlag::ACC_ENUM);
                 }
             }
         }
-        if raw & 0x8000 != 0  { warning!("Ignoring invalid (unused) flag: 0x8000"); }
+        if raw & 0x8000 != 0  { warn!("Ignoring invalid (unused) flag: 0x8000"); }
         if raw & 0x10000 != 0 {
             match for_type {
                 AccessFlagType::Method => {
                     flags.push(AccessFlag::ACC_CONSTRUCTOR);
                 },
                 _ => {
-                    warning!("Ignoring invalid flag for {for_type}: 0x10000");
+                    warn!("Ignoring invalid flag for {for_type}: 0x10000");
                 }
             }
         }
@@ -231,7 +231,7 @@ impl AccessFlag {
                     flags.push(AccessFlag::ACC_DECLARED_SYNCHRONIZED);
                 },
                 _ => {
-                    warning!("Ignoring invalid flag for {for_type}: 0x20000");
+                    warn!("Ignoring invalid flag for {for_type}: 0x20000");
                 }
             }
         }

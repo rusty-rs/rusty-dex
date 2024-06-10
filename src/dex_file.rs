@@ -8,7 +8,7 @@
 //! sorted (the actual sorting method depends on the type of content being sorted -- see the
 //! classes documentations for details).
 
-use crate::info;
+use log::info;
 
 use crate::dex_reader::DexReader;
 use crate::dex_header::DexHeader;

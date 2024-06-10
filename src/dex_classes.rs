@@ -5,11 +5,11 @@
 use std::io::{Seek, SeekFrom};
 use lazy_static::lazy_static;
 use regex::Regex;
+use log::{ warn, debug };
 
 use crate::dex_reader::DexReader;
 use crate::access_flags::{ AccessFlag, AccessFlagType };
 use crate::code_item::CodeItem;
-use crate::{ warning, debug };
 
 use crate::dex_strings::DexStrings;
 use crate::dex_types::DexTypes;
@@ -338,7 +338,7 @@ impl EncodedMethod {
         };
 
         if method_name.is_empty() {
-            warning!("Cannot retrieve method name from prototype");
+            warn!("Cannot retrieve method name from prototype");
             debug!("Prototype: {}", &self.proto);
         };
 

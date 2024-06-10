@@ -1,5 +1,5 @@
 use std::fmt;
-use crate::warning;
+use log::warn;
 
 #[allow(non_camel_case_types)]
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -302,7 +302,7 @@ impl OpCode {
 
             /* Unused */
             0x3e..=0x43 => {
-                warning!("use of unused opcode {}", value);
+                warn!("use of unused opcode {}", value);
                 None
             },
 
@@ -356,7 +356,7 @@ impl OpCode {
 
             /* Unused */
             0x73 => {
-                warning!("use of unused opcode {}", value);
+                warn!("use of unused opcode {}", value);
                 None
             },
 
@@ -368,7 +368,7 @@ impl OpCode {
 
             /* Unused */
             0x79 | 0x7a => {
-                warning!("use of unused opcode {}", value);
+                warn!("use of unused opcode {}", value);
                 None
             },
 
@@ -479,7 +479,7 @@ impl OpCode {
 
             /* Unused */
             0xe3..=0xf9 => {
-                warning!("use of unused opcode {}", value);
+                warn!("use of unused opcode {}", value);
                 None
             },
 

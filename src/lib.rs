@@ -4,7 +4,7 @@ use crate::dex_reader::DexReader;
 use crate::dex_file::DexFile;
 use crate::instructions::Instructions;
 
-pub mod logging;
+// pub mod logging;
 pub mod dex_header;
 pub mod dex_file;
 pub mod map_list;
