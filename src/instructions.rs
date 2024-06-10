@@ -2,19 +2,6 @@ use crate::opcodes::OpCode;
 use crate::dex_reader::DexEndianness;
 use crate::DexReader;
 
-/// Utility function to read i32 from [u16]
-fn read_i32(bytes: &[u16],
-            offset: usize,
-            endianness: DexEndianness) -> i32
-{
-    match endianness {
-        DexEndianness::LittleEndian =>
-            ((bytes[offset + 1] as i32) << 16) + bytes[offset] as i32,
-        DexEndianness::BigEndian =>
-            ((bytes[offset] as i32) << 16) + bytes[offset + 1] as i32,
-    }
-}
-
 // TODO replace old instructions by these ones (remove prefix too)
 #[derive(Debug, Clone)]
 pub struct Instruction10t  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 1] }
