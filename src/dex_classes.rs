@@ -1,3 +1,7 @@
+//! Representation of a class and encoded methods
+//!
+//! 
+
 use std::io::{Seek, SeekFrom};
 use lazy_static::lazy_static;
 use regex::Regex;
@@ -12,8 +16,11 @@ use crate::dex_types::DexTypes;
 use crate::dex_fields::DexFields;
 use crate::dex_methods::DexMethods;
 
+/// Constant to represent the absence of index
 const NO_INDEX: u32 = 0xffffffff;
+
 lazy_static!{
+    /// Regex for method prototypes
     static ref METHOD_REGEX: Regex = Regex::new(r"(?x)
         (?P<class>L[a-zA-Z/$0-9]+;)
         (->)
@@ -22,7 +29,7 @@ lazy_static!{
     ").unwrap();
 }
 
-
+/// Class definition
 #[derive(Debug)]
 pub struct ClassDefItem {
     class_str: String,
