@@ -1,77 +1,76 @@
 use crate::opcodes::OpCode;
-use crate::dex_reader::DexEndianness;
 use crate::DexReader;
 
 // TODO replace old instructions by these ones (remove prefix too)
 #[derive(Debug, Clone)]
-pub struct Instruction10t  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 1] }
+pub struct Instruction10t  { opcode: OpCode, length: usize, bytes: [u16; 1] }
 #[derive(Debug, Clone)]
-pub struct Instruction10x  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 1] }
+pub struct Instruction10x  { opcode: OpCode, length: usize, bytes: [u16; 1] }
 #[derive(Debug, Clone)]
-pub struct Instruction11n  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 1] }
+pub struct Instruction11n  { opcode: OpCode, length: usize, bytes: [u16; 1] }
 #[derive(Debug, Clone)]
-pub struct Instruction11x  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 1] }
+pub struct Instruction11x  { opcode: OpCode, length: usize, bytes: [u16; 1] }
 #[derive(Debug, Clone)]
-pub struct Instruction12x  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 1] }
+pub struct Instruction12x  { opcode: OpCode, length: usize, bytes: [u16; 1] }
 #[derive(Debug, Clone)]
-pub struct Instruction20t  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 2] }
+pub struct Instruction20t  { opcode: OpCode, length: usize, bytes: [u16; 2] }
 #[derive(Debug, Clone)]
-pub struct Instruction21c  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 2] }
+pub struct Instruction21c  { opcode: OpCode, length: usize, bytes: [u16; 2] }
 #[derive(Debug, Clone)]
-pub struct Instruction21h  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 2] }
+pub struct Instruction21h  { opcode: OpCode, length: usize, bytes: [u16; 2] }
 #[derive(Debug, Clone)]
-pub struct Instruction21s  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 2] }
+pub struct Instruction21s  { opcode: OpCode, length: usize, bytes: [u16; 2] }
 #[derive(Debug, Clone)]
-pub struct Instruction21t  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 2] }
+pub struct Instruction21t  { opcode: OpCode, length: usize, bytes: [u16; 2] }
 #[derive(Debug, Clone)]
-pub struct Instruction22b  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 2] }
+pub struct Instruction22b  { opcode: OpCode, length: usize, bytes: [u16; 2] }
 #[derive(Debug, Clone)]
-pub struct Instruction22c  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 2] }
+pub struct Instruction22c  { opcode: OpCode, length: usize, bytes: [u16; 2] }
 #[derive(Debug, Clone)]
-pub struct Instruction22s  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 2] }
+pub struct Instruction22s  { opcode: OpCode, length: usize, bytes: [u16; 2] }
 #[derive(Debug, Clone)]
-pub struct Instruction22t  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 2] }
+pub struct Instruction22t  { opcode: OpCode, length: usize, bytes: [u16; 2] }
 #[derive(Debug, Clone)]
-pub struct Instruction22x  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 2] }
+pub struct Instruction22x  { opcode: OpCode, length: usize, bytes: [u16; 2] }
 #[derive(Debug, Clone)]
-pub struct Instruction23x  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 2] }
+pub struct Instruction23x  { opcode: OpCode, length: usize, bytes: [u16; 2] }
 #[derive(Debug, Clone)]
-pub struct Instruction30t  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 3] }
+pub struct Instruction30t  { opcode: OpCode, length: usize, bytes: [u16; 3] }
 #[derive(Debug, Clone)]
-pub struct Instruction31c  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 3] }
+pub struct Instruction31c  { opcode: OpCode, length: usize, bytes: [u16; 3] }
 #[derive(Debug, Clone)]
-pub struct Instruction31i  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 3] }
+pub struct Instruction31i  { opcode: OpCode, length: usize, bytes: [u16; 3] }
 #[derive(Debug, Clone)]
-pub struct Instruction31t  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 3] }
+pub struct Instruction31t  { opcode: OpCode, length: usize, bytes: [u16; 3] }
 #[derive(Debug, Clone)]
-pub struct Instruction32x  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 3] }
+pub struct Instruction32x  { opcode: OpCode, length: usize, bytes: [u16; 3] }
 #[derive(Debug, Clone)]
-pub struct Instruction35c  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 3] }
+pub struct Instruction35c  { opcode: OpCode, length: usize, bytes: [u16; 3] }
 #[derive(Debug, Clone)]
-pub struct Instruction3rc  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 3] }
+pub struct Instruction3rc  { opcode: OpCode, length: usize, bytes: [u16; 3] }
 #[derive(Debug, Clone)]
-pub struct Instruction45cc { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 4] }
+pub struct Instruction45cc { opcode: OpCode, length: usize, bytes: [u16; 4] }
 #[derive(Debug, Clone)]
-pub struct Instruction4rcc { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 4] }
+pub struct Instruction4rcc { opcode: OpCode, length: usize, bytes: [u16; 4] }
 #[derive(Debug, Clone)]
-pub struct Instruction51l  { pub(crate) opcode: OpCode, length: usize, bytes: [u16; 5] }
+pub struct Instruction51l  { opcode: OpCode, length: usize, bytes: [u16; 5] }
 #[derive(Debug, Clone)]
 pub struct PackedSwitchPayload {
-    pub(crate) opcode: OpCode,
+    opcode: OpCode,
     size: u16,
     first_key: i32,
     targets: Vec<i32>
 }
 #[derive(Debug, Clone)]
 pub struct SparseSwitchPayload {
-    pub(crate) opcode: OpCode,
+    opcode: OpCode,
     size: u16,
     keys: Vec<i32>,
     targets: Vec<i32>
 }
 #[derive(Debug, Clone)]
 pub struct FillArrayDataPayload {
-    pub(crate) opcode: OpCode,
+    opcode: OpCode,
     element_width: u16,
     size: u32,
     data: Vec<u8>
@@ -174,9 +173,9 @@ impl Instructions {
             Instructions::Instruction45cc(inst) => &inst.bytes,
             Instructions::Instruction4rcc(inst) => &inst.bytes,
             Instructions::Instruction51l(inst) => &inst.bytes,
-            Instructions::PackedSwitchPayload(inst) => &[],  // FIXME
-            Instructions::SparseSwitchPayload(inst) => &[],  // FIXME
-            Instructions::FillArrayDataPayload(inst) => &[],  // FIXME
+            Instructions::PackedSwitchPayload(_) => &[],  // FIXME
+            Instructions::SparseSwitchPayload(_) => &[],  // FIXME
+            Instructions::FillArrayDataPayload(_) => &[],  // FIXME
         }
     }
 }

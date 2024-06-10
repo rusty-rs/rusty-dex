@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use crate::dex_reader::DexReader;
 use crate::dex_file::DexFile;
 use crate::instructions::Instructions;
