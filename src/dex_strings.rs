@@ -164,6 +164,7 @@ mod tests {
         let dex_strings = DexStrings::build(&mut dex_reader, 50, 1);
 
         assert_eq!(dex_strings.strings.len(), 1);
-        assert_eq!(dex_strings.strings[0], String::from(""));
+        // the invalid MUTF-8 sequence will be "decoded" to � (replacement character)
+        assert_eq!(dex_strings.strings[0], String::from("\u{FFFD}"));
     }
 }
