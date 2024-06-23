@@ -1,7 +1,7 @@
 use std::io::{Seek, SeekFrom};
 
-use crate::dex_reader::DexReader;
-use crate::dex_strings::DexStrings;
+use crate::dex::reader::DexReader;
+use crate::dex::strings::DexStrings;
 
 #[derive(Debug)]
 struct DexTypeItem {

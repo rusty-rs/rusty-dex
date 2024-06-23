@@ -8,9 +8,9 @@
 use std::io::{Seek, SeekFrom};
 use std::cmp::Ordering;
 
-use crate::dex_reader::DexReader;
-use crate::dex_types::DexTypes;
-use crate::dex_strings::DexStrings;
+use crate::dex::reader::DexReader;
+use crate::dex::types::DexTypes;
+use crate::dex::strings::DexStrings;
 
 /// Internal representation of a field. The index fields are read from the DEX file and are then
 /// used to decode the field, which is what we actually return to the user.

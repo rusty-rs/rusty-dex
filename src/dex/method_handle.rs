@@ -1,6 +1,6 @@
 use std::io::{Seek, SeekFrom};
 
-use crate::dex_reader::DexReader;
+use crate::dex::reader::DexReader;
 
 // FIXME: untested
 

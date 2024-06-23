@@ -4,7 +4,7 @@ use std::io::{Seek, SeekFrom};
 use std::io::BufRead;
 use std::cmp::Ordering;
 
-use crate::dex_reader::DexReader;
+use crate::dex::reader::DexReader;
 
 #[derive(Debug, PartialEq)]
 pub struct DexStringsItem {

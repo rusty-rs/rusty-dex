@@ -7,14 +7,14 @@ use lazy_static::lazy_static;
 use regex::Regex;
 use log::{ warn, debug };
 
-use crate::dex_reader::DexReader;
-use crate::access_flags::{ AccessFlag, AccessFlagType };
-use crate::code_item::CodeItem;
+use crate::dex::reader::DexReader;
+use crate::dex::access_flags::{ AccessFlag, AccessFlagType };
+use crate::dex::code_item::CodeItem;
 
-use crate::dex_strings::DexStrings;
-use crate::dex_types::DexTypes;
-use crate::dex_fields::DexFields;
-use crate::dex_methods::DexMethods;
+use crate::dex::strings::DexStrings;
+use crate::dex::types::DexTypes;
+use crate::dex::fields::DexFields;
+use crate::dex::methods::DexMethods;
 
 /// Constant to represent the absence of index
 const NO_INDEX: u32 = 0xffffffff;

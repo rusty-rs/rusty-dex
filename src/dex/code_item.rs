@@ -1,9 +1,12 @@
 use std::io::{Seek, SeekFrom};
 
-use crate::dex_reader::DexReader;
-use crate::{ instructions, instructions::Instructions };
+use crate::dex::reader::DexReader;
+use crate::dex::{
+    instructions,
+    instructions::Instructions
+};
 
-use crate::dex_types::DexTypes;
+use crate::dex::types::DexTypes;
 
 #[derive(Clone, Debug)]
 pub struct TryItem {

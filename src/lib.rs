@@ -1,28 +1,14 @@
 #![allow(dead_code)]
 
-use crate::dex_reader::DexReader;
-use crate::dex_file::DexFile;
-use crate::instructions::Instructions;
+use crate::dex::reader::DexReader;
+use crate::dex::file::DexFile;
+use crate::dex::instructions::Instructions;
 
 // pub mod logging;
-pub mod dex_header;
-pub mod dex_file;
-pub mod map_list;
+pub mod dex;
 pub mod error;
-pub mod dex_reader;
 pub mod adler32;
 pub mod mutf8;
-pub mod dex_strings;
-pub mod dex_types;
-pub mod dex_protos;
-pub mod dex_fields;
-pub mod dex_methods;
-pub mod dex_classes;
-pub mod access_flags;
-pub mod method_handle;
-pub mod code_item;
-pub mod opcodes;
-pub mod instructions;
 
 /* Actually unused for now but there should
  * be more options as things progress */

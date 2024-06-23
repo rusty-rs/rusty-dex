@@ -3,7 +3,7 @@
 use std::io::Read;
 
 use crate::error::DexError;
-use crate::dex_reader::DexReader;
+use crate::dex::reader::DexReader;
 
 #[derive(Debug)]
 pub struct DexHeader {

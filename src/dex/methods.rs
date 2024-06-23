@@ -1,10 +1,10 @@
 use std::io::{Seek, SeekFrom};
 use std::cmp::Ordering;
 
-use crate::dex_reader::DexReader;
-use crate::dex_types::DexTypes;
-use crate::dex_protos::DexProtos;
-use crate::dex_strings::DexStrings;
+use crate::dex::reader::DexReader;
+use crate::dex::types::DexTypes;
+use crate::dex::protos::DexProtos;
+use crate::dex::strings::DexStrings;
 
 #[derive(Debug)]
 struct MethodIdItem {

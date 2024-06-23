@@ -1,8 +1,8 @@
 use std::io::{Seek, SeekFrom};
 use std::cmp::Ordering;
 
-use crate::dex_reader::DexReader;
-use crate::dex_types::DexTypes;
+use crate::dex::reader::DexReader;
+use crate::dex::types::DexTypes;
 
 #[derive(Debug)]
 struct ProtoIdItem {

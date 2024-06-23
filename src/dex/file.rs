@@ -10,14 +10,14 @@
 
 use log::info;
 
-use crate::dex_reader::DexReader;
-use crate::dex_header::DexHeader;
-use crate::dex_strings::DexStrings;
-use crate::dex_types::DexTypes;
-use crate::dex_protos::DexProtos;
-use crate::dex_fields::DexFields;
-use crate::dex_methods::DexMethods;
-use crate::dex_classes::{ DexClasses, ClassDefItem, EncodedMethod };
+use crate::dex::reader::DexReader;
+use crate::dex::header::DexHeader;
+use crate::dex::strings::DexStrings;
+use crate::dex::types::DexTypes;
+use crate::dex::protos::DexProtos;
+use crate::dex::fields::DexFields;
+use crate::dex::methods::DexMethods;
+use crate::dex::classes::{ DexClasses, ClassDefItem, EncodedMethod };
 
 /// Representation of a DEX file
 #[derive(Debug)]

@@ -1,5 +1,5 @@
-use crate::opcodes::OpCode;
-use crate::DexReader;
+use crate::dex::opcodes::OpCode;
+use crate::dex::reader::DexReader;
 
 // TODO replace old instructions by these ones (remove prefix too)
 #[derive(Debug, Clone)]
