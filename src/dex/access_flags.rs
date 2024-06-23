@@ -9,7 +9,7 @@
 //! # Example
 //!
 //! ```
-//! use dex_parser::access_flags::{ AccessFlag, AccessFlagType };
+//! use dex_parser::dex::access_flags::{ AccessFlag, AccessFlagType };
 //!
 //! let flags = AccessFlag::parse(0x0001_0009, AccessFlagType::Method);
 //!
