@@ -16,6 +16,8 @@
 //! assert!(verify_from_bytes(&bytes, 0x14300184).unwrap());
 //! ```
 
+use std::io::Cursor;
+
 use crate::error::DexError;
 
 /// Constant used in the checksum computation
@@ -25,14 +27,14 @@ const MOD_ADLER: u32 = 65521;
 /// 11 bytes, which correspond to the space taken by the magic and the checksum.
 /// This function computes the checksum of the file, and compares it to the one
 /// found in the header.
-pub fn verify_from_bytes(bytes: &[u8], checksum: u32) -> Result<bool, DexError> {
+pub fn verify_from_bytes(bytes: &Cursor<Vec<u8>>, checksum: u32) -> Result<bool, DexError> {
 
     // Define variable for checksum computation
     let mut a: u32 = 1;
     let mut b: u32 = 0;
 
     // Main computation
-    for byte in bytes {
+    for byte in bytes.get_ref().iter().skip(12) {
         a = (a + *byte as u32) % MOD_ADLER;
         b = (b + a) % MOD_ADLER;
     }
