@@ -1,4 +1,9 @@
-#![allow(dead_code)]
+//! DEX file header
+//!
+//! This module contains the representation of the header of a DEX file.
+//! The main use of this module is to load and parse each DEX file. When
+//! parsing a DEX file, the module will also verify the Adler32 checksum
+//! contained in the header.
 
 use std::io::Read;
 
@@ -6,6 +11,7 @@ use crate::error::DexError;
 use crate::adler32;
 use crate::dex::reader::DexReader;
 
+/// Representation of the header of a DEX file
 #[derive(Debug)]
 pub struct DexHeader {
     pub version: [u8; 3],
@@ -34,6 +40,7 @@ pub struct DexHeader {
 }
 
 impl DexHeader {
+    /// Reads from the given cursor and builds a `DexHeader`
     pub fn new(dex_cursor: &mut DexReader) -> Result<DexHeader, DexError> {
         /* DEX version */
         let mut magic = [0; 8];
