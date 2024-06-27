@@ -1,23 +1,32 @@
+//! Collection of error types for DEX files parsing
+//!
+//! Note: this mostly unused as of now but might be useful in the future.
+
 use std::error::Error;
 use std::fmt;
 
+/// A generic error type
 #[derive(Debug)]
 pub struct DexError {
+    /// Error message
     pub message: String,
 }
 
 impl DexError {
+    /// Create a new error with the given message
     pub fn new(msg: &str) -> DexError {
         DexError { message: msg.to_string() }
     }
 }
 
+/// Implement `Display` trait for `DexError`
 impl fmt::Display for DexError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f,"{}", self.message)
     }
 }
 
+/// Implement `Error` trait for `DexError`
 impl Error for DexError {
     fn description(&self) -> &str {
         &self.message

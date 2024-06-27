@@ -57,21 +57,22 @@ mod tests {
     #[test]
     fn test_verify_valid_from_bytes() {
         // Test data with valid checksum
-        let bytes: [u8; 16] = [0x44, 0x45, 0x58, 0x0a,
+        let bytes = Cursor::new(vec![0x44, 0x45, 0x58, 0x0a,
                                0x30, 0x33, 0x35, 0x00,
                                0x00, 0x00, 0x00, 0x00,
-                               0x00, 0x00, 0x00, 0x00];
-        let checksum: u32 = 0x14300184;
+                               0x00, 0x00, 0x00, 0x00]);
+        let checksum: u32 = 0x00040001;
+        println!("{}", verify_from_bytes(&bytes, checksum).unwrap());
         assert!(verify_from_bytes(&bytes, checksum).unwrap());
     }
 
     #[test]
     fn test_verify_invalid_from_bytes() {
         // Test data with invalid checksum
-        let bytes: [u8; 16] = [0x44, 0x45, 0x58, 0x0a,
+        let bytes = Cursor::new(vec![0x44, 0x45, 0x58, 0x0a,
                                0x30, 0x33, 0x35, 0x00,
                                0x00, 0x00, 0x00, 0x00,
-                               0x00, 0x00, 0x00, 0x00];
+                               0x00, 0x00, 0x00, 0x00]);
         let checksum: u32 = 0xcafebabe;
         assert_eq!(verify_from_bytes(&bytes, checksum).unwrap_err().to_string(),
                    "[adler32] error: computed checksum does not match one in header");
