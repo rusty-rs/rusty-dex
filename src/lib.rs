@@ -6,7 +6,7 @@ use crate::dex::instructions::Instructions;
 
 pub mod dex;
 pub mod error;
-pub mod adler32;
+mod adler32;
 
 /// Parse an APK and create a `DexFile` object from the embedded class(es) files
 pub fn parse(filepath: &str) -> DexFile {

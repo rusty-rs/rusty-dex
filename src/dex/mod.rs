@@ -1,13 +1,14 @@
-pub mod header;
 pub mod file;
 pub mod reader;
-pub mod strings;
-pub mod types;
-pub mod protos;
-pub mod fields;
 pub mod methods;
 pub mod classes;
 pub mod access_flags;
-pub mod code_item;
 pub mod opcodes;
 pub mod instructions;
+
+mod header;
+mod strings;
+mod types;
+mod protos;
+mod fields;
+mod code_item;
