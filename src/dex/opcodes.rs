@@ -1,5 +1,11 @@
+//! Opcodes module
+//!
+//! This modules defines the list of all possible opcodes in Dalvik, and a
+//! method to convert an `u8` value into an `OpCode` object.
+
 use log::warn;
 
+/// All existing Dalvik opcodes
 #[allow(non_camel_case_types)]
 #[derive(Copy, Clone, Debug, PartialEq)]
 pub enum OpCode {
@@ -234,6 +240,7 @@ pub enum OpCode {
 
 
 impl OpCode {
+    /// Converts an `u8` into an `OpCode`
     pub fn parse(value: u8) -> Option<Self> {
         match value {
             0x00 => Some(OpCode::NOP),                        // Instruction 10x

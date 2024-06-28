@@ -1,3 +1,11 @@
+//! Methods identifiers
+//!
+//! This module deals with method identifiers. Each DEX file contains a list
+//! of identifiers for all methods reffered to in the code. The list is sorted
+//! by the defining type (by `type_id` index), method name (by `string_id`
+//! index), and method prototype (by `proto_id` index), and cannot contain
+//! duplicates.
+
 use std::io::{Seek, SeekFrom};
 use std::cmp::Ordering;
 
@@ -6,6 +14,7 @@ use crate::dex::types::DexTypes;
 use crate::dex::protos::DexProtos;
 use crate::dex::strings::DexStrings;
 
+/// Identifier of a method
 #[derive(Debug)]
 struct MethodIdItem {
     class_idx: u16,
@@ -14,12 +23,14 @@ struct MethodIdItem {
     decoded: String
 }
 
+/// Sorted list of method IDs
 #[derive(Debug)]
 pub struct DexMethods {
     pub items: Vec<String>
 }
 
 impl DexMethods {
+    /// Implement correct sorting method for method identifiers
     fn sort(a: &MethodIdItem, b: &MethodIdItem) -> Ordering {
         // First sort by defining type
         let mut order = a.class_idx.cmp(&b.class_idx);
@@ -37,6 +48,7 @@ impl DexMethods {
         order
     }
 
+    /// Build the list of method identifiers from a file
     pub fn build(dex_reader: &mut DexReader,
                  offset: u32,
                  size: u32,
