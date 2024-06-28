@@ -1,3 +1,10 @@
+//! DEX bytecode
+//!
+//! Code item elements contain the actual bytecode of the app.
+//! Each code item represent a function and the associated bytecode,
+//! along with some metadata such as the number of registers, try/catch
+//! offsets, etc.
+
 use std::io::{Seek, SeekFrom};
 
 use crate::dex::reader::DexReader;
@@ -8,6 +15,7 @@ use crate::dex::{
 
 use crate::dex::types::DexTypes;
 
+/// A `try` statement with offset to the `catch` part
 #[derive(Clone, Debug)]
 pub struct TryItem {
     start_addr : u32,
@@ -15,6 +23,7 @@ pub struct TryItem {
     handler_off: u16
 }
 
+/// A `catch` statement
 #[derive(Clone, Debug)]
 pub struct EncodedCatchHandler {
     size          : i32,
@@ -22,12 +31,14 @@ pub struct EncodedCatchHandler {
     catch_all_addr: Option<u32>,
 }
 
+/// Addresses of the handler for an exception of the given type
 #[derive(Clone, Debug)]
 pub struct EncodedTypeAddrPair {
     decoded_type: String,
     addr        : u32,
 }
 
+/// Code structure for a method
 #[derive(Debug)]
 pub struct CodeItem {
     registers_size: u16,
@@ -40,6 +51,7 @@ pub struct CodeItem {
 }
 
 impl CodeItem {
+    /// Build a `CodeItem` struct from the reader
     pub fn build(dex_reader: &mut DexReader,
                  offset: u32,
                  types_list: &DexTypes) -> Self {

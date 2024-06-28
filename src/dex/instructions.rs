@@ -1,59 +1,91 @@
+//! Dalvik instructions
+//!
+//! This module contains the definition of all instructions types, including
+//! special instructions such as `PackedSwitch` which have their payload
+//! at the end of the `CodeItem`.
+
 use crate::dex::opcodes::OpCode;
 use crate::dex::reader::DexReader;
 
-// TODO replace old instructions by these ones (remove prefix too)
+/// `Instruction10t` instruction type
 #[derive(Debug, Clone)]
 pub struct Instruction10t  { opcode: OpCode, length: usize, bytes: [u16; 1] }
+/// `Instruction10x` instruction type
 #[derive(Debug, Clone)]
 pub struct Instruction10x  { opcode: OpCode, length: usize, bytes: [u16; 1] }
+/// `Instruction11n` instruction type
 #[derive(Debug, Clone)]
 pub struct Instruction11n  { opcode: OpCode, length: usize, bytes: [u16; 1] }
+/// `Instruction11x` instruction type
 #[derive(Debug, Clone)]
 pub struct Instruction11x  { opcode: OpCode, length: usize, bytes: [u16; 1] }
+/// `Instruction12x` instruction type
 #[derive(Debug, Clone)]
 pub struct Instruction12x  { opcode: OpCode, length: usize, bytes: [u16; 1] }
+/// `Instruction20t` instruction type
 #[derive(Debug, Clone)]
 pub struct Instruction20t  { opcode: OpCode, length: usize, bytes: [u16; 2] }
+/// `Instruction21c` instruction type
 #[derive(Debug, Clone)]
 pub struct Instruction21c  { opcode: OpCode, length: usize, bytes: [u16; 2] }
+/// `Instruction21h` instruction type
 #[derive(Debug, Clone)]
 pub struct Instruction21h  { opcode: OpCode, length: usize, bytes: [u16; 2] }
+/// `Instruction21s` instruction type
 #[derive(Debug, Clone)]
 pub struct Instruction21s  { opcode: OpCode, length: usize, bytes: [u16; 2] }
+/// `Instruction21t` instruction type
 #[derive(Debug, Clone)]
 pub struct Instruction21t  { opcode: OpCode, length: usize, bytes: [u16; 2] }
+/// `Instruction22b` instruction type
 #[derive(Debug, Clone)]
 pub struct Instruction22b  { opcode: OpCode, length: usize, bytes: [u16; 2] }
+/// `Instruction22c` instruction type
 #[derive(Debug, Clone)]
 pub struct Instruction22c  { opcode: OpCode, length: usize, bytes: [u16; 2] }
+/// `Instruction22s` instruction type
 #[derive(Debug, Clone)]
 pub struct Instruction22s  { opcode: OpCode, length: usize, bytes: [u16; 2] }
+/// `Instruction22t` instruction type
 #[derive(Debug, Clone)]
 pub struct Instruction22t  { opcode: OpCode, length: usize, bytes: [u16; 2] }
+/// `Instruction22x` instruction type
 #[derive(Debug, Clone)]
 pub struct Instruction22x  { opcode: OpCode, length: usize, bytes: [u16; 2] }
+/// `Instruction23x` instruction type
 #[derive(Debug, Clone)]
 pub struct Instruction23x  { opcode: OpCode, length: usize, bytes: [u16; 2] }
+/// `Instruction30t` instruction type
 #[derive(Debug, Clone)]
 pub struct Instruction30t  { opcode: OpCode, length: usize, bytes: [u16; 3] }
+/// `Instruction31c` instruction type
 #[derive(Debug, Clone)]
 pub struct Instruction31c  { opcode: OpCode, length: usize, bytes: [u16; 3] }
+/// `Instruction31i` instruction type
 #[derive(Debug, Clone)]
 pub struct Instruction31i  { opcode: OpCode, length: usize, bytes: [u16; 3] }
+/// `Instruction31t` instruction type
 #[derive(Debug, Clone)]
 pub struct Instruction31t  { opcode: OpCode, length: usize, bytes: [u16; 3] }
+/// `Instruction32x` instruction type
 #[derive(Debug, Clone)]
 pub struct Instruction32x  { opcode: OpCode, length: usize, bytes: [u16; 3] }
+/// `Instruction35c` instruction type
 #[derive(Debug, Clone)]
 pub struct Instruction35c  { opcode: OpCode, length: usize, bytes: [u16; 3] }
+/// `Instruction3rc` instruction type
 #[derive(Debug, Clone)]
 pub struct Instruction3rc  { opcode: OpCode, length: usize, bytes: [u16; 3] }
+/// `Instruction45cc` instruction type
 #[derive(Debug, Clone)]
 pub struct Instruction45cc { opcode: OpCode, length: usize, bytes: [u16; 4] }
+/// `Instruction4rcc` instruction type
 #[derive(Debug, Clone)]
 pub struct Instruction4rcc { opcode: OpCode, length: usize, bytes: [u16; 4] }
+/// `Instruction51l` instruction type
 #[derive(Debug, Clone)]
 pub struct Instruction51l  { opcode: OpCode, length: usize, bytes: [u16; 5] }
+/// `PackedSwitchPayload` instruction type
 #[derive(Debug, Clone)]
 pub struct PackedSwitchPayload {
     opcode: OpCode,
@@ -61,6 +93,7 @@ pub struct PackedSwitchPayload {
     first_key: i32,
     targets: Vec<i32>
 }
+/// `SparseSwitchPayload` instruction type
 #[derive(Debug, Clone)]
 pub struct SparseSwitchPayload {
     opcode: OpCode,
@@ -68,116 +101,13 @@ pub struct SparseSwitchPayload {
     keys: Vec<i32>,
     targets: Vec<i32>
 }
+/// `FillArrayDataPayload` instruction type
 #[derive(Debug, Clone)]
 pub struct FillArrayDataPayload {
     opcode: OpCode,
     element_width: u16,
     size: u32,
     data: Vec<u8>
-}
-
-impl Instructions {
-    pub fn length(&self) -> usize {
-        match self {
-            Instructions::Instruction10t(inst) => inst.length,
-            Instructions::Instruction10x(inst) => inst.length,
-            Instructions::Instruction11n(inst) => inst.length,
-            Instructions::Instruction11x(inst) => inst.length,
-            Instructions::Instruction12x(inst) => inst.length,
-            Instructions::Instruction20t(inst) => inst.length,
-            Instructions::Instruction21c(inst) => inst.length,
-            Instructions::Instruction21h(inst) => inst.length,
-            Instructions::Instruction21s(inst) => inst.length,
-            Instructions::Instruction21t(inst) => inst.length,
-            Instructions::Instruction22b(inst) => inst.length,
-            Instructions::Instruction22c(inst) => inst.length,
-            Instructions::Instruction22s(inst) => inst.length,
-            Instructions::Instruction22t(inst) => inst.length,
-            Instructions::Instruction22x(inst) => inst.length,
-            Instructions::Instruction23x(inst) => inst.length,
-            Instructions::Instruction30t(inst) => inst.length,
-            Instructions::Instruction31c(inst) => inst.length,
-            Instructions::Instruction31i(inst) => inst.length,
-            Instructions::Instruction31t(inst) => inst.length,
-            Instructions::Instruction32x(inst) => inst.length,
-            Instructions::Instruction35c(inst) => inst.length,
-            Instructions::Instruction3rc(inst) => inst.length,
-            Instructions::Instruction45cc(inst) => inst.length,
-            Instructions::Instruction4rcc(inst) => inst.length,
-            Instructions::Instruction51l(inst) => inst.length,
-            Instructions::PackedSwitchPayload(inst) => inst.length(),
-            Instructions::SparseSwitchPayload(inst) => inst.length(),
-            Instructions::FillArrayDataPayload(inst) => inst.length(),
-        }
-    }
-
-    pub fn opcode(&self) -> OpCode {
-        match self {
-            Instructions::Instruction10t(inst) => inst.opcode,
-            Instructions::Instruction10x(inst) => inst.opcode,
-            Instructions::Instruction11n(inst) => inst.opcode,
-            Instructions::Instruction11x(inst) => inst.opcode,
-            Instructions::Instruction12x(inst) => inst.opcode,
-            Instructions::Instruction20t(inst) => inst.opcode,
-            Instructions::Instruction21c(inst) => inst.opcode,
-            Instructions::Instruction21h(inst) => inst.opcode,
-            Instructions::Instruction21s(inst) => inst.opcode,
-            Instructions::Instruction21t(inst) => inst.opcode,
-            Instructions::Instruction22b(inst) => inst.opcode,
-            Instructions::Instruction22c(inst) => inst.opcode,
-            Instructions::Instruction22s(inst) => inst.opcode,
-            Instructions::Instruction22t(inst) => inst.opcode,
-            Instructions::Instruction22x(inst) => inst.opcode,
-            Instructions::Instruction23x(inst) => inst.opcode,
-            Instructions::Instruction30t(inst) => inst.opcode,
-            Instructions::Instruction31c(inst) => inst.opcode,
-            Instructions::Instruction31i(inst) => inst.opcode,
-            Instructions::Instruction31t(inst) => inst.opcode,
-            Instructions::Instruction32x(inst) => inst.opcode,
-            Instructions::Instruction35c(inst) => inst.opcode,
-            Instructions::Instruction3rc(inst) => inst.opcode,
-            Instructions::Instruction45cc(inst) => inst.opcode,
-            Instructions::Instruction4rcc(inst) => inst.opcode,
-            Instructions::Instruction51l(inst) => inst.opcode,
-            Instructions::PackedSwitchPayload(inst) => inst.opcode,
-            Instructions::SparseSwitchPayload(inst) => inst.opcode,
-            Instructions::FillArrayDataPayload(inst) => inst.opcode,
-        }
-    }
-
-    pub fn bytes(&self) -> &[u16] {
-        match self {
-            Instructions::Instruction10t(inst) => &inst.bytes,
-            Instructions::Instruction10x(inst) => &inst.bytes,
-            Instructions::Instruction11n(inst) => &inst.bytes,
-            Instructions::Instruction11x(inst) => &inst.bytes,
-            Instructions::Instruction12x(inst) => &inst.bytes,
-            Instructions::Instruction20t(inst) => &inst.bytes,
-            Instructions::Instruction21c(inst) => &inst.bytes,
-            Instructions::Instruction21h(inst) => &inst.bytes,
-            Instructions::Instruction21s(inst) => &inst.bytes,
-            Instructions::Instruction21t(inst) => &inst.bytes,
-            Instructions::Instruction22b(inst) => &inst.bytes,
-            Instructions::Instruction22c(inst) => &inst.bytes,
-            Instructions::Instruction22s(inst) => &inst.bytes,
-            Instructions::Instruction22t(inst) => &inst.bytes,
-            Instructions::Instruction22x(inst) => &inst.bytes,
-            Instructions::Instruction23x(inst) => &inst.bytes,
-            Instructions::Instruction30t(inst) => &inst.bytes,
-            Instructions::Instruction31c(inst) => &inst.bytes,
-            Instructions::Instruction31i(inst) => &inst.bytes,
-            Instructions::Instruction31t(inst) => &inst.bytes,
-            Instructions::Instruction32x(inst) => &inst.bytes,
-            Instructions::Instruction35c(inst) => &inst.bytes,
-            Instructions::Instruction3rc(inst) => &inst.bytes,
-            Instructions::Instruction45cc(inst) => &inst.bytes,
-            Instructions::Instruction4rcc(inst) => &inst.bytes,
-            Instructions::Instruction51l(inst) => &inst.bytes,
-            Instructions::PackedSwitchPayload(_) => &[],  // FIXME
-            Instructions::SparseSwitchPayload(_) => &[],  // FIXME
-            Instructions::FillArrayDataPayload(_) => &[],  // FIXME
-        }
-    }
 }
 
 impl PackedSwitchPayload {
@@ -342,6 +272,7 @@ impl FillArrayDataPayload {
 }
 
 
+/// Enumeration of all possible instruction types
 #[derive(Debug, Clone)]
 pub enum Instructions {
     Instruction10t(Instruction10t),
@@ -376,8 +307,116 @@ pub enum Instructions {
 }
 
 
+impl Instructions {
+    /// Get the length of a given instruction
+    pub fn length(&self) -> usize {
+        match self {
+            Instructions::Instruction10t(inst) => inst.length,
+            Instructions::Instruction10x(inst) => inst.length,
+            Instructions::Instruction11n(inst) => inst.length,
+            Instructions::Instruction11x(inst) => inst.length,
+            Instructions::Instruction12x(inst) => inst.length,
+            Instructions::Instruction20t(inst) => inst.length,
+            Instructions::Instruction21c(inst) => inst.length,
+            Instructions::Instruction21h(inst) => inst.length,
+            Instructions::Instruction21s(inst) => inst.length,
+            Instructions::Instruction21t(inst) => inst.length,
+            Instructions::Instruction22b(inst) => inst.length,
+            Instructions::Instruction22c(inst) => inst.length,
+            Instructions::Instruction22s(inst) => inst.length,
+            Instructions::Instruction22t(inst) => inst.length,
+            Instructions::Instruction22x(inst) => inst.length,
+            Instructions::Instruction23x(inst) => inst.length,
+            Instructions::Instruction30t(inst) => inst.length,
+            Instructions::Instruction31c(inst) => inst.length,
+            Instructions::Instruction31i(inst) => inst.length,
+            Instructions::Instruction31t(inst) => inst.length,
+            Instructions::Instruction32x(inst) => inst.length,
+            Instructions::Instruction35c(inst) => inst.length,
+            Instructions::Instruction3rc(inst) => inst.length,
+            Instructions::Instruction45cc(inst) => inst.length,
+            Instructions::Instruction4rcc(inst) => inst.length,
+            Instructions::Instruction51l(inst) => inst.length,
+            Instructions::PackedSwitchPayload(inst) => inst.length(),
+            Instructions::SparseSwitchPayload(inst) => inst.length(),
+            Instructions::FillArrayDataPayload(inst) => inst.length(),
+        }
+    }
+
+    /// Get the opcode of a given instruction
+    pub fn opcode(&self) -> OpCode {
+        match self {
+            Instructions::Instruction10t(inst) => inst.opcode,
+            Instructions::Instruction10x(inst) => inst.opcode,
+            Instructions::Instruction11n(inst) => inst.opcode,
+            Instructions::Instruction11x(inst) => inst.opcode,
+            Instructions::Instruction12x(inst) => inst.opcode,
+            Instructions::Instruction20t(inst) => inst.opcode,
+            Instructions::Instruction21c(inst) => inst.opcode,
+            Instructions::Instruction21h(inst) => inst.opcode,
+            Instructions::Instruction21s(inst) => inst.opcode,
+            Instructions::Instruction21t(inst) => inst.opcode,
+            Instructions::Instruction22b(inst) => inst.opcode,
+            Instructions::Instruction22c(inst) => inst.opcode,
+            Instructions::Instruction22s(inst) => inst.opcode,
+            Instructions::Instruction22t(inst) => inst.opcode,
+            Instructions::Instruction22x(inst) => inst.opcode,
+            Instructions::Instruction23x(inst) => inst.opcode,
+            Instructions::Instruction30t(inst) => inst.opcode,
+            Instructions::Instruction31c(inst) => inst.opcode,
+            Instructions::Instruction31i(inst) => inst.opcode,
+            Instructions::Instruction31t(inst) => inst.opcode,
+            Instructions::Instruction32x(inst) => inst.opcode,
+            Instructions::Instruction35c(inst) => inst.opcode,
+            Instructions::Instruction3rc(inst) => inst.opcode,
+            Instructions::Instruction45cc(inst) => inst.opcode,
+            Instructions::Instruction4rcc(inst) => inst.opcode,
+            Instructions::Instruction51l(inst) => inst.opcode,
+            Instructions::PackedSwitchPayload(inst) => inst.opcode,
+            Instructions::SparseSwitchPayload(inst) => inst.opcode,
+            Instructions::FillArrayDataPayload(inst) => inst.opcode,
+        }
+    }
+
+    /// Get the bytes of a given instruction
+    pub fn bytes(&self) -> &[u16] {
+        match self {
+            Instructions::Instruction10t(inst) => &inst.bytes,
+            Instructions::Instruction10x(inst) => &inst.bytes,
+            Instructions::Instruction11n(inst) => &inst.bytes,
+            Instructions::Instruction11x(inst) => &inst.bytes,
+            Instructions::Instruction12x(inst) => &inst.bytes,
+            Instructions::Instruction20t(inst) => &inst.bytes,
+            Instructions::Instruction21c(inst) => &inst.bytes,
+            Instructions::Instruction21h(inst) => &inst.bytes,
+            Instructions::Instruction21s(inst) => &inst.bytes,
+            Instructions::Instruction21t(inst) => &inst.bytes,
+            Instructions::Instruction22b(inst) => &inst.bytes,
+            Instructions::Instruction22c(inst) => &inst.bytes,
+            Instructions::Instruction22s(inst) => &inst.bytes,
+            Instructions::Instruction22t(inst) => &inst.bytes,
+            Instructions::Instruction22x(inst) => &inst.bytes,
+            Instructions::Instruction23x(inst) => &inst.bytes,
+            Instructions::Instruction30t(inst) => &inst.bytes,
+            Instructions::Instruction31c(inst) => &inst.bytes,
+            Instructions::Instruction31i(inst) => &inst.bytes,
+            Instructions::Instruction31t(inst) => &inst.bytes,
+            Instructions::Instruction32x(inst) => &inst.bytes,
+            Instructions::Instruction35c(inst) => &inst.bytes,
+            Instructions::Instruction3rc(inst) => &inst.bytes,
+            Instructions::Instruction45cc(inst) => &inst.bytes,
+            Instructions::Instruction4rcc(inst) => &inst.bytes,
+            Instructions::Instruction51l(inst) => &inst.bytes,
+            Instructions::PackedSwitchPayload(_) => &[],  // FIXME
+            Instructions::SparseSwitchPayload(_) => &[],  // FIXME
+            Instructions::FillArrayDataPayload(_) => &[],  // FIXME
+        }
+    }
+}
+
 /////////////////////////////////////////////////////////////////
 
+/// Read the raw bytecode of a code item and parse it into a vector of instructions
 pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> usize {
     let raw_opcode = reader.read_u16().unwrap();
 
