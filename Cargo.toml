@@ -1,7 +1,12 @@
 [package]
-name = "dex_parser"
+name = "rusty-dex"
 version = "0.1.0"
 edition = "2021"
+license = "Apache-2.0"
+description = "`rusty-dex` is a parser for DEX files"
+homepage = "https://github.com/lukhio/rusty-dex"
+repository = "https://github.com/lukhio/rusty-dex"
+readme = "README.md"
 
 [dependencies]
 byteorder = "1.4.3"
