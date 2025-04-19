@@ -1,4 +1,4 @@
-extern crate dex_parser;
+extern crate rusty_dex;
 
 #[test]
 /// Simple test to make sure we get all the methods
@@ -7,7 +7,7 @@ extern crate dex_parser;
 /// This test simply parse the test APK and checks the
 /// number of methods in the `manymethods` package.
 fn test_multidex() {
-    let parsed = dex_parser::parse("tests/multidex.apk");
+    let parsed = rusty_dex::parse("tests/multidex.apk");
 
     let mut many_methods_count = 0;
     for method in parsed.methods.items.iter() {
