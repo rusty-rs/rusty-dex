@@ -46,7 +46,7 @@ pub fn verify_from_bytes(bytes: &Cursor<Vec<u8>>, checksum: u32) -> Result<bool,
     if computed_checksum == checksum {
         Ok(true)
     } else {
-        Err(DexError::new("[adler32] error: computed checksum does not match one in header"))
+        Err(DexError::InvalidChecksumError)
     }
 }
 
@@ -75,6 +75,6 @@ mod tests {
                                0x00, 0x00, 0x00, 0x00]);
         let checksum: u32 = 0xcafebabe;
         assert_eq!(verify_from_bytes(&bytes, checksum).unwrap_err().to_string(),
-                   "[adler32] error: computed checksum does not match one in header");
+                   "computed checksum does not match one in header");
     }
 }

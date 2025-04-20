@@ -51,10 +51,7 @@ impl DexHeader {
         version[2] = magic[6];
 
         let checksum = dex_cursor.read_u32().unwrap();
-        match adler32::verify_from_bytes(&dex_cursor.bytes, checksum) {
-            Ok(_) => { },
-            Err(err) => {panic!("{}", err);},
-        }
+        adler32::verify_from_bytes(&dex_cursor.bytes, checksum)?;
 
         let mut signature = [0; 20];
         dex_cursor.bytes.read_exact(&mut signature).unwrap();

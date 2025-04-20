@@ -66,7 +66,7 @@ impl DexReader {
         // Cannot use self here as we need to know the endianness before anything else
 
         if bytes.len() < 44 {
-            return Err(DexError::new("Error: DEX header too short"));
+            return Err(DexError::DexHeaderTooShortError);
         }
 
         let endian_tag = &bytes[40..44];
@@ -74,7 +74,7 @@ impl DexReader {
         match endian_tag.try_into().unwrap() {
             ENDIAN_CONSTANT => Ok(DexEndianness::BigEndian),
             REVERSE_ENDIAN_CONSTANT => Ok(DexEndianness::LittleEndian),
-            _ => panic!("Error: invalid endian tag in DEX header")
+            _ => return Err(DexError::InvalidEndianessTag)
         }
     }
 
@@ -88,7 +88,7 @@ impl DexReader {
 
     pub fn read_u8(&mut self) -> Result<u8, DexError> {
         if self.bytes.position() >= self.bytes_len {
-            return Err(DexError::new("Error: no data left to read"));
+            return Err(DexError::NoDataLeftError);
         }
 
         Ok(self.bytes.read_u8().unwrap())
@@ -96,7 +96,7 @@ impl DexReader {
 
     pub fn read_u16(&mut self) -> Result<u16, DexError> {
         if self.bytes.position() > self.bytes_len - 2 {
-            return Err(DexError::new("Error: no data left to read"));
+            return Err(DexError::NoDataLeftError);
         }
 
         match self.endianness {
@@ -107,7 +107,7 @@ impl DexReader {
 
     pub fn read_u32(&mut self) -> Result<u32, DexError> {
         if self.bytes.position() > self.bytes_len - 4 {
-            return Err(DexError::new("Error: no data left to read"));
+            return Err(DexError::NoDataLeftError);
         }
 
         match self.endianness {
@@ -118,7 +118,7 @@ impl DexReader {
 
     pub fn read_i32(&mut self) -> Result<i32, DexError> {
         if self.bytes.position() > self.bytes_len - 4 {
-            return Err(DexError::new("Error: no data left to read"));
+            return Err(DexError::NoDataLeftError);
         }
 
         match self.endianness {
@@ -144,7 +144,7 @@ impl DexReader {
             }
 
             if bytes_read >= 5 {
-                return Err(DexError::new("Error: too many bytes in unsigned LEB128 value"));
+                return Err(DexError::InvalidUleb128Value);
             }
         }
 
@@ -170,7 +170,7 @@ impl DexReader {
             }
 
             if bytes_read >= 5 {
-                return Err(DexError::new("Error: too many bytes in unsigned LEB128 value"));
+                return Err(DexError::InvalidSleb128Value);
             }
         }
 
@@ -216,17 +216,26 @@ mod tests {
         let endianness = DexReader::check_endianness(&DEX_DATA).unwrap();
         assert_eq!(endianness, DexEndianness::LittleEndian);
         assert_eq!(dex_reader.endianness, endianness);
-
-        let invalid_data = vec![0x00; 10];
-        let error = DexReader::check_endianness(&invalid_data).unwrap_err();
-        assert_eq!(error.message, "Error: DEX header too short");
     }
 
     #[test]
-    #[should_panic]
-    fn test_check_invalid_endianess() {
+    fn test_check_endianness_invalid() {
+        let invalid_data = vec![0x00; 10];
+        let result = DexReader::check_endianness(&invalid_data);
+        assert_eq!(
+            result.unwrap_err().to_string(),
+            "DEX header too short"
+        );
+    }
+
+    #[test]
+    fn test_check_endianness_invalid_long() {
         let invalid_long_data = vec![0x00; 100];
-        let _ = DexReader::check_endianness(&invalid_long_data).unwrap_err();
+        let result = DexReader::check_endianness(&invalid_long_data);
+        assert_eq!(
+            result.unwrap_err().to_string(),
+            "invalid endianness tag"
+        );
     }
 
     #[test]
@@ -240,7 +249,7 @@ mod tests {
         let result = dex_reader.read_u8();
         assert_eq!(
             result.unwrap_err().to_string(),
-            "Error: no data left to read"
+            "no data left to read"
         );
 
         let bound = DEX_DATA.len() + 10;
@@ -248,7 +257,7 @@ mod tests {
         let result = dex_reader.read_u8();
         assert_eq!(
             result.unwrap_err().to_string(),
-            "Error: no data left to read"
+            "no data left to read"
         );
     }
 
@@ -263,7 +272,7 @@ mod tests {
         let result = dex_reader.read_u16();
         assert_eq!(
             result.unwrap_err().to_string(),
-            "Error: no data left to read"
+            "no data left to read"
         );
 
         let bound = DEX_DATA.len() + 10;
@@ -271,7 +280,7 @@ mod tests {
         let result = dex_reader.read_u16();
         assert_eq!(
             result.unwrap_err().to_string(),
-            "Error: no data left to read"
+            "no data left to read"
         );
     }
 
@@ -286,7 +295,7 @@ mod tests {
         let result = dex_reader.read_u32();
         assert_eq!(
             result.unwrap_err().to_string(),
-            "Error: no data left to read"
+            "no data left to read"
         );
 
         let bound = DEX_DATA.len() + 10;
@@ -294,7 +303,7 @@ mod tests {
         let result = dex_reader.read_u32();
         assert_eq!(
             result.unwrap_err().to_string(),
-            "Error: no data left to read"
+            "no data left to read"
         );
     }
 
@@ -312,7 +321,7 @@ mod tests {
         let result = reader.read_uleb128();
         assert_eq!(
             result.unwrap_err().to_string(),
-            "Error: too many bytes in unsigned LEB128 value"
+            "too many bytes in unsigned LEB128 value"
         );
     }
 
@@ -330,7 +339,7 @@ mod tests {
         let result = reader.read_sleb128();
         assert_eq!(
             result.unwrap_err().to_string(),
-            "Error: too many bytes in unsigned LEB128 value"
+            "too many bytes in signed LEB128 value"
         );
     }
 
@@ -351,7 +360,7 @@ mod tests {
         let result = reader.read_uleb128p1();
         assert_eq!(
             result.unwrap_err().to_string(),
-            "Error: too many bytes in unsigned LEB128 value"
+            "too many bytes in unsigned LEB128 value"
         );
     }
 }
