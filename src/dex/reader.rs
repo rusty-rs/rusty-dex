@@ -74,14 +74,14 @@ impl DexReader {
         match endian_tag.try_into().unwrap() {
             ENDIAN_CONSTANT => Ok(DexEndianness::BigEndian),
             REVERSE_ENDIAN_CONSTANT => Ok(DexEndianness::LittleEndian),
-            _ => return Err(DexError::InvalidEndianessTag)
+            _ => Err(DexError::InvalidEndianessTag)
         }
     }
 
     /// Check if the cursor is on an even-numbered bytecode offsets
     /// and, if not, consume data until it is
     pub fn align_cursor(&mut self) {
-        while ! (self.bytes.position() % 4 == 0) {
+        while self.bytes.position() % 4 != 0 {
             let _ = self.read_u8().unwrap();
         }
     }

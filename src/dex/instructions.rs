@@ -442,7 +442,7 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
                 bytes,
                 length: 1
             }));
-            return 1;
+            1
         },
 
         OpCode::NOP | OpCode::RETURN_VOID => {
@@ -453,7 +453,7 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
                 bytes,
                 length: 1
             }));
-            return 1;
+            1
         },
 
         OpCode::CONST_4 => {
@@ -464,7 +464,7 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
                 bytes,
                 length: 1
             }));
-            return 1;
+            1
         },
 
         OpCode::MONITOR_ENTER            | OpCode::MONITOR_EXIT
@@ -480,7 +480,7 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
                     bytes,
                     length: 1
                 }));
-                return 1;
+                1
             },
 
         OpCode::ADD_DOUBLE_2ADDR      | OpCode::ADD_FLOAT_2ADDR
@@ -520,7 +520,7 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
                     bytes,
                     length: 1
                 }));
-                return 1;
+                1
             },
 
         OpCode::GOTO_16 => {
@@ -532,7 +532,7 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
                 bytes,
                 length: 2
             }));
-            return 2;
+            2
         },
 
         OpCode::CHECK_CAST                | OpCode::CONST_CLASS
@@ -554,7 +554,7 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
                     bytes,
                     length: 2
                 }));
-                return 2;
+                2
             },
 
         OpCode::CONST_HIGH16 | OpCode::CONST_WIDE_HIGH16
@@ -567,7 +567,7 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
                     bytes,
                     length: 2
                 }));
-                return 2;
+                2
             },
 
         OpCode::CONST_16 | OpCode::CONST_WIDE_16
@@ -580,7 +580,7 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
                     bytes,
                     length: 2
                 }));
-                return 2;
+                2
             },
 
         OpCode::IF_EQZ       | OpCode::IF_GEZ
@@ -595,7 +595,7 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
                     bytes,
                     length: 2
                 }));
-                return 2;
+                2
             },
 
         OpCode::ADD_INT_LIT8        | OpCode::AND_INT_LIT8
@@ -613,7 +613,7 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
                     bytes,
                     length: 2
                 }));
-                return 2;
+                2
             },
 
         OpCode::IGET_BOOLEAN       | OpCode::IGET_BYTE
@@ -633,7 +633,7 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
                     bytes,
                     length: 2
                 }));
-                return 2;
+                2
             },
 
         OpCode::ADD_INT_LIT16       | OpCode::AND_INT_LIT16
@@ -649,7 +649,7 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
                     bytes,
                     length: 2
                 }));
-                return 2;
+                2
             },
 
         OpCode::IF_EQ       | OpCode::IF_GE
@@ -664,7 +664,7 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
                     bytes,
                     length: 2
                 }));
-                return 2;
+                2
             },
 
         OpCode::MOVE_FROM16 | OpCode::MOVE_OBJECT_FROM16
@@ -678,7 +678,7 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
                     bytes,
                     length: 2
                 }));
-                return 2;
+                2
             },
 
         OpCode::ADD_DOUBLE         | OpCode::ADD_FLOAT
@@ -716,7 +716,7 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
                     bytes,
                     length: 2
                 }));
-                return 2;
+                2
             },
 
         OpCode::GOTO_32 => {
@@ -729,7 +729,7 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
                 bytes,
                 length: 3
             }));
-            return 3;
+            3
         },
 
         OpCode::CONST_STRING_JUMBO => {
@@ -742,7 +742,7 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
                 bytes,
                 length: 3
             }));
-            return 3;
+            3
         },
 
         OpCode::CONST | OpCode::CONST_WIDE_32
@@ -756,7 +756,7 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
                     bytes,
                     length: 3
                 }));
-                return 3;
+                3
             },
 
         OpCode::FILL_ARRAY_DATA | OpCode::PACKED_SWITCH
@@ -770,7 +770,7 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
                     bytes,
                     length: 3
                 }));
-                return 3;
+                3
             },
 
         OpCode::MOVE_16 | OpCode::MOVE_OBJECT_16
@@ -784,7 +784,7 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
                     bytes,
                     length: 3
                 }));
-                return 3;
+                3
             },
 
         OpCode::FILLED_NEW_ARRAY    | OpCode::INVOKE_CUSTOM
@@ -801,7 +801,7 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
                     bytes,
                     length: 3
                 }));
-                return 3;
+                3
             },
 
         OpCode::FILLED_NEW_ARRAY_RANGE    | OpCode::INVOKE_CUSTOM_RANGE
@@ -818,7 +818,7 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
                     bytes,
                     length: 3
                 }));
-                return 3;
+                3
             },
 
         OpCode::INVOKE_POLYMORPHIC => {
@@ -832,7 +832,7 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
                 bytes,
                 length: 4
             }));
-            return 4;
+            4
         },
 
         OpCode::INVOKE_POLYMORPHIC_RANGE => {
@@ -846,7 +846,7 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
                 bytes,
                 length: 4
             }));
-            return 4;
+            4
         },
 
         OpCode::CONST_WIDE => {
@@ -861,7 +861,7 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
                 bytes,
                 length: 5
             }));
-            return 5;
+            5
         },
 
         OpCode::PACKED_SWITCH_PAYLOAD => {
@@ -869,7 +869,7 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
             let len = inst.length();
             container.push(Instructions::PackedSwitchPayload(inst));
             reader.align_cursor();
-            return len;
+            len
         },
 
         OpCode::SPARSE_SWITCH_PAYLOAD => {
@@ -877,7 +877,7 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
             let len = inst.length();
             container.push(Instructions::SparseSwitchPayload(inst));
             reader.align_cursor();
-            return len;
+            len
         },
 
         OpCode::FILL_ARRAY_DATA_PAYLOAD => {
@@ -885,7 +885,7 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
             let len = inst.length();
             container.push(Instructions::FillArrayDataPayload(inst));
             reader.align_cursor();
-            return len;
+            len
         }
     }
 }

@@ -273,13 +273,7 @@ impl DexClasses {
     }
 
     pub fn get_class_def(&self, class_name: &String) -> Option<&ClassDefItem> {
-        for item in self.items.iter() {
-            if &item.class_str == class_name {
-                return Some(&item);
-            }
-        }
-
-        None
+        self.items.iter().find(|&item| &item.class_str == class_name)
     }
 }
 

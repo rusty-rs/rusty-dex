@@ -240,7 +240,7 @@ impl AccessFlag {
     }
 
     /// Pretty print a vector of access flags
-    pub fn vec_to_string(flags: &Vec<AccessFlag>) -> String {
+    pub fn vec_to_string(flags: &[AccessFlag]) -> String {
         let mut output = String::new();
         let flags_len = flags.len();
 

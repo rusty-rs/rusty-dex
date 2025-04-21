@@ -182,7 +182,7 @@ impl DexFile {
         };
 
         DexFile {
-            header: header,
+            header,
             strings: DexStrings { strings: strings_list },
             types: DexTypes { items: type_ids_list },
             protos: DexProtos { items: proto_ids_list },
