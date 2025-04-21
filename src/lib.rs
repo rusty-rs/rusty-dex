@@ -1,5 +1,7 @@
 #![allow(dead_code)]
 
+use error::DexError;
+
 use crate::dex::reader::DexReader;
 use crate::dex::file::DexFile;
 use crate::dex::instructions::Instructions;
@@ -9,8 +11,8 @@ pub mod error;
 mod adler32;
 
 /// Parse an APK and create a `DexFile` object from the embedded class(es) files
-pub fn parse(filepath: &str) -> DexFile {
-    let readers = DexReader::build_from_file(filepath);
+pub fn parse(filepath: &str) -> Result<DexFile, DexError> {
+    let readers = DexReader::build_from_file(filepath)?;
     DexFile::merge(readers)
 }
 

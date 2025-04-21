@@ -15,6 +15,7 @@ use crate::dex::strings::DexStrings;
 use crate::dex::types::DexTypes;
 use crate::dex::fields::DexFields;
 use crate::dex::methods::DexMethods;
+use crate::error::DexError;
 
 /// Constant to represent the absence of index
 const NO_INDEX: u32 = 0xffffffff;
@@ -76,40 +77,41 @@ impl DexClasses {
                  fields_list: &DexFields,
                  types_list: &DexTypes,
                  strings_list: &DexStrings,
-                 methods_list: &DexMethods) -> Self {
-        dex_reader.bytes.seek(SeekFrom::Start(offset.into())).unwrap();
+                 methods_list: &DexMethods) -> Result<Self, DexError> {
+        dex_reader.bytes.seek(SeekFrom::Start(offset.into()))?;
 
         let mut methods = Vec::new();
 
         for _ in 0..size {
-            let class_idx = dex_reader.read_u32().unwrap();
-            let access_flags = dex_reader.read_u32().unwrap();
+            let class_idx = dex_reader.read_u32()?;
+            let access_flags = dex_reader.read_u32()?;
             let access_flags_decoded = AccessFlag::parse(access_flags,
                                                          AccessFlagType::Class);
 
-            let superclass_idx   = dex_reader.read_u32().unwrap();
-            let interfaces_off   = dex_reader.read_u32().unwrap();
-            let source_file_idx  = dex_reader.read_u32().unwrap();
-            let annotations_off  = dex_reader.read_u32().unwrap();
-            let class_data_off   = dex_reader.read_u32().unwrap();
-            let static_value_off = dex_reader.read_u32().unwrap();
+            let superclass_idx   = dex_reader.read_u32()?;
+            let interfaces_off   = dex_reader.read_u32()?;
+            let source_file_idx  = dex_reader.read_u32()?;
+            let annotations_off  = dex_reader.read_u32()?;
+            let class_data_off   = dex_reader.read_u32()?;
+            let static_value_off = dex_reader.read_u32()?;
 
             // Convert indexs into human-readable strings
             let class_str = types_list.items
-                                      .get(class_idx as usize).unwrap();
+                                      .get(class_idx as usize)
+                                      .ok_or(DexError::InvalidTypeIdx)?;
 
             let mut superclass_str = None;
             if superclass_idx != NO_INDEX {
                 superclass_str = Some(types_list.items
                                                 .get(superclass_idx as usize)
-                                                .unwrap());
+                                                .ok_or(DexError::InvalidTypeIdx)?);
             }
 
             let mut source_file_str = None;
             if source_file_idx != NO_INDEX {
                 source_file_str = Some(strings_list.strings
                                                    .get(source_file_idx as usize)
-                                                   .unwrap());
+                                                   .ok_or(DexError::InvalidStringIdx)?);
             }
 
             // If class_data_off == 0 then we have no class data
@@ -121,12 +123,12 @@ impl DexClasses {
                 let current_offset = dex_reader.bytes.position();
 
                 // Go to class data offset
-                dex_reader.bytes.seek(SeekFrom::Start(class_data_off.into())).unwrap();
+                dex_reader.bytes.seek(SeekFrom::Start(class_data_off.into()))?;
 
-                let (static_fields_size, _)   = dex_reader.read_uleb128().unwrap();
-                let (instance_fields_size, _) = dex_reader.read_uleb128().unwrap();
-                let (direct_methods_size, _)  = dex_reader.read_uleb128().unwrap();
-                let (virtual_methods_size, _) = dex_reader.read_uleb128().unwrap();
+                let (static_fields_size, _)   = dex_reader.read_uleb128()?;
+                let (instance_fields_size, _) = dex_reader.read_uleb128()?;
+                let (direct_methods_size, _)  = dex_reader.read_uleb128()?;
+                let (virtual_methods_size, _) = dex_reader.read_uleb128()?;
 
                 let mut static_fields   = Vec::<EncodedField>::with_capacity(static_fields_size as usize);
                 let mut instance_fields = Vec::<EncodedField>::with_capacity(instance_fields_size as usize);
@@ -136,38 +138,36 @@ impl DexClasses {
                 // Encoded fields
                 let mut field_idx = 0;
                 for _ in 0..static_fields_size {
-                    let (idx, _) = dex_reader.read_uleb128().unwrap();
-                    let (access_flags, _) = dex_reader.read_uleb128().unwrap();
+                    let (idx, _) = dex_reader.read_uleb128()?;
+                    let (access_flags, _) = dex_reader.read_uleb128()?;
 
                     field_idx += idx;
 
                     let decoded_field = fields_list.items.get(field_idx as usize)
-                                                         .unwrap()
-                                                         .to_string();
+                                                         .ok_or(DexError::InvalidFieldIdx)?;
                     let decoded_flags = AccessFlag::parse(access_flags,
                                                           AccessFlagType::Field);
 
                     static_fields.push(EncodedField {
-                        field: decoded_field,
+                        field: decoded_field.to_string(),
                         access_flags: decoded_flags
                     });
                 }
 
                 let mut field_idx = 0;
                 for _ in 0..instance_fields_size {
-                    let (idx, _) = dex_reader.read_uleb128().unwrap();
-                    let (access_flags, _) = dex_reader.read_uleb128().unwrap();
+                    let (idx, _) = dex_reader.read_uleb128()?;
+                    let (access_flags, _) = dex_reader.read_uleb128()?;
 
                     field_idx += idx;
 
                     let decoded_field = fields_list.items.get(field_idx as usize)
-                                                         .unwrap()
-                                                         .to_string();
+                                                         .ok_or(DexError::InvalidFieldIdx)?;
                     let decoded_flags = AccessFlag::parse(access_flags,
                                                           AccessFlagType::Field);
 
                     instance_fields.push(EncodedField {
-                        field: decoded_field,
+                        field: decoded_field.to_string(),
                         access_flags: decoded_flags
                     });
                 }
@@ -175,15 +175,14 @@ impl DexClasses {
                 // Encoded methods
                 let mut method_idx = 0;
                 for _ in 0..direct_methods_size {
-                    let (idx, _) = dex_reader.read_uleb128().unwrap();
-                    let (access_flags, _) = dex_reader.read_uleb128().unwrap();
-                    let (code_offset, _) = dex_reader.read_uleb128().unwrap();
+                    let (idx, _) = dex_reader.read_uleb128()?;
+                    let (access_flags, _) = dex_reader.read_uleb128()?;
+                    let (code_offset, _) = dex_reader.read_uleb128()?;
 
                     method_idx += idx;
 
                     let proto = methods_list.items.get(method_idx as usize)
-                                                  .unwrap()
-                                                  .to_string();
+                                                         .ok_or(DexError::InvalidMethodIdx)?;
                     let decoded_flags = AccessFlag::parse(access_flags,
                                                           AccessFlagType::Method);
 
@@ -198,8 +197,8 @@ impl DexClasses {
                         let current_offset = dex_reader.bytes.position();
                         let code_item = CodeItem::build(dex_reader,
                                                         code_offset,
-                                                        types_list);
-                        dex_reader.bytes.seek(SeekFrom::Start(current_offset)).unwrap();
+                                                        types_list)?;
+                        dex_reader.bytes.seek(SeekFrom::Start(current_offset))?;
 
                         direct_methods.push(EncodedMethod {
                             proto: proto.to_string(),
@@ -211,15 +210,14 @@ impl DexClasses {
 
                 let mut method_idx = 0;
                 for _ in 0..virtual_methods_size {
-                    let (idx, _) = dex_reader.read_uleb128().unwrap();
-                    let (access_flags, _) = dex_reader.read_uleb128().unwrap();
-                    let (code_offset, _) = dex_reader.read_uleb128().unwrap();
+                    let (idx, _) = dex_reader.read_uleb128()?;
+                    let (access_flags, _) = dex_reader.read_uleb128()?;
+                    let (code_offset, _) = dex_reader.read_uleb128()?;
 
                     method_idx += idx;
 
                     let proto = methods_list.items.get(method_idx as usize)
-                                                  .unwrap()
-                                                  .to_string();
+                                                  .ok_or(DexError::InvalidMethodIdx)?;
                     let decoded_flags = AccessFlag::parse(access_flags,
                                                           AccessFlagType::Method);
 
@@ -234,8 +232,8 @@ impl DexClasses {
                         let current_offset = dex_reader.bytes.position();
                         let code_item = CodeItem::build(dex_reader,
                                                         code_offset,
-                                                        types_list);
-                        dex_reader.bytes.seek(SeekFrom::Start(current_offset)).unwrap();
+                                                        types_list)?;
+                        dex_reader.bytes.seek(SeekFrom::Start(current_offset))?;
 
                         virtual_methods.push(EncodedMethod {
                             proto: proto.to_string(),
@@ -246,7 +244,7 @@ impl DexClasses {
                 }
 
                 // Go back to the previous offset
-                dex_reader.bytes.seek(SeekFrom::Start(current_offset)).unwrap();
+                dex_reader.bytes.seek(SeekFrom::Start(current_offset))?;
 
                 class_data = Some(ClassDataItem {
                     static_fields,
@@ -269,7 +267,7 @@ impl DexClasses {
             });
         }
 
-        DexClasses { items: methods }
+        Ok(DexClasses { items: methods })
     }
 
     pub fn get_class_def(&self, class_name: &String) -> Option<&ClassDefItem> {

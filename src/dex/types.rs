@@ -2,6 +2,7 @@ use std::io::{Seek, SeekFrom};
 
 use crate::dex::reader::DexReader;
 use crate::dex::strings::DexStrings;
+use crate::error::DexError;
 
 #[derive(Debug)]
 struct DexTypeItem {
@@ -18,16 +19,17 @@ impl DexTypes {
     pub fn build(dex_reader: &mut DexReader,
                  offset: u32,
                  size: u32,
-                 strings_list: &DexStrings) -> Self {
-        dex_reader.bytes.seek(SeekFrom::Start(offset.into())).unwrap();
+                 strings_list: &DexStrings) -> Result<Self, DexError> {
+        dex_reader.bytes.seek(SeekFrom::Start(offset.into()))?;
 
         let mut types = Vec::new();
 
         for _ in 0..size {
-            let offset = dex_reader.read_u32().unwrap();
+            let offset = dex_reader.read_u32()?;
+            let str_type = strings_list.strings.get(offset as usize).ok_or(DexError::InvalidStringIdx)?;
             types.push(DexTypeItem {
                 offset,
-                str_type: strings_list.strings[offset as usize].clone()
+                str_type: str_type.to_string(),
             });
         }
         types.sort_by(|a, b| a.offset.cmp(&b.offset));
@@ -38,7 +40,7 @@ impl DexTypes {
         }
         items.dedup();
 
-        DexTypes { items }
+        Ok(DexTypes { items })
     }
 }
 
@@ -56,10 +58,10 @@ mod tests {
             0x78, 0x56, 0x34, 0x12, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  // endianness tag
         ];
 
-        let mut dex_reader = DexReader::build(dex_data);
+        let mut dex_reader = DexReader::build(dex_data).unwrap();
         let strings_list = DexStrings { strings: Vec::new() };
 
-        let dex_types = DexTypes::build(&mut dex_reader, 0, 0, &strings_list);
+        let dex_types = DexTypes::build(&mut dex_reader, 0, 0, &strings_list).unwrap();
 
         assert_eq!(dex_types.items.len(), 0);
     }
@@ -78,7 +80,7 @@ mod tests {
             0x03, 0x00, 0x00, 0x00,     // type 3 offset
         ];
 
-        let mut dex_reader = DexReader::build(dex_data);
+        let mut dex_reader = DexReader::build(dex_data).unwrap();
         let strings_list = DexStrings { strings: vec![
                 "Type0".to_string(),
                 "Type1".to_string(),
@@ -87,7 +89,7 @@ mod tests {
             ]
         };
 
-        let dex_types = DexTypes::build(&mut dex_reader, 50, 4, &strings_list);
+        let dex_types = DexTypes::build(&mut dex_reader, 50, 4, &strings_list).unwrap();
 
         assert_eq!(dex_types.items.len(), 4);
         assert_eq!(dex_types.items[0], "Type0");
@@ -109,7 +111,7 @@ mod tests {
             0x02, 0x00, 0x00, 0x00,     // type 1 duplicate offset
         ];
 
-        let mut dex_reader = DexReader::build(dex_data);
+        let mut dex_reader = DexReader::build(dex_data).unwrap();
         let strings_list = DexStrings { strings: vec![
                 "Type0".to_string(),
                 "Type1".to_string(),
@@ -117,7 +119,7 @@ mod tests {
             ]
         };
 
-        let dex_types = DexTypes::build(&mut dex_reader, 50, 2, &strings_list);
+        let dex_types = DexTypes::build(&mut dex_reader, 50, 2, &strings_list).unwrap();
 
         assert_eq!(dex_types.items.len(), 2);
         assert_eq!(dex_types.items[0], "Type0");

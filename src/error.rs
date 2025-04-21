@@ -18,4 +18,14 @@ pub enum DexError {
     InvalidUleb128Value,
     #[error("too many bytes in signed LEB128 value")]
     InvalidSleb128Value,
+    #[error("cannot move reader to requested offset")]
+    SeekError(#[from] std::io::Error),
+    #[error("cannot find element in types list")]
+    InvalidTypeIdx,
+    #[error("cannot find element in strings list")]
+    InvalidStringIdx,
+    #[error("cannot find element in fields list")]
+    InvalidFieldIdx,
+    #[error("cannot find element in methods list")]
+    InvalidMethodIdx,
 }

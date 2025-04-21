@@ -23,7 +23,7 @@ pub struct DexReader {
 }
 
 impl DexReader {
-    pub fn build_from_file(filepath: &str) -> Vec<DexReader> {
+    pub fn build_from_file(filepath: &str) -> Result<Vec<DexReader>, DexError> {
         let raw_file = File::open(filepath)
             .unwrap_or_else(|err| panic!("could not open input file: {err}"));
         let mut zip_file = ZipArchive::new(raw_file)
@@ -41,25 +41,25 @@ impl DexReader {
             let mut raw_dex = Vec::new();
             dex_entry.read_to_end(&mut raw_dex)
                      .unwrap_or_else(|err| panic!("Could not read input file: {err}"));
-            let reader = DexReader::build(raw_dex);
+            let reader = DexReader::build(raw_dex)?;
             readers.push(reader);
         }
 
-        readers
+        Ok(readers)
     }
 
-    pub fn build(raw_dex: Vec<u8>) -> Self {
-        let endianness = DexReader::check_endianness(&raw_dex).unwrap();
+    pub fn build(raw_dex: Vec<u8>) -> Result<Self, DexError> {
+        let endianness = DexReader::check_endianness(&raw_dex)?;
 
         let mut bytes = Cursor::new(raw_dex);
-        let bytes_len = bytes.seek(SeekFrom::End(0)).unwrap();
-        bytes.rewind().unwrap();
+        let bytes_len = bytes.seek(SeekFrom::End(0))?;
+        bytes.rewind()?;
 
-        DexReader {
+        Ok(DexReader {
             bytes,
             bytes_len,
             endianness
-        }
+        })
     }
 
     pub fn check_endianness(bytes: &[u8]) -> Result<DexEndianness, DexError> {
@@ -80,10 +80,12 @@ impl DexReader {
 
     /// Check if the cursor is on an even-numbered bytecode offsets
     /// and, if not, consume data until it is
-    pub fn align_cursor(&mut self) {
+    pub fn align_cursor(&mut self) -> Result<(), DexError> {
         while self.bytes.position() % 4 != 0 {
-            let _ = self.read_u8().unwrap();
+            let _ = self.read_u8()?;
         }
+
+        Ok(())
     }
 
     pub fn read_u8(&mut self) -> Result<u8, DexError> {
@@ -91,7 +93,7 @@ impl DexReader {
             return Err(DexError::NoDataLeftError);
         }
 
-        Ok(self.bytes.read_u8().unwrap())
+        Ok(self.bytes.read_u8()?)
     }
 
     pub fn read_u16(&mut self) -> Result<u16, DexError> {
@@ -100,8 +102,8 @@ impl DexReader {
         }
 
         match self.endianness {
-            DexEndianness::BigEndian => Ok(self.bytes.read_u16::<BigEndian>().unwrap()),
-            DexEndianness::LittleEndian => Ok(self.bytes.read_u16::<LittleEndian>().unwrap()),
+            DexEndianness::BigEndian => Ok(self.bytes.read_u16::<BigEndian>()?),
+            DexEndianness::LittleEndian => Ok(self.bytes.read_u16::<LittleEndian>()?),
         }
     }
 
@@ -111,8 +113,8 @@ impl DexReader {
         }
 
         match self.endianness {
-            DexEndianness::BigEndian => Ok(self.bytes.read_u32::<BigEndian>().unwrap()),
-            DexEndianness::LittleEndian => Ok(self.bytes.read_u32::<LittleEndian>().unwrap()),
+            DexEndianness::BigEndian => Ok(self.bytes.read_u32::<BigEndian>()?),
+            DexEndianness::LittleEndian => Ok(self.bytes.read_u32::<LittleEndian>()?),
         }
     }
 
@@ -122,8 +124,8 @@ impl DexReader {
         }
 
         match self.endianness {
-            DexEndianness::BigEndian => Ok(self.bytes.read_i32::<BigEndian>().unwrap()),
-            DexEndianness::LittleEndian => Ok(self.bytes.read_i32::<LittleEndian>().unwrap()),
+            DexEndianness::BigEndian => Ok(self.bytes.read_i32::<BigEndian>()?),
+            DexEndianness::LittleEndian => Ok(self.bytes.read_i32::<LittleEndian>()?),
         }
     }
 
@@ -133,7 +135,7 @@ impl DexReader {
         let mut shift = 0;
 
         loop {
-            let byte = self.bytes.read_u8().unwrap();
+            let byte = self.bytes.read_u8()?;
             bytes_read += 1;
             let payload = (byte & 0b0111_1111) as u32;
             result |= payload << shift;
@@ -158,7 +160,7 @@ impl DexReader {
         let mut byte;
 
         loop {
-            byte = self.bytes.read_u8().unwrap() as u32;
+            byte = self.bytes.read_u8()? as u32;
             bytes_read += 1;
             let payload = byte & 0b0111_1111;
             result |= payload << shift;
@@ -205,14 +207,14 @@ mod tests {
 
     #[test]
     fn test_build() {
-        let dex_reader = DexReader::build(DEX_DATA.to_vec());
+        let dex_reader = DexReader::build(DEX_DATA.to_vec()).unwrap();
         assert_eq!(dex_reader.bytes_len, DEX_DATA.len() as u64);
         assert_eq!(dex_reader.endianness, DexEndianness::LittleEndian);
     }
 
     #[test]
     fn test_check_endianness() {
-        let dex_reader = DexReader::build(DEX_DATA.to_vec());
+        let dex_reader = DexReader::build(DEX_DATA.to_vec()).unwrap();
         let endianness = DexReader::check_endianness(&DEX_DATA).unwrap();
         assert_eq!(endianness, DexEndianness::LittleEndian);
         assert_eq!(dex_reader.endianness, endianness);
@@ -240,7 +242,7 @@ mod tests {
 
     #[test]
     fn test_read_u8() {
-        let mut dex_reader = DexReader::build(DEX_DATA.to_vec());
+        let mut dex_reader = DexReader::build(DEX_DATA.to_vec()).unwrap();
         let byte = dex_reader.read_u8().unwrap();
         assert_eq!(byte, 0x64);
 
@@ -263,7 +265,7 @@ mod tests {
 
     #[test]
     fn test_read_u16() {
-        let mut dex_reader = DexReader::build(DEX_DATA.to_vec());
+        let mut dex_reader = DexReader::build(DEX_DATA.to_vec()).unwrap();
         let u16_val = dex_reader.read_u16().unwrap();
         assert_eq!(u16_val, 0x6564);
 
@@ -286,7 +288,7 @@ mod tests {
 
     #[test]
     fn test_read_u32() {
-        let mut dex_reader = DexReader::build(DEX_DATA.to_vec());
+        let mut dex_reader = DexReader::build(DEX_DATA.to_vec()).unwrap();
         let u32_val = dex_reader.read_u32().unwrap();
         assert_eq!(u32_val, 0x0a786564);
 
@@ -309,7 +311,7 @@ mod tests {
 
         #[test]
     fn test_read_uleb128() {
-        let mut reader = DexReader::build(DEX_DATA.to_vec());
+        let mut reader = DexReader::build(DEX_DATA.to_vec()).unwrap();
         reader.bytes.seek(SeekFrom::Start(10)).unwrap();
 
         let result = reader.read_uleb128().unwrap();
@@ -327,7 +329,7 @@ mod tests {
 
     #[test]
     fn test_read_sleb128() {
-        let mut reader = DexReader::build(DEX_DATA.to_vec());
+        let mut reader = DexReader::build(DEX_DATA.to_vec()).unwrap();
         reader.bytes.seek(SeekFrom::Start(20)).unwrap();
 
         let result = reader.read_sleb128().unwrap();
@@ -345,7 +347,7 @@ mod tests {
 
     #[test]
     fn test_read_uleb128p1() {
-        let mut reader = DexReader::build(DEX_DATA.to_vec());
+        let mut reader = DexReader::build(DEX_DATA.to_vec()).unwrap();
         reader.bytes.seek(SeekFrom::Start(30)).unwrap();
 
         let result = reader.read_uleb128p1().unwrap();

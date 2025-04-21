@@ -7,13 +7,13 @@
 
 use std::io::{Seek, SeekFrom};
 
-use crate::dex::reader::DexReader;
+use crate::error::DexError;
 use crate::dex::{
+    reader::DexReader,
+    types::DexTypes,
     instructions,
     instructions::Instructions
 };
-
-use crate::dex::types::DexTypes;
 
 /// A `try` statement with offset to the `catch` part
 #[derive(Clone, Debug)]
@@ -54,18 +54,18 @@ impl CodeItem {
     /// Build a `CodeItem` struct from the reader
     pub fn build(dex_reader: &mut DexReader,
                  offset: u32,
-                 types_list: &DexTypes) -> Self {
+                 types_list: &DexTypes) -> Result<Self, DexError> {
 
         /* Go to start of code item */
-        dex_reader.bytes.seek(SeekFrom::Start(offset.into())).unwrap();
+        dex_reader.bytes.seek(SeekFrom::Start(offset.into()))?;
 
         /* Get the metadata */
-        let registers_size = dex_reader.read_u16().unwrap();
-        let ins_size       = dex_reader.read_u16().unwrap();
-        let outs_size      = dex_reader.read_u16().unwrap();
-        let tries_size     = dex_reader.read_u16().unwrap();
-        let debug_info_off = dex_reader.read_u32().unwrap();
-        let insns_size     = dex_reader.read_u32().unwrap();
+        let registers_size = dex_reader.read_u16()?;
+        let ins_size       = dex_reader.read_u16()?;
+        let outs_size      = dex_reader.read_u16()?;
+        let tries_size     = dex_reader.read_u16()?;
+        let debug_info_off = dex_reader.read_u32()?;
+        let insns_size     = dex_reader.read_u32()?;
 
         /* Get the actual bytecode */
         let mut insns = Vec::with_capacity(insns_size as usize);
@@ -77,7 +77,7 @@ impl CodeItem {
 
         /* Check if there is some padding */
         if tries_size != 0 && insns_size % 2 == 1 {
-            _ = dex_reader.read_u16().unwrap();
+            _ = dex_reader.read_u16()?;
         }
 
         let mut tries = Vec::<TryItem>::new();
@@ -86,9 +86,9 @@ impl CodeItem {
         if tries_size != 0 {
             tries = Vec::with_capacity(tries_size as usize);
             for _ in 0..tries_size {
-                let start_addr = dex_reader.read_u32().unwrap();
-                let insn_count = dex_reader.read_u16().unwrap();
-                let handler_off = dex_reader.read_u16().unwrap();
+                let start_addr = dex_reader.read_u32()?;
+                let insn_count = dex_reader.read_u16()?;
+                let handler_off = dex_reader.read_u16()?;
 
                 tries.push(TryItem {
                     start_addr,
@@ -97,19 +97,19 @@ impl CodeItem {
                 });
             }
 
-            let (handlers_list_size, _) = dex_reader.read_uleb128().unwrap();
+            let (handlers_list_size, _) = dex_reader.read_uleb128()?;
             handlers = Vec::with_capacity(handlers_list_size as usize);
 
             for _ in 0..handlers_list_size {
-                let (handler_size, _) = dex_reader.read_sleb128().unwrap();
+                let (handler_size, _) = dex_reader.read_sleb128()?;
                 let mut type_add_pairs = Vec::with_capacity(handler_size.unsigned_abs() as usize);
 
                 for _ in 0..handler_size.abs() {
-                    let (type_idx, _) = dex_reader.read_uleb128().unwrap();
+                    let (type_idx, _) = dex_reader.read_uleb128()?;
                     let decoded_type = types_list.items.get(type_idx as usize)
                                                        .unwrap_or(&String::from("MISSINGTYPE"))  // FIXME
                                                        .to_string();
-                    let (addr, _) = dex_reader.read_uleb128().unwrap();
+                    let (addr, _) = dex_reader.read_uleb128()?;
 
                     type_add_pairs.push(EncodedTypeAddrPair {
                         decoded_type,
@@ -119,7 +119,7 @@ impl CodeItem {
                 }
 
                 if handler_size <= 0 {
-                    let (catch_all_addr, _) = dex_reader.read_uleb128().unwrap();
+                    let (catch_all_addr, _) = dex_reader.read_uleb128()?;
                     handlers.push(EncodedCatchHandler {
                         size: handler_size,
                         handlers: type_add_pairs,
@@ -136,27 +136,31 @@ impl CodeItem {
         }
 
         if tries_size != 0 {
-            CodeItem {
-                registers_size,
-                ins_size,
-                outs_size,
-                debug_info_off,
-                // insns: parsed_ins,
-                insns: Some(insns),
-                tries: Some(tries),
-                handlers: Some(handlers)
-            }
+            Ok(
+                CodeItem {
+                    registers_size,
+                    ins_size,
+                    outs_size,
+                    debug_info_off,
+                    // insns: parsed_ins,
+                    insns: Some(insns),
+                    tries: Some(tries),
+                    handlers: Some(handlers)
+                }
+            )
         } else {
-            CodeItem {
-                registers_size,
-                ins_size,
-                outs_size,
-                debug_info_off,
-                // insns: parsed_ins,
-                insns: Some(insns),
-                tries: None,
-                handlers: None
-            }
+            Ok(
+                CodeItem {
+                    registers_size,
+                    ins_size,
+                    outs_size,
+                    debug_info_off,
+                    // insns: parsed_ins,
+                    insns: Some(insns),
+                    tries: None,
+                    handlers: None
+                }
+            )
         }
     }
 }

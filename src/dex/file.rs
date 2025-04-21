@@ -18,6 +18,7 @@ use crate::dex::protos::DexProtos;
 use crate::dex::fields::DexFields;
 use crate::dex::methods::DexMethods;
 use crate::dex::classes::{ DexClasses, ClassDefItem, EncodedMethod };
+use crate::error::DexError;
 
 /// Representation of a DEX file
 #[derive(Debug)]
@@ -40,35 +41,35 @@ pub struct DexFile {
 
 impl DexFile {
     /// Parse a DEX file from the reader and create a `DexFile` object
-    pub fn build(mut dex_reader: DexReader) -> Self {
-        let dex_header = DexHeader::new(&mut dex_reader).unwrap();
+    pub fn build(mut dex_reader: DexReader) -> Result<Self, DexError> {
+        let dex_header = DexHeader::new(&mut dex_reader)?;
 
         let strings_list = DexStrings::build(&mut dex_reader,
                                              dex_header.string_ids_off,
-                                             dex_header.string_ids_size);
+                                             dex_header.string_ids_size)?;
 
         let type_ids_list = DexTypes::build(&mut dex_reader,
                                             dex_header.type_ids_off,
                                             dex_header.type_ids_size,
-                                            &strings_list);
+                                            &strings_list)?;
 
         let proto_ids_list = DexProtos::build(&mut dex_reader,
                                               dex_header.proto_ids_off,
                                               dex_header.proto_ids_size,
-                                              &type_ids_list);
+                                              &type_ids_list)?;
 
         let field_ids_list = DexFields::build(&mut dex_reader,
                                               dex_header.fields_ids_off,
                                               dex_header.fields_ids_size,
                                               &type_ids_list,
-                                              &strings_list);
+                                              &strings_list)?;
 
         let method_ids_list = DexMethods::build(&mut dex_reader,
                                                 dex_header.method_ids_off,
                                                 dex_header.method_ids_size,
                                                 &type_ids_list,
                                                 &proto_ids_list,
-                                                &strings_list);
+                                                &strings_list)?;
 
         let class_defs_list = DexClasses::build(&mut dex_reader,
                                                 dex_header.class_defs_off,
@@ -76,9 +77,9 @@ impl DexFile {
                                                 &field_ids_list,
                                                 &type_ids_list,
                                                 &strings_list,
-                                                &method_ids_list);
+                                                &method_ids_list)?;
 
-        DexFile {
+        Ok(DexFile {
             header: dex_header,
             strings: strings_list,
             types: type_ids_list,
@@ -86,13 +87,13 @@ impl DexFile {
             fields: field_ids_list,
             methods: method_ids_list,
             classes: class_defs_list,
-        }
+        })
     }
 
     /// Create a `DexFile` from a collection of `DexReader`.
     /// This function will create an intermediary `DexFile` object for each reader and then merge
     /// them into the final `DexFile`.
-    pub fn merge(readers: Vec<DexReader>) -> Self {
+    pub fn merge(readers: Vec<DexReader>) -> Result<Self, DexError> {
         let mut strings_list = Vec::new();
         let mut type_ids_list = Vec::new();
         let mut proto_ids_list = Vec::new();
@@ -102,7 +103,7 @@ impl DexFile {
 
         info!("start merging DEX files");
         for reader in readers.into_iter() {
-            let current_dex_file = DexFile::build(reader);
+            let current_dex_file = DexFile::build(reader)?;
 
             info!("  merging strings");
             for string in current_dex_file.strings.strings.into_iter() {
@@ -181,7 +182,7 @@ impl DexFile {
             data_off: 0x00
         };
 
-        DexFile {
+        Ok(DexFile {
             header,
             strings: DexStrings { strings: strings_list },
             types: DexTypes { items: type_ids_list },
@@ -189,7 +190,7 @@ impl DexFile {
             fields: DexFields { items: field_ids_list },
             methods: DexMethods { items: method_ids_list },
             classes: DexClasses { items: class_defs_list },
-        }
+        })
     }
 
     /// Returns a vector containing the names of all the classes defined in the DEX file

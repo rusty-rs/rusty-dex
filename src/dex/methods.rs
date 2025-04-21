@@ -9,6 +9,7 @@
 use std::io::{Seek, SeekFrom};
 use std::cmp::Ordering;
 
+use crate::error::DexError;
 use crate::dex::reader::DexReader;
 use crate::dex::types::DexTypes;
 use crate::dex::protos::DexProtos;
@@ -54,21 +55,21 @@ impl DexMethods {
                  size: u32,
                  types_list: &DexTypes,
                  protos_list: &DexProtos,
-                 strings_list: &DexStrings) -> Self {
-        dex_reader.bytes.seek(SeekFrom::Start(offset.into())).unwrap();
+                 strings_list: &DexStrings) -> Result<Self, DexError> {
+        dex_reader.bytes.seek(SeekFrom::Start(offset.into()))?;
 
         let mut methods = Vec::new();
 
         for _ in 0..size {
-            let class_idx = dex_reader.read_u16().unwrap();
-            let proto_idx = dex_reader.read_u16().unwrap();
-            let name_idx = dex_reader.read_u32().unwrap();
+            let class_idx = dex_reader.read_u16()?;
+            let proto_idx = dex_reader.read_u16()?;
+            let name_idx = dex_reader.read_u32()?;
 
             let mut decoded = String::new();
-            decoded.push_str(types_list.items.get(class_idx as usize).unwrap());
+            decoded.push_str(types_list.items.get(class_idx as usize).ok_or(DexError::InvalidTypeIdx)?);
             decoded.push_str("->");
-            decoded.push_str(strings_list.strings.get(name_idx as usize).unwrap());
-            decoded.push_str(protos_list.items.get(proto_idx as usize).unwrap());
+            decoded.push_str(strings_list.strings.get(name_idx as usize).ok_or(DexError::InvalidStringIdx)?);
+            decoded.push_str(protos_list.items.get(proto_idx as usize).ok_or(DexError::InvalidTypeIdx)?); 
 
             methods.push(MethodIdItem {
                 class_idx,
@@ -86,6 +87,6 @@ impl DexMethods {
         }
         items.dedup();
 
-        DexMethods { items }
+        Ok(DexMethods { items })
     }
 }

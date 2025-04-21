@@ -3,6 +3,7 @@ use std::cmp::Ordering;
 
 use crate::dex::reader::DexReader;
 use crate::dex::types::DexTypes;
+use crate::error::DexError;
 
 #[derive(Debug)]
 struct ProtoIdItem {
@@ -34,15 +35,15 @@ impl DexProtos {
     pub fn build(dex_reader: &mut DexReader,
                  offset: u32,
                  size: u32,
-                 types_list: &DexTypes) -> Self {
-        dex_reader.bytes.seek(SeekFrom::Start(offset.into())).unwrap();
+                 types_list: &DexTypes) -> Result<Self, DexError> {
+        dex_reader.bytes.seek(SeekFrom::Start(offset.into()))?;
 
         let mut protos = Vec::new();
 
         for _ in 0..size {
-            let shorty_idx = dex_reader.read_u32().unwrap();
-            let return_type_idx = dex_reader.read_u32().unwrap();
-            let parameters_off = dex_reader.read_u32().unwrap();
+            let shorty_idx = dex_reader.read_u32()?;
+            let return_type_idx = dex_reader.read_u32()?;
+            let parameters_off = dex_reader.read_u32()?;
 
             // Decode the prototype
             let mut proto = String::new();
@@ -55,15 +56,15 @@ impl DexProtos {
                 let current_pos = dex_reader.bytes.position();
 
                 // Decode the parameters
-                dex_reader.bytes.seek(SeekFrom::Start(parameters_off.into())).unwrap();
+                dex_reader.bytes.seek(SeekFrom::Start(parameters_off.into()))?;
 
                 proto.push('(');
-                let params_size = dex_reader.read_u32().unwrap();
+                let params_size = dex_reader.read_u32()?;
                 for idx in 0..params_size {
-                    let offset = dex_reader.read_u16().unwrap();
+                    let offset = dex_reader.read_u16()?;
                     parameters_off_list.push(offset);
 
-                    proto.push_str(types_list.items.get(offset as usize).unwrap());
+                    proto.push_str(types_list.items.get(offset as usize).ok_or(DexError::InvalidTypeIdx)?);
                     if idx < params_size - 1 {
                         proto.push(' ');
                     }
@@ -71,9 +72,9 @@ impl DexProtos {
                 proto.push(')');
 
                 // Go back to the previous position
-                dex_reader.bytes.seek(SeekFrom::Start(current_pos)).unwrap();
+                dex_reader.bytes.seek(SeekFrom::Start(current_pos))?;
             }
-            proto.push_str(types_list.items.get(return_type_idx as usize).unwrap());
+            proto.push_str(types_list.items.get(return_type_idx as usize).ok_or(DexError::InvalidTypeIdx)?);
 
             protos.push(ProtoIdItem {
                 shorty_idx,
@@ -93,6 +94,6 @@ impl DexProtos {
         }
         items.dedup();
 
-        DexProtos { items }
+        Ok(DexProtos { items })
     }
 }

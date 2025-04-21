@@ -44,39 +44,39 @@ impl DexHeader {
     pub fn new(dex_cursor: &mut DexReader) -> Result<DexHeader, DexError> {
         /* DEX version */
         let mut magic = [0; 8];
-        dex_cursor.bytes.read_exact(&mut magic).unwrap();
+        dex_cursor.bytes.read_exact(&mut magic)?;
         let mut version = [0; 3];
         version[0] = magic[4];
         version[1] = magic[5];
         version[2] = magic[6];
 
-        let checksum = dex_cursor.read_u32().unwrap();
+        let checksum = dex_cursor.read_u32()?;
         adler32::verify_from_bytes(&dex_cursor.bytes, checksum)?;
 
         let mut signature = [0; 20];
-        dex_cursor.bytes.read_exact(&mut signature).unwrap();
+        dex_cursor.bytes.read_exact(&mut signature)?;
 
-        let file_size = dex_cursor.read_u32().unwrap();
-        let header_size = dex_cursor.read_u32().unwrap();
-        let endian_tag = dex_cursor.read_u32().unwrap();
+        let file_size = dex_cursor.read_u32()?;
+        let header_size = dex_cursor.read_u32()?;
+        let endian_tag = dex_cursor.read_u32()?;
 
-        let link_size = dex_cursor.read_u32().unwrap();
-        let link_off = dex_cursor.read_u32().unwrap();
-        let map_off = dex_cursor.read_u32().unwrap();
-        let string_ids_size = dex_cursor.read_u32().unwrap();
-        let string_ids_off = dex_cursor.read_u32().unwrap();
-        let type_ids_size = dex_cursor.read_u32().unwrap();
-        let type_ids_off = dex_cursor.read_u32().unwrap();
-        let proto_ids_size = dex_cursor.read_u32().unwrap();
-        let proto_ids_off = dex_cursor.read_u32().unwrap();
-        let fields_ids_size = dex_cursor.read_u32().unwrap();
-        let fields_ids_off = dex_cursor.read_u32().unwrap();
-        let method_ids_size = dex_cursor.read_u32().unwrap();
-        let method_ids_off = dex_cursor.read_u32().unwrap();
-        let class_defs_size = dex_cursor.read_u32().unwrap();
-        let class_defs_off = dex_cursor.read_u32().unwrap();
-        let data_size = dex_cursor.read_u32().unwrap();
-        let data_off = dex_cursor.read_u32().unwrap();
+        let link_size = dex_cursor.read_u32()?;
+        let link_off = dex_cursor.read_u32()?;
+        let map_off = dex_cursor.read_u32()?;
+        let string_ids_size = dex_cursor.read_u32()?;
+        let string_ids_off = dex_cursor.read_u32()?;
+        let type_ids_size = dex_cursor.read_u32()?;
+        let type_ids_off = dex_cursor.read_u32()?;
+        let proto_ids_size = dex_cursor.read_u32()?;
+        let proto_ids_off = dex_cursor.read_u32()?;
+        let fields_ids_size = dex_cursor.read_u32()?;
+        let fields_ids_off = dex_cursor.read_u32()?;
+        let method_ids_size = dex_cursor.read_u32()?;
+        let method_ids_off = dex_cursor.read_u32()?;
+        let class_defs_size = dex_cursor.read_u32()?;
+        let class_defs_off = dex_cursor.read_u32()?;
+        let data_size = dex_cursor.read_u32()?;
+        let data_off = dex_cursor.read_u32()?;
 
         Ok(DexHeader {
                 version,
@@ -131,7 +131,7 @@ mod tests {
 
     // #[test]
     fn test_build() {
-        let mut dex_reader = DexReader::build(DEX_DATA.to_vec());
+        let mut dex_reader = DexReader::build(DEX_DATA.to_vec()).unwrap();
         let dex_header = DexHeader::new(&mut dex_reader).unwrap();
 
         assert_eq!(dex_header.version, [0x30, 0x33, 0x35]);

@@ -7,7 +7,7 @@ extern crate rusty_dex;
 /// This test simply parse the test APK and checks the
 /// number of methods in the `manymethods` package.
 fn test_multidex() {
-    let parsed = rusty_dex::parse("tests/multidex.apk");
+    let parsed = rusty_dex::parse("tests/multidex.apk").unwrap();
 
     let mut many_methods_count = 0;
     for method in parsed.methods.items.iter() {

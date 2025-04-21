@@ -5,6 +5,7 @@ use std::io::BufRead;
 use std::cmp::Ordering;
 
 use crate::dex::reader::DexReader;
+use crate::error::DexError;
 
 #[derive(Debug, PartialEq)]
 pub struct DexStringsItem {
@@ -34,22 +35,22 @@ impl DexStrings {
         a.offset.cmp(&b.offset)
     }
 
-    pub fn build(dex_reader: &mut DexReader, offset: u32, size: u32) -> Self {
+    pub fn build(dex_reader: &mut DexReader, offset: u32, size: u32) -> Result<Self, DexError> {
         /* Move to start of map list */
-        dex_reader.bytes.seek(SeekFrom::Start(offset.into())).unwrap();
+        dex_reader.bytes.seek(SeekFrom::Start(offset.into()))?;
 
         let mut strings = Vec::new();
 
         for _ in 0..size {
-            let string_offset = dex_reader.read_u32().unwrap();
+            let string_offset = dex_reader.read_u32()?;
             let current_offset = dex_reader.bytes.position();
 
-            dex_reader.bytes.seek(SeekFrom::Start(string_offset.into())).unwrap();
+            dex_reader.bytes.seek(SeekFrom::Start(string_offset.into()))?;
 
-            let (utf16_size, _) = dex_reader.read_uleb128().unwrap();
+            let (utf16_size, _) = dex_reader.read_uleb128()?;
             if utf16_size > 0 {
                 let mut raw_string = Vec::with_capacity(utf16_size as usize);
-                dex_reader.bytes.read_until(0, &mut raw_string).unwrap();
+                dex_reader.bytes.read_until(0, &mut raw_string)?;
                 raw_string.pop();
 
                 // TODO: `mutf8::decode()` has some issues which leads to
@@ -81,7 +82,7 @@ impl DexStrings {
                 });
             }
 
-            dex_reader.bytes.seek(SeekFrom::Start(current_offset)).unwrap();
+            dex_reader.bytes.seek(SeekFrom::Start(current_offset))?;
 
         }
 
@@ -91,7 +92,7 @@ impl DexStrings {
                                                    .collect();
         uniq_strings.dedup();
 
-        DexStrings { strings: uniq_strings }
+        Ok(DexStrings { strings: uniq_strings })
     }
 }
 
@@ -108,8 +109,8 @@ mod tests {
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  // nothing
             0x78, 0x56, 0x34, 0x12, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  // endianness tag
         ];
-        let mut dex_reader = DexReader::build(data);
-        let dex_strings = DexStrings::build(&mut dex_reader, 44, 0);
+        let mut dex_reader = DexReader::build(data).unwrap();
+        let dex_strings = DexStrings::build(&mut dex_reader, 44, 0).unwrap();
 
         assert_eq!(dex_strings.strings.len(), 0);
     }
@@ -135,8 +136,8 @@ mod tests {
             0x00,
         ];
 
-        let mut dex_reader = DexReader::build(data);
-        let dex_strings = DexStrings::build(&mut dex_reader, 50, 3);
+        let mut dex_reader = DexReader::build(data).unwrap();
+        let dex_strings = DexStrings::build(&mut dex_reader, 50, 3).unwrap();
 
         assert_eq!(dex_strings.strings.len(), 3);
         assert_eq!(dex_strings.strings[0], String::from("Hello!"));
@@ -160,8 +161,8 @@ mod tests {
             0xc3, 0x00    // incomplete MUTF-8 two-byte sequence
         ];
 
-        let mut dex_reader = DexReader::build(data);
-        let dex_strings = DexStrings::build(&mut dex_reader, 50, 1);
+        let mut dex_reader = DexReader::build(data).unwrap();
+        let dex_strings = DexStrings::build(&mut dex_reader, 50, 1).unwrap();
 
         assert_eq!(dex_strings.strings.len(), 1);
         // the invalid MUTF-8 sequence will be "decoded" to � (replacement character)

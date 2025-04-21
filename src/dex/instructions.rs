@@ -6,6 +6,7 @@
 
 use crate::dex::opcodes::OpCode;
 use crate::dex::reader::DexReader;
+use crate::error::DexError;
 
 /// `Instruction10t` instruction type
 #[derive(Debug, Clone)]
@@ -111,21 +112,21 @@ pub struct FillArrayDataPayload {
 }
 
 impl PackedSwitchPayload {
-    fn build(reader: &mut DexReader) -> Self {
-        let size = reader.read_u16().unwrap();
-        let first_key = reader.read_i32().unwrap();
+    fn build(reader: &mut DexReader) -> Result<Self, DexError> {
+        let size = reader.read_u16()?;
+        let first_key = reader.read_i32()?;
 
         let mut targets = Vec::with_capacity(size.into());
         for _ in 0..size {
-            targets.push(reader.read_i32().unwrap());
+            targets.push(reader.read_i32()?);
         }
 
-        PackedSwitchPayload {
+        Ok(PackedSwitchPayload {
             opcode: OpCode::PACKED_SWITCH_PAYLOAD,
             size,
             first_key,
             targets
-        }
+        })
     }
 
     fn get_size(&self) -> usize {
@@ -163,25 +164,25 @@ impl PackedSwitchPayload {
 }
 
 impl SparseSwitchPayload {
-    fn build(reader: &mut DexReader) -> Self {
-        let size = reader.read_u16().unwrap();
+    fn build(reader: &mut DexReader) -> Result<Self, DexError> {
+        let size = reader.read_u16()?;
 
         let mut keys = Vec::with_capacity(size.into());
         for _ in 0..size {
-            keys.push(reader.read_i32().unwrap());
+            keys.push(reader.read_i32()?);
         }
 
         let mut targets = Vec::with_capacity(size.into());
         for _ in 0..size {
-            targets.push(reader.read_i32().unwrap());
+            targets.push(reader.read_i32()?);
         }
 
-        SparseSwitchPayload {
+        Ok(SparseSwitchPayload {
             opcode: OpCode::SPARSE_SWITCH_PAYLOAD,
             size,
             keys,
             targets
-        }
+        })
     }
 
     fn get_size(&self) -> usize {
@@ -218,24 +219,24 @@ impl SparseSwitchPayload {
 }
 
 impl FillArrayDataPayload {
-    fn build(reader: &mut DexReader) -> Self {
+    fn build(reader: &mut DexReader) -> Result<Self, DexError> {
         // FIXME the bytes come up empty, check the bounds of the for loop
-        let element_width = reader.read_u16().unwrap();
-        let size = reader.read_u32().unwrap();
+        let element_width = reader.read_u16()?;
+        let size = reader.read_u32()?;
 
-        let mut data = Vec::with_capacity((size * element_width as u32).try_into().unwrap());
+        let mut data = Vec::with_capacity((size * element_width as u32) as usize);
         for _ in 0..size {
             for _ in 0..element_width {
-                data.push(reader.read_u8().unwrap());
+                data.push(reader.read_u8()?);
             }
         }
 
-        FillArrayDataPayload {
+        Ok(FillArrayDataPayload {
             opcode: OpCode::FILL_ARRAY_DATA_PAYLOAD,
             element_width,
             size,
             data
-        }
+        })
     }
 
     fn get_element_width(&self) -> u16 {
@@ -865,7 +866,7 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
         },
 
         OpCode::PACKED_SWITCH_PAYLOAD => {
-            let inst = PackedSwitchPayload::build(reader);
+            let inst = PackedSwitchPayload::build(reader).unwrap();
             let len = inst.length();
             container.push(Instructions::PackedSwitchPayload(inst));
             reader.align_cursor();
@@ -873,7 +874,7 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
         },
 
         OpCode::SPARSE_SWITCH_PAYLOAD => {
-            let inst = SparseSwitchPayload::build(reader);
+            let inst = SparseSwitchPayload::build(reader).unwrap();
             let len = inst.length();
             container.push(Instructions::SparseSwitchPayload(inst));
             reader.align_cursor();
@@ -881,7 +882,7 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
         },
 
         OpCode::FILL_ARRAY_DATA_PAYLOAD => {
-            let inst = FillArrayDataPayload::build(reader);
+            let inst = FillArrayDataPayload::build(reader).unwrap();
             let len = inst.length();
             container.push(Instructions::FillArrayDataPayload(inst));
             reader.align_cursor();
