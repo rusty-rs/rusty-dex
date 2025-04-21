@@ -71,8 +71,10 @@ impl CodeItem {
         let mut insns = Vec::with_capacity(insns_size as usize);
         let end_offset = dex_reader.bytes.position() + (insns_size * 2) as u64;
 
+        // No need to update the stream's position manually: it is updated in
+        // `parse_instruction` when reading bytes from it
         while dex_reader.bytes.position() < end_offset {
-            instructions::parse_read(dex_reader, &mut insns);
+            let _ = instructions::parse_instruction(dex_reader, &mut insns)?;
         }
 
         /* Check if there is some padding */

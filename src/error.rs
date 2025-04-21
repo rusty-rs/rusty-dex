@@ -28,4 +28,6 @@ pub enum DexError {
     InvalidFieldIdx,
     #[error("cannot find element in methods list")]
     InvalidMethodIdx,
+    #[error("cannot parse instruction opcode")]
+    InvalidOpCode,
 }

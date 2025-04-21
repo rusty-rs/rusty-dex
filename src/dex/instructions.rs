@@ -418,8 +418,8 @@ impl Instructions {
 /////////////////////////////////////////////////////////////////
 
 /// Read the raw bytecode of a code item and parse it into a vector of instructions
-pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> usize {
-    let raw_opcode = reader.read_u16().unwrap();
+pub fn parse_instruction(reader: &mut DexReader, container: &mut Vec<Instructions>) -> Result<usize, DexError> {
+    let raw_opcode = reader.read_u16()?;
 
     let opcode = match OpCode::parse((raw_opcode & 0xff).try_into().unwrap()) {
         // Deal with the special cases of fill-array-data-payload,
@@ -431,7 +431,7 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
             _    => OpCode::NOP
         },
         Some(code) => code,
-        None => panic!("Cannot parse instruction from: 0x{:X?}", raw_opcode & 0xff)
+        None => return Err(DexError::InvalidOpCode)
     };
 
     match opcode {
@@ -443,7 +443,7 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
                 bytes,
                 length: 1
             }));
-            1
+            Ok(1)
         },
 
         OpCode::NOP | OpCode::RETURN_VOID => {
@@ -454,7 +454,7 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
                 bytes,
                 length: 1
             }));
-            1
+            Ok(1)
         },
 
         OpCode::CONST_4 => {
@@ -465,7 +465,7 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
                 bytes,
                 length: 1
             }));
-            1
+            Ok(1)
         },
 
         OpCode::MONITOR_ENTER            | OpCode::MONITOR_EXIT
@@ -481,7 +481,7 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
                     bytes,
                     length: 1
                 }));
-                1
+                Ok(1)
             },
 
         OpCode::ADD_DOUBLE_2ADDR      | OpCode::ADD_FLOAT_2ADDR
@@ -521,19 +521,19 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
                     bytes,
                     length: 1
                 }));
-                1
+                Ok(1)
             },
 
         OpCode::GOTO_16 => {
             let mut bytes = [0u16; 2];
             bytes[0] = raw_opcode;
-            bytes[1] = reader.read_u16().unwrap();
+            bytes[1] = reader.read_u16()?;
             container.push(Instructions::Instruction20t(Instruction20t{
                 opcode,
                 bytes,
                 length: 2
             }));
-            2
+            Ok(2)
         },
 
         OpCode::CHECK_CAST                | OpCode::CONST_CLASS
@@ -549,39 +549,39 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
             => {
                 let mut bytes = [0u16; 2];
                 bytes[0] = raw_opcode;
-                bytes[1] = reader.read_u16().unwrap();
+                bytes[1] = reader.read_u16()?;
                 container.push(Instructions::Instruction21c(Instruction21c {
                     opcode,
                     bytes,
                     length: 2
                 }));
-                2
+                Ok(2)
             },
 
         OpCode::CONST_HIGH16 | OpCode::CONST_WIDE_HIGH16
             => {
                 let mut bytes = [0u16; 2];
                 bytes[0] = raw_opcode;
-                bytes[1] = reader.read_u16().unwrap();
+                bytes[1] = reader.read_u16()?;
                 container.push(Instructions::Instruction21h(Instruction21h {
                     opcode,
                     bytes,
                     length: 2
                 }));
-                2
+                Ok(2)
             },
 
         OpCode::CONST_16 | OpCode::CONST_WIDE_16
             => {
                 let mut bytes = [0u16; 2];
                 bytes[0] = raw_opcode;
-                bytes[1] = reader.read_u16().unwrap();
+                bytes[1] = reader.read_u16()?;
                 container.push(Instructions::Instruction21s(Instruction21s {
                     opcode,
                     bytes,
                     length: 2
                 }));
-                2
+                Ok(2)
             },
 
         OpCode::IF_EQZ       | OpCode::IF_GEZ
@@ -590,13 +590,13 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
             => {
                 let mut bytes = [0u16; 2];
                 bytes[0] = raw_opcode;
-                bytes[1] = reader.read_u16().unwrap();
+                bytes[1] = reader.read_u16()?;
                 container.push(Instructions::Instruction21t(Instruction21t {
                     opcode,
                     bytes,
                     length: 2
                 }));
-                2
+                Ok(2)
             },
 
         OpCode::ADD_INT_LIT8        | OpCode::AND_INT_LIT8
@@ -608,13 +608,13 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
             => {
                 let mut bytes = [0u16; 2];
                 bytes[0] = raw_opcode;
-                bytes[1] = reader.read_u16().unwrap();
+                bytes[1] = reader.read_u16()?;
                 container.push(Instructions::Instruction22b(Instruction22b {
                     opcode,
                     bytes,
                     length: 2
                 }));
-                2
+                Ok(2)
             },
 
         OpCode::IGET_BOOLEAN       | OpCode::IGET_BYTE
@@ -628,13 +628,13 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
             => {
                 let mut bytes = [0u16; 2];
                 bytes[0] = raw_opcode;
-                bytes[1] = reader.read_u16().unwrap();
+                bytes[1] = reader.read_u16()?;
                 container.push(Instructions::Instruction22c(Instruction22c {
                     opcode,
                     bytes,
                     length: 2
                 }));
-                2
+                Ok(2)
             },
 
         OpCode::ADD_INT_LIT16       | OpCode::AND_INT_LIT16
@@ -644,13 +644,13 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
             => {
                 let mut bytes = [0u16; 2];
                 bytes[0] = raw_opcode;
-                bytes[1] = reader.read_u16().unwrap();
+                bytes[1] = reader.read_u16()?;
                 container.push(Instructions::Instruction22s(Instruction22s {
                     opcode,
                     bytes,
                     length: 2
                 }));
-                2
+                Ok(2)
             },
 
         OpCode::IF_EQ       | OpCode::IF_GE
@@ -659,13 +659,13 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
             => {
                 let mut bytes = [0u16; 2];
                 bytes[0] = raw_opcode;
-                bytes[1] = reader.read_u16().unwrap();
+                bytes[1] = reader.read_u16()?;
                 container.push(Instructions::Instruction22t(Instruction22t {
                     opcode,
                     bytes,
                     length: 2
                 }));
-                2
+                Ok(2)
             },
 
         OpCode::MOVE_FROM16 | OpCode::MOVE_OBJECT_FROM16
@@ -673,13 +673,13 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
             => {
                 let mut bytes = [0u16; 2];
                 bytes[0] = raw_opcode;
-                bytes[1] = reader.read_u16().unwrap();
+                bytes[1] = reader.read_u16()?;
                 container.push(Instructions::Instruction22x(Instruction22x {
                     opcode,
                     bytes,
                     length: 2
                 }));
-                2
+                Ok(2)
             },
 
         OpCode::ADD_DOUBLE         | OpCode::ADD_FLOAT
@@ -711,81 +711,81 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
             => {
                 let mut bytes = [0u16; 2];
                 bytes[0] = raw_opcode;
-                bytes[1] = reader.read_u16().unwrap();
+                bytes[1] = reader.read_u16()?;
                 container.push(Instructions::Instruction23x(Instruction23x {
                     opcode,
                     bytes,
                     length: 2
                 }));
-                2
+                Ok(2)
             },
 
         OpCode::GOTO_32 => {
             let mut bytes = [0u16; 3];
             bytes[0] = raw_opcode;
-            bytes[1] = reader.read_u16().unwrap();
-            bytes[2] = reader.read_u16().unwrap();
+            bytes[1] = reader.read_u16()?;
+            bytes[2] = reader.read_u16()?;
             container.push(Instructions::Instruction30t(Instruction30t {
                 opcode,
                 bytes,
                 length: 3
             }));
-            3
+            Ok(3)
         },
 
         OpCode::CONST_STRING_JUMBO => {
             let mut bytes = [0u16; 3];
             bytes[0] = raw_opcode;
-            bytes[1] = reader.read_u16().unwrap();
-            bytes[2] = reader.read_u16().unwrap();
+            bytes[1] = reader.read_u16()?;
+            bytes[2] = reader.read_u16()?;
             container.push(Instructions::Instruction31c(Instruction31c {
                 opcode,
                 bytes,
                 length: 3
             }));
-            3
+            Ok(3)
         },
 
         OpCode::CONST | OpCode::CONST_WIDE_32
             => {
                 let mut bytes = [0u16; 3];
                 bytes[0] = raw_opcode;
-                bytes[1] = reader.read_u16().unwrap();
-                bytes[2] = reader.read_u16().unwrap();
+                bytes[1] = reader.read_u16()?;
+                bytes[2] = reader.read_u16()?;
                 container.push(Instructions::Instruction31i(Instruction31i {
                     opcode,
                     bytes,
                     length: 3
                 }));
-                3
+                Ok(3)
             },
 
         OpCode::FILL_ARRAY_DATA | OpCode::PACKED_SWITCH
             | OpCode::SPARSE_SWITCH => {
                 let mut bytes = [0u16; 3];
                 bytes[0] = raw_opcode;
-                bytes[1] = reader.read_u16().unwrap();
-                bytes[2] = reader.read_u16().unwrap();
+                bytes[1] = reader.read_u16()?;
+                bytes[2] = reader.read_u16()?;
                 container.push(Instructions::Instruction31t(Instruction31t {
                     opcode,
                     bytes,
                     length: 3
                 }));
-                3
+                Ok(3)
             },
 
         OpCode::MOVE_16 | OpCode::MOVE_OBJECT_16
             | OpCode::MOVE_WIDE_16 => {
                 let mut bytes = [0u16; 3];
                 bytes[0] = raw_opcode;
-                bytes[1] = reader.read_u16().unwrap();
-                bytes[2] = reader.read_u16().unwrap();
+                bytes[1] = reader.read_u16()?;
+                bytes[2] = reader.read_u16()?;
                 container.push(Instructions::Instruction32x(Instruction32x {
                     opcode,
                     bytes,
                     length: 3
                 }));
-                3
+                Ok(3)
             },
 
         OpCode::FILLED_NEW_ARRAY    | OpCode::INVOKE_CUSTOM
@@ -795,14 +795,14 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
             => {
                 let mut bytes = [0u16; 3];
                 bytes[0] = raw_opcode;
-                bytes[1] = reader.read_u16().unwrap();
-                bytes[2] = reader.read_u16().unwrap();
+                bytes[1] = reader.read_u16()?;
+                bytes[2] = reader.read_u16()?;
                 container.push(Instructions::Instruction35c(Instruction35c {
                     opcode,
                     bytes,
                     length: 3
                 }));
-                3
+                Ok(3)
             },
 
         OpCode::FILLED_NEW_ARRAY_RANGE    | OpCode::INVOKE_CUSTOM_RANGE
@@ -812,81 +812,81 @@ pub fn parse_read(reader: &mut DexReader, container: &mut Vec<Instructions>) -> 
             => {
                 let mut bytes = [0u16; 3];
                 bytes[0] = raw_opcode;
-                bytes[1] = reader.read_u16().unwrap();
-                bytes[2] = reader.read_u16().unwrap();
+                bytes[1] = reader.read_u16()?;
+                bytes[2] = reader.read_u16()?;
                 container.push(Instructions::Instruction3rc(Instruction3rc {
                     opcode,
                     bytes,
                     length: 3
                 }));
-                3
+                Ok(3)
             },
 
         OpCode::INVOKE_POLYMORPHIC => {
             let mut bytes = [0u16; 4];
             bytes[0] = raw_opcode;
-            bytes[1] = reader.read_u16().unwrap();
-            bytes[2] = reader.read_u16().unwrap();
-            bytes[3] = reader.read_u16().unwrap();
+            bytes[1] = reader.read_u16()?;
+            bytes[2] = reader.read_u16()?;
+            bytes[3] = reader.read_u16()?;
             container.push(Instructions::Instruction45cc(Instruction45cc {
                 opcode,
                 bytes,
                 length: 4
             }));
-            4
+            Ok(4)
         },
 
         OpCode::INVOKE_POLYMORPHIC_RANGE => {
             let mut bytes = [0u16; 4];
             bytes[0] = raw_opcode;
-            bytes[1] = reader.read_u16().unwrap();
-            bytes[2] = reader.read_u16().unwrap();
-            bytes[3] = reader.read_u16().unwrap();
+            bytes[1] = reader.read_u16()?;
+            bytes[2] = reader.read_u16()?;
+            bytes[3] = reader.read_u16()?;
             container.push(Instructions::Instruction4rcc(Instruction4rcc {
                 opcode,
                 bytes,
                 length: 4
             }));
-            4
+            Ok(4)
         },
 
         OpCode::CONST_WIDE => {
             let mut bytes = [0u16; 5];
             bytes[0] = raw_opcode;
-            bytes[1] = reader.read_u16().unwrap();
-            bytes[2] = reader.read_u16().unwrap();
-            bytes[3] = reader.read_u16().unwrap();
-            bytes[4] = reader.read_u16().unwrap();
+            bytes[1] = reader.read_u16()?;
+            bytes[2] = reader.read_u16()?;
+            bytes[3] = reader.read_u16()?;
+            bytes[4] = reader.read_u16()?;
             container.push(Instructions::Instruction51l(Instruction51l {
                 opcode,
                 bytes,
                 length: 5
             }));
-            5
+            Ok(5)
         },
 
         OpCode::PACKED_SWITCH_PAYLOAD => {
-            let inst = PackedSwitchPayload::build(reader).unwrap();
+            let inst = PackedSwitchPayload::build(reader)?;
             let len = inst.length();
             container.push(Instructions::PackedSwitchPayload(inst));
-            reader.align_cursor();
-            len
+            reader.align_cursor()?;
+            Ok(len)
         },
 
         OpCode::SPARSE_SWITCH_PAYLOAD => {
-            let inst = SparseSwitchPayload::build(reader).unwrap();
+            let inst = SparseSwitchPayload::build(reader)?;
             let len = inst.length();
             container.push(Instructions::SparseSwitchPayload(inst));
-            reader.align_cursor();
-            len
+            reader.align_cursor()?;
+            Ok(len)
         },
 
         OpCode::FILL_ARRAY_DATA_PAYLOAD => {
-            let inst = FillArrayDataPayload::build(reader).unwrap();
+            let inst = FillArrayDataPayload::build(reader)?;
             let len = inst.length();
             container.push(Instructions::FillArrayDataPayload(inst));
-            reader.align_cursor();
-            len
+            reader.align_cursor()?;
+            Ok(len)
         }
     }
 }
