@@ -109,12 +109,11 @@ impl CodeItem {
                 for _ in 0..handler_size.abs() {
                     let (type_idx, _) = dex_reader.read_uleb128()?;
                     let decoded_type = types_list.items.get(type_idx as usize)
-                                                       .unwrap_or(&String::from("MISSINGTYPE"))  // FIXME
-                                                       .to_string();
+                                                       .ok_or(DexError::InvalidTypeIdx)?;
                     let (addr, _) = dex_reader.read_uleb128()?;
 
                     type_add_pairs.push(EncodedTypeAddrPair {
-                        decoded_type,
+                        decoded_type: decoded_type.to_owned(),
                         addr
                     });
 
