@@ -309,7 +309,7 @@ mod tests {
         );
     }
 
-        #[test]
+    #[test]
     fn test_read_uleb128() {
         let mut reader = DexReader::build(DEX_DATA.to_vec()).unwrap();
         reader.bytes.seek(SeekFrom::Start(10)).unwrap();
@@ -325,6 +325,45 @@ mod tests {
             result.unwrap_err().to_string(),
             "too many bytes in unsigned LEB128 value"
         );
+
+        let dex_data = [
+            0x64, 0x65, 0x78, 0x0a, 0x30, 0x33, 0x35, 0x00, 0x00, 0x00,  // DEX magic
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  // padding
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  // padding
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  // padding
+            0x78, 0x56, 0x34, 0x12, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  // endianness tag
+            0x00,                                                        // 0
+            0x01,                                                        // 1
+            0x7f,                                                        // 127
+            0x80, 0x7f,                                                  // 16256
+            0xb4, 0x07,                                                  // 0x3b4
+            0x8c, 0x08,                                                  // 0x40c
+            0xff, 0xff, 0xff, 0xff, 0xf                                  // 0xffffffff
+        ];
+
+        let mut reader = DexReader::build(dex_data.to_vec()).unwrap();
+        reader.bytes.seek(SeekFrom::Start(50)).unwrap();
+
+        let result = reader.read_uleb128().unwrap();
+        assert_eq!(result, (0, 1));
+
+        let result = reader.read_uleb128().unwrap();
+        assert_eq!(result, (1, 1));
+
+        let result = reader.read_uleb128().unwrap();
+        assert_eq!(result, (127, 1));
+
+        let result = reader.read_uleb128().unwrap();
+        assert_eq!(result, (16256, 2));
+
+        let result = reader.read_uleb128().unwrap();
+        assert_eq!(result, (0x3b4, 2));
+
+        let result = reader.read_uleb128().unwrap();
+        assert_eq!(result, (0x40c, 2));
+
+        let result = reader.read_uleb128().unwrap();
+        assert_eq!(result, (0xffffffff, 5));
     }
 
     #[test]
@@ -343,6 +382,37 @@ mod tests {
             result.unwrap_err().to_string(),
             "too many bytes in signed LEB128 value"
         );
+
+        let dex_data = [
+            0x64, 0x65, 0x78, 0x0a, 0x30, 0x33, 0x35, 0x00, 0x00, 0x00,  // DEX magic
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  // padding
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  // padding
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  // padding
+            0x78, 0x56, 0x34, 0x12, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  // endianness tag
+            0x00,                                                        // 0
+            0x01,                                                        // 1
+            0x7f,                                                        // -1
+            0x80, 0x7f,                                                  // -128
+            0x3c,                                                        // 0x3c
+        ];
+
+        let mut reader = DexReader::build(dex_data.to_vec()).unwrap();
+        reader.bytes.seek(SeekFrom::Start(50)).unwrap();
+
+        let result = reader.read_sleb128().unwrap();
+        assert_eq!(result, (0, 1));
+
+        let result = reader.read_sleb128().unwrap();
+        assert_eq!(result, (1, 1));
+
+        let result = reader.read_sleb128().unwrap();
+        assert_eq!(result, (-1, 1));
+
+        let result = reader.read_sleb128().unwrap();
+        assert_eq!(result, (-128, 2));
+
+        let result = reader.read_sleb128().unwrap();
+        assert_eq!(result, (0x3c, 1));
     }
 
     #[test]
