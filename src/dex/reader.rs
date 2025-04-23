@@ -188,7 +188,7 @@ impl DexReader {
     pub fn read_uleb128p1(&mut self) -> Result<(i32, usize), DexError> {
         match self.read_uleb128() {
             Ok((uleb128, bytes_read)) => Ok(((uleb128 as i32) - 1, bytes_read)),
-            Err(err) => Err(err)
+            Err(_) => Err(DexError::InvalidUleb128p1Value)
         }
     }
 }
@@ -362,7 +362,7 @@ mod tests {
         let result = reader.read_uleb128p1();
         assert_eq!(
             result.unwrap_err().to_string(),
-            "too many bytes in unsigned LEB128 value"
+            "too many bytes in unsigned LEB128p1 value"
         );
     }
 }

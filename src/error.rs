@@ -16,6 +16,8 @@ pub enum DexError {
     NoDataLeftError,
     #[error("too many bytes in unsigned LEB128 value")]
     InvalidUleb128Value,
+    #[error("too many bytes in unsigned LEB128p1 value")]
+    InvalidUleb128p1Value,
     #[error("too many bytes in signed LEB128 value")]
     InvalidSleb128Value,
     #[error("cannot move reader to requested offset")]
