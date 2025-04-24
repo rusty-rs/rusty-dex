@@ -1,4 +1,4 @@
-# DEXParser
+# rusty-dex
 
 [![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/rusty-rs/rusty-dex/ci.yml?branch=main&style=for-the-badge)](https://github.com/rusty-rs/rusty-dex/actions/workflows/ci.yml)
 [![Crates.io Version](https://img.shields.io/crates/v/rusty-dex?style=for-the-badge)](https://crates.io/crates/rusty-dex)
