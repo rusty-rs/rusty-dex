@@ -1,3 +1,7 @@
+//! Representation of method prototypes
+//!
+//! This module contains the logic to decode method prototypes from a DEX file.
+
 use std::io::{Seek, SeekFrom};
 use std::cmp::Ordering;
 
@@ -5,6 +9,7 @@ use crate::dex::reader::DexReader;
 use crate::dex::types::DexTypes;
 use crate::error::DexError;
 
+/// Internal representation of a prototype index
 #[derive(Debug)]
 struct ProtoIdItem {
     shorty_idx: u32,
@@ -14,12 +19,14 @@ struct ProtoIdItem {
     proto: String,
 }
 
+/// List of decoded prototypes in the DEX files
 #[derive(Debug)]
 pub struct DexProtos {
     pub items: Vec<String>
 }
 
 impl DexProtos {
+    /// Sorting method for prototypes
     fn sort(a: &ProtoIdItem, b: &ProtoIdItem) -> Ordering {
         // First sort by return type
         let sort_return = a.return_type_idx.cmp(&b.return_type_idx);
@@ -32,6 +39,7 @@ impl DexProtos {
         sort_return
     }
 
+    /// Parse the prototypes from the reader
     pub fn build(dex_reader: &mut DexReader,
                  offset: u32,
                  size: u32,

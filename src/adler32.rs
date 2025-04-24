@@ -23,6 +23,8 @@ use crate::error::DexError;
 /// Constant used in the checksum computation
 const MOD_ADLER: u32 = 65521;
 
+/// Verify the Adler32 checksum of a cursor of bytes
+///
 /// Each DEX header contains an Adler-32 checksum of the file, minus the first
 /// 11 bytes, which correspond to the space taken by the magic and the checksum.
 /// This function computes the checksum of the file, and compares it to the one

@@ -44,6 +44,7 @@ impl fmt::Display for AccessFlagType {
 }
 
 /// Representation of the different access flag
+///
 /// Bitfields of these flags are used to indicate the accessibility and overall properties of
 /// classes and class members.
 #[derive(Debug, PartialEq)]
@@ -109,6 +110,9 @@ pub enum AccessFlag {
 
 impl AccessFlag {
     /// Converts a raw flag (an unsigned 32 bits integer) into a vector for access flags
+    ///
+    /// The result values will be different depending on where the type is used (for a class, a
+    /// method, or a field)
     pub fn parse(raw: u32, for_type: AccessFlagType) -> Vec<Self> {
         let mut flags = Vec::new();
 

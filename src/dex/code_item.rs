@@ -52,14 +52,16 @@ pub struct CodeItem {
 
 impl CodeItem {
     /// Build a `CodeItem` struct from the reader
+    ///
+    /// The `offset` argument corresponds to the offset of the code item in the cursor
     pub fn build(dex_reader: &mut DexReader,
                  offset: u32,
                  types_list: &DexTypes) -> Result<Self, DexError> {
 
-        /* Go to start of code item */
+        // Go to start of code item
         dex_reader.bytes.seek(SeekFrom::Start(offset.into()))?;
 
-        /* Get the metadata */
+        // Get the metadata
         let registers_size = dex_reader.read_u16()?;
         let ins_size       = dex_reader.read_u16()?;
         let outs_size      = dex_reader.read_u16()?;
@@ -67,7 +69,7 @@ impl CodeItem {
         let debug_info_off = dex_reader.read_u32()?;
         let insns_size     = dex_reader.read_u32()?;
 
-        /* Get the actual bytecode */
+        // Get the actual bytecode
         let mut insns = Vec::with_capacity(insns_size as usize);
         let end_offset = dex_reader.bytes.position() + (insns_size * 2) as u64;
 
@@ -77,7 +79,7 @@ impl CodeItem {
             let _ = instructions::parse_instruction(dex_reader, &mut insns)?;
         }
 
-        /* Check if there is some padding */
+        // Check if there is some padding
         if tries_size != 0 && insns_size % 2 == 1 {
             _ = dex_reader.read_u16()?;
         }

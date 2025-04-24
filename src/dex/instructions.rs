@@ -2,7 +2,7 @@
 //!
 //! This module contains the definition of all instructions types, including
 //! special instructions such as `PackedSwitch` which have their payload
-//! at the end of the `CodeItem`.
+//! at the end of the `CodeItem` of a method.
 
 use crate::dex::opcodes::OpCode;
 use crate::dex::reader::DexReader;
@@ -112,6 +112,7 @@ pub struct FillArrayDataPayload {
 }
 
 impl PackedSwitchPayload {
+    /// Create a `PackedSwitchPayload` instruction from the reader
     fn build(reader: &mut DexReader) -> Result<Self, DexError> {
         let size = reader.read_u16()?;
         let first_key = reader.read_i32()?;
@@ -164,6 +165,7 @@ impl PackedSwitchPayload {
 }
 
 impl SparseSwitchPayload {
+    /// Create a `SparseSwitchPayload` instruction from the reader
     fn build(reader: &mut DexReader) -> Result<Self, DexError> {
         let size = reader.read_u16()?;
 
@@ -219,6 +221,7 @@ impl SparseSwitchPayload {
 }
 
 impl FillArrayDataPayload {
+    /// Create a `FillArrayDataPayload` instruction from the reader
     fn build(reader: &mut DexReader) -> Result<Self, DexError> {
         // FIXME the bytes come up empty, check the bounds of the for loop
         let element_width = reader.read_u16()?;
@@ -417,7 +420,7 @@ impl Instructions {
 
 /////////////////////////////////////////////////////////////////
 
-/// Read the raw bytecode of a code item and parse it into a vector of instructions
+/// Parse an instruction from the reader
 pub fn parse_instruction(reader: &mut DexReader, container: &mut Vec<Instructions>) -> Result<usize, DexError> {
     let raw_opcode = reader.read_u16()?;
 

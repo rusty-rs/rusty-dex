@@ -1,3 +1,8 @@
+//! DEX reader
+//!
+//! This module defines all the methods to read bytes from the DEX file while respecint ght
+//! endianess which can change from one DEX file to another.
+
 use std::fs::File;
 use std::io::{ Read, Cursor, Seek, SeekFrom };
 use zip::ZipArchive;
@@ -5,24 +10,34 @@ use byteorder::{BigEndian, LittleEndian, ReadBytesExt};
 
 use crate::error::DexError;
 
-/* Endianness constants */
+/// Little-endian DEX file
 const ENDIAN_CONSTANT: [u8; 4] = [0x12, 0x34, 0x56, 0x78];
+/// Big-endian DEX file
 const REVERSE_ENDIAN_CONSTANT: [u8; 4] = [0x78, 0x56, 0x34, 0x12];
 
+/// Possible endianness
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum DexEndianness {
     LittleEndian,
     BigEndian,
 }
 
+/// A reader for a DEX file
 #[derive(Debug)]
 pub struct DexReader {
+    /// A cursor over the bytes of the DEX file
     pub bytes: Cursor<Vec<u8>>,
+    /// Number of bytes in the DEX file
     pub bytes_len: u64,
+    /// Endianness of the DEX file
     pub endianness: DexEndianness,
 }
 
 impl DexReader {
+    /// Open the file at the given path and create reader(s)
+    ///
+    /// Each APK can contain multiple DEX files. This function extracts them all, create a reader
+    /// from each, and returns a vector of readers.
     pub fn build_from_file(filepath: &str) -> Result<Vec<DexReader>, DexError> {
         let raw_file = File::open(filepath)
             .unwrap_or_else(|err| panic!("could not open input file: {err}"));
@@ -48,6 +63,7 @@ impl DexReader {
         Ok(readers)
     }
 
+    /// Read a DEX file and create a reader from it
     pub fn build(raw_dex: Vec<u8>) -> Result<Self, DexError> {
         let endianness = DexReader::check_endianness(&raw_dex)?;
 
@@ -62,6 +78,7 @@ impl DexReader {
         })
     }
 
+    /// Check the endianness of a DEX file
     pub fn check_endianness(bytes: &[u8]) -> Result<DexEndianness, DexError> {
         // Cannot use self here as we need to know the endianness before anything else
 
@@ -70,6 +87,7 @@ impl DexReader {
         }
 
         let endian_tag = &bytes[40..44];
+
         // try_into to convert the slice into an array
         match endian_tag.try_into().unwrap() {
             ENDIAN_CONSTANT => Ok(DexEndianness::BigEndian),
@@ -88,6 +106,7 @@ impl DexReader {
         Ok(())
     }
 
+    /// Read an unsigned 8 bits integer from the reader
     pub fn read_u8(&mut self) -> Result<u8, DexError> {
         if self.bytes.position() >= self.bytes_len {
             return Err(DexError::NoDataLeftError);
@@ -96,6 +115,7 @@ impl DexReader {
         Ok(self.bytes.read_u8()?)
     }
 
+    /// Read an unsigned 16 bits integer from the reader
     pub fn read_u16(&mut self) -> Result<u16, DexError> {
         if self.bytes.position() > self.bytes_len - 2 {
             return Err(DexError::NoDataLeftError);
@@ -107,6 +127,7 @@ impl DexReader {
         }
     }
 
+    /// Read an unsigned 32 bits integer from the reader
     pub fn read_u32(&mut self) -> Result<u32, DexError> {
         if self.bytes.position() > self.bytes_len - 4 {
             return Err(DexError::NoDataLeftError);
@@ -118,6 +139,7 @@ impl DexReader {
         }
     }
 
+    /// Read a signed 32 bits integer from the reader
     pub fn read_i32(&mut self) -> Result<i32, DexError> {
         if self.bytes.position() > self.bytes_len - 4 {
             return Err(DexError::NoDataLeftError);
@@ -129,6 +151,7 @@ impl DexReader {
         }
     }
 
+    /// Read an unsigned LEB128 value from the reader
     pub fn read_uleb128(&mut self) -> Result<(u32, usize), DexError> {
         let mut bytes_read: usize = 0;
         let mut result: u32 = 0;
@@ -153,6 +176,7 @@ impl DexReader {
         Ok((result, bytes_read))
     }
 
+    /// Read a signed LEB128 value from the reader
     pub fn read_sleb128(&mut self) -> Result<(i32, usize), DexError> {
         let mut bytes_read: usize = 0;
         let mut result: u32 = 0;
@@ -185,6 +209,7 @@ impl DexReader {
         Ok((result, bytes_read))
     }
 
+    /// Read a signed LEB128p1 value from the reader
     pub fn read_uleb128p1(&mut self) -> Result<(i32, usize), DexError> {
         match self.read_uleb128() {
             Ok((uleb128, bytes_read)) => Ok(((uleb128 as i32) - 1, bytes_read)),

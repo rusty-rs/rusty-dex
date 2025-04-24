@@ -91,6 +91,7 @@ impl DexFile {
     }
 
     /// Create a `DexFile` from a collection of `DexReader`.
+    ///
     /// This function will create an intermediary `DexFile` object for each reader and then merge
     /// them into the final `DexFile`.
     pub fn merge(readers: Vec<DexReader>) -> Result<Self, DexError> {
@@ -214,6 +215,7 @@ impl DexFile {
         if let Some(class_def) = self.get_class_def(class_name) {
             return class_def.get_methods();
         }
+
         Vec::new()
     }
 }

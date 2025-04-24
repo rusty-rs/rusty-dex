@@ -13,8 +13,10 @@ use crate::dex::reader::DexReader;
 use crate::dex::types::DexTypes;
 use crate::dex::strings::DexStrings;
 
-/// Internal representation of a field. The index fields are read from the DEX file and are then
-/// used to decode the field, which is what we actually return to the user.
+/// Internal representation of a field.
+///
+/// The index fields are read from the DEX file and are then used to decode the field, which is
+/// what we actually return to the user.
 #[derive(Debug)]
 struct FieldIdItem {
     /// Index into the list of types representing the defining class of the field
@@ -54,8 +56,9 @@ impl DexFields {
         order
     }
 
-    /// Parse the fields from the DEX file. This function returns a vector of decoded field names
-    /// in the correct order.
+    /// Parse the fields from the DEX file
+    ///
+    /// This function returns a vector of decoded field names in the correct order
     pub fn build(dex_reader: &mut DexReader,
                  offset: u32,
                  size: u32,

@@ -1,5 +1,11 @@
 #![allow(dead_code)]
 
+//! Representation of strings
+//!
+//! This module defines the logic to decode strings from a DEX file as well as an ordering method
+//! to ensure that we sort the strings in the order defined in the official documentation.
+//! Strings can be stored either in UTF-16 or (most of the time) in MUTF-8 format.
+
 use std::io::{Seek, SeekFrom};
 use std::io::BufRead;
 use std::cmp::Ordering;
@@ -7,6 +13,7 @@ use std::cmp::Ordering;
 use crate::dex::reader::DexReader;
 use crate::error::DexError;
 
+/// Internal representation of a string
 #[derive(Debug, PartialEq)]
 pub struct DexStringsItem {
     utf16_size: u32,
@@ -16,12 +23,14 @@ pub struct DexStringsItem {
     string: String
 }
 
+/// List of strings of a DEX file
 #[derive(Debug)]
 pub struct DexStrings {
     pub strings: Vec<String>
 }
 
 impl DexStrings {
+    /// Sort the strings of a DEX file
     fn sort(a: &DexStringsItem, b: &DexStringsItem) -> Ordering {
         // TODO: this seems to work (tested on app for which I have
         // the Java source code) but this is not following the
@@ -35,8 +44,9 @@ impl DexStrings {
         a.offset.cmp(&b.offset)
     }
 
+    /// Parse all strings from a DEX file
     pub fn build(dex_reader: &mut DexReader, offset: u32, size: u32) -> Result<Self, DexError> {
-        /* Move to start of map list */
+        // Move to start of map list
         dex_reader.bytes.seek(SeekFrom::Start(offset.into()))?;
 
         let mut strings = Vec::new();

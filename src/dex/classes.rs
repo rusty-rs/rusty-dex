@@ -1,6 +1,4 @@
 //! Representation of a class and encoded methods
-//!
-//! 
 
 use std::io::{Seek, SeekFrom};
 use lazy_static::lazy_static;
@@ -30,7 +28,11 @@ lazy_static!{
     ").unwrap();
 }
 
-/// Class definition
+/// Class definition item
+///
+/// This struct contains all the metadata of a class. The optional `class_data` item then contains
+/// the list of fields and methods (with bytecode) in this class. Note that it is possible that a
+/// class contains not fields or methods, in which case `class_data` will be `None`.
 #[derive(Debug)]
 pub struct ClassDefItem {
     class_str: String,
@@ -44,12 +46,14 @@ pub struct ClassDefItem {
     class_data: Option<ClassDataItem>
 }
 
+/// Representation of an encoded field
 #[derive(Debug)]
 pub struct EncodedField {
     field: String,
     access_flags: Vec<AccessFlag>,
 }
 
+/// Representation of an encoded method
 #[derive(Debug)]
 pub struct EncodedMethod {
     pub proto: String,
@@ -57,6 +61,7 @@ pub struct EncodedMethod {
     pub code_item: Option<CodeItem>,
 }
 
+/// Class data item which contains all fields and methods of a class
 #[derive(Debug)]
 pub struct ClassDataItem {
     static_fields: Vec<EncodedField>,
@@ -65,12 +70,14 @@ pub struct ClassDataItem {
     virtual_methods: Vec<EncodedMethod>,
 }
 
+/// List of all classes of a DEX file
 #[derive(Debug)]
 pub struct DexClasses {
     pub items: Vec<ClassDefItem>
 }
 
 impl DexClasses {
+    /// Parse the DEX file to extract the classes and their content
     pub fn build(dex_reader: &mut DexReader,
                  offset: u32,
                  size: u32,
@@ -270,20 +277,24 @@ impl DexClasses {
         Ok(DexClasses { items: methods })
     }
 
+    /// Get a class definition from the class name, if it exists
     pub fn get_class_def(&self, class_name: &String) -> Option<&ClassDefItem> {
         self.items.iter().find(|&item| &item.class_str == class_name)
     }
 }
 
 impl ClassDefItem {
+    /// Get the name from a class definition
     pub fn get_class_name(&self) -> &String {
         &self.class_str
     }
 
+    /// Get the access flags of a class definition
     pub fn get_access_flags(&self) -> String {
         AccessFlag::vec_to_string(&self.access_flags)
     }
 
+    /// Get the methods of a class definition
     pub fn get_methods(&self) -> Vec<&EncodedMethod> {
         let mut methods = Vec::new();
 
@@ -295,6 +306,7 @@ impl ClassDefItem {
         methods
     }
 
+    /// Get a method from a class definition using the method name
     pub fn get_encoded_method(&self, method_name: &String) -> Option<&EncodedMethod> {
         if let Some(class_data) = &self.class_data {
             for method in &class_data.direct_methods {
@@ -313,10 +325,12 @@ impl ClassDefItem {
 }
 
 impl EncodedMethod {
+    /// Get the prototype of a method
     pub fn get_proto(&self) -> &str {
         &self.proto
     }
 
+    /// Get the name of a method
     pub fn get_method_name(&self) -> &str {
         let matches = METHOD_REGEX.captures(&self.proto);
         let method_name = match matches {
@@ -337,6 +351,7 @@ impl EncodedMethod {
         method_name
     }
 
+    /// Get the access flags of a method
     pub fn get_access_flags(&self) -> String {
         AccessFlag::vec_to_string(&self.access_flags)
     }

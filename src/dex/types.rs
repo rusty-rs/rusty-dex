@@ -1,21 +1,29 @@
+//! DEX types
+//!
+//! Types that are used in the bytecode are stored as strings. The DEX header then contains a list
+//! of offset of these strings. This module decodes these offset to make them available later on.
+
 use std::io::{Seek, SeekFrom};
 
 use crate::dex::reader::DexReader;
 use crate::dex::strings::DexStrings;
 use crate::error::DexError;
 
+/// Internal representation of a DEX type item
 #[derive(Debug)]
 struct DexTypeItem {
     offset: u32,
     str_type: String,
 }
 
+/// List of types defined in the DEX file
 #[derive(Debug)]
 pub struct DexTypes{
     pub items: Vec<String>
 }
 
 impl DexTypes {
+    /// Parse the types from a DEX reader
     pub fn build(dex_reader: &mut DexReader,
                  offset: u32,
                  size: u32,

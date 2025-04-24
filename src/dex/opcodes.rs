@@ -306,7 +306,7 @@ impl OpCode {
             0x3c => Some(OpCode::IF_GTZ),                     // Instruction 21t
             0x3d => Some(OpCode::IF_LEZ),                     // Instruction 21t
 
-            /* Unused */
+            // Unused
             0x3e..=0x43 => {
                 warn!("use of unused opcode {}", value);
                 None
@@ -360,7 +360,7 @@ impl OpCode {
             0x71 => Some(OpCode::INVOKE_STATIC),              // Instruction 35c
             0x72 => Some(OpCode::INVOKE_INTERFACE),           // Instruction 35c
 
-            /* Unused */
+            // Unused
             0x73 => {
                 warn!("use of unused opcode {}", value);
                 None
@@ -372,7 +372,7 @@ impl OpCode {
             0x77 => Some(OpCode::INVOKE_STATIC_RANGE),        // Instruction 3rc
             0x78 => Some(OpCode::INVOKE_INTERFACE_RANGE),     // Instruction 3rc
 
-            /* Unused */
+            // Unused
             0x79 | 0x7a => {
                 warn!("use of unused opcode {}", value);
                 None
@@ -483,7 +483,7 @@ impl OpCode {
             0xe1 => Some(OpCode::SHR_INT_LIT8),               // Instruction 22b
             0xe2 => Some(OpCode::USHR_INT_LIT8),              // Instruction 22b
 
-            /* Unused */
+            // Unused
             0xe3..=0xf9 => {
                 warn!("use of unused opcode {}", value);
                 None

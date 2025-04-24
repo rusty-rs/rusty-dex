@@ -42,7 +42,7 @@ pub struct DexHeader {
 impl DexHeader {
     /// Reads from the given cursor and builds a `DexHeader`
     pub fn new(dex_cursor: &mut DexReader) -> Result<DexHeader, DexError> {
-        /* DEX version */
+        // DEX version
         let mut magic = [0; 8];
         dex_cursor.bytes.read_exact(&mut magic)?;
         let mut version = [0; 3];
